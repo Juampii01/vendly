@@ -150,7 +150,7 @@ export function DealershipHeader({ store, categories, userLoggedIn = false }: Pr
         )}
       </header>
 
-      <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} store={store} />
+      <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} store={store} />
     </>
   )
 }
