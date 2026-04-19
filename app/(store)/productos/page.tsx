@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import { getStoreConfig, getCategories, getProducts } from '@/lib/store'
 import { ProductCard } from '@/components/store/ProductCard'
 import { ModoProductCard } from '@/components/store/modo/ModoProductCard'
+import { AthleticProductCard } from '@/components/store/athletic/AthleticProductCard'
 import { FilterSidebar } from '@/components/store/FilterSidebar'
 import { SearchInput } from '@/components/store/SearchInput'
 import { FadeUp, StaggerGrid, StaggerItem } from '@/components/store/motion'
@@ -80,6 +81,8 @@ export default async function ProductosPage({ searchParams }: PageProps) {
                   <StaggerItem key={product.id}>
                     {store.site_type === 'modo'
                       ? <ModoProductCard product={product} store={store} />
+                      : store.site_type === 'athletic'
+                      ? <AthleticProductCard product={product} store={store} />
                       : <ProductCard product={product} store={store} />
                     }
                   </StaggerItem>

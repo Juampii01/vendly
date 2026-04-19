@@ -105,6 +105,8 @@ export async function createStore(
     plan,
     template_id: templateId ?? null,
     status: 'active',
+    // Site type del template (determina qué componentes se renderizan)
+    site_type: (template?.site_type as string | undefined) ?? 'ecommerce',
     // Colores del template o defaults
     color_primary:    template?.color_primary    ?? '#1a1a2e',
     color_secondary:  template?.color_secondary  ?? '#16213e',

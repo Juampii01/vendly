@@ -12,6 +12,7 @@ interface Template {
   color_background: string
   color_text: string
   hero_title: string
+  site_type?: string
 }
 
 interface Props {
@@ -223,6 +224,7 @@ export default function NewStoreWizard({ templates }: Props) {
                 colorBg={t.color_background}
                 colorText={t.color_text}
                 heroTitle={t.hero_title}
+                siteType={t.site_type}
                 selected={selectedTemplate === t.id}
                 onSelect={() => setSelectedTemplate(t.id)}
               />
@@ -301,7 +303,7 @@ function StepDot({
 }
 
 function TemplateCard({
-  id, name, description, colorPrimary, colorAccent, colorBg, colorText, heroTitle, selected, onSelect,
+  id, name, description, colorPrimary, colorAccent, colorBg, colorText, heroTitle, siteType, selected, onSelect,
 }: {
   id: string | null
   name: string
@@ -311,6 +313,7 @@ function TemplateCard({
   colorBg: string
   colorText: string
   heroTitle: string
+  siteType?: string
   selected: boolean
   onSelect: () => void
 }) {
@@ -324,32 +327,70 @@ function TemplateCard({
       `}
     >
       {/* Mini preview */}
-      <div
-        className="h-24 relative flex items-center justify-center"
-        style={{ backgroundColor: colorBg }}
-      >
-        <div
-          className="absolute inset-x-0 top-0 h-8"
-          style={{ backgroundColor: colorPrimary }}
-        />
-        <div className="relative z-10 px-3 py-1 rounded text-xs font-bold" style={{ backgroundColor: colorAccent, color: '#fff' }}>
-          {heroTitle}
+      {siteType === 'modo' ? (
+        /* Modo preview: split hero look */
+        <div className="h-24 relative overflow-hidden flex" style={{ backgroundColor: colorBg }}>
+          {/* Left: text side */}
+          <div className="w-1/2 flex flex-col justify-center px-3 gap-1" style={{ backgroundColor: colorBg }}>
+            <div className="w-3 h-0.5 rounded-full" style={{ backgroundColor: colorAccent }} />
+            <div className="text-[9px] font-black uppercase tracking-tight leading-none" style={{ color: colorPrimary }}>
+              {heroTitle}
+            </div>
+            <div className="mt-1 px-2 py-0.5 text-[7px] font-bold uppercase w-fit" style={{ backgroundColor: colorPrimary, color: colorBg }}>
+              Ver colección
+            </div>
+          </div>
+          {/* Right: image placeholder */}
+          <div className="w-1/2 relative" style={{ backgroundColor: colorPrimary }}>
+            <div className="absolute inset-2 flex flex-col gap-1">
+              <div className="flex-1 rounded-sm opacity-30" style={{ backgroundColor: colorBg }} />
+              <div className="flex gap-1 h-3">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="flex-1 rounded-sm opacity-20" style={{ backgroundColor: colorBg }} />
+                ))}
+              </div>
+            </div>
+          </div>
+          {/* Accent line top */}
+          <div className="absolute inset-x-0 top-0 h-1" style={{ backgroundColor: colorAccent }} />
         </div>
+      ) : (
+        /* Default preview */
         <div
-          className="absolute bottom-0 inset-x-0 h-6 flex items-center px-3 gap-1"
+          className="h-24 relative flex items-center justify-center"
           style={{ backgroundColor: colorBg }}
         >
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="flex-1 h-3 rounded-sm" style={{ backgroundColor: colorPrimary, opacity: 0.15 }} />
-          ))}
+          <div
+            className="absolute inset-x-0 top-0 h-8"
+            style={{ backgroundColor: colorPrimary }}
+          />
+          <div className="relative z-10 px-3 py-1 rounded text-xs font-bold" style={{ backgroundColor: colorAccent, color: '#fff' }}>
+            {heroTitle}
+          </div>
+          <div
+            className="absolute bottom-0 inset-x-0 h-6 flex items-center px-3 gap-1"
+            style={{ backgroundColor: colorBg }}
+          >
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex-1 h-3 rounded-sm" style={{ backgroundColor: colorPrimary, opacity: 0.15 }} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Info */}
       <div className="px-3 py-2.5 bg-slate-900 border-t border-slate-800">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold text-white">{name}</span>
-          {selected && <span className="text-xs text-green-400 font-bold">✓ Seleccionada</span>}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-white">{name}</span>
+            {siteType && siteType !== 'ecommerce' && (
+              <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full"
+                style={{ backgroundColor: colorAccent + '22', color: colorAccent }}>
+                {siteType}
+              </span>
+            )}
+          </div>
+          {selected && <span className="text-xs text-green-400 font-bold">✓</span>}
         </div>
         {description && <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{description}</p>}
       </div>

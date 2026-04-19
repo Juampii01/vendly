@@ -8,7 +8,7 @@ export default async function NewStorePage() {
   const supabase = createServiceClient()
   const { data: templates } = await supabase
     .from('store_templates')
-    .select('id, name, description, color_primary, color_accent, color_background, color_text, hero_title')
+    .select('id, name, description, color_primary, color_accent, color_background, color_text, hero_title, site_type')
     .eq('is_active', true)
     .order('position')
 

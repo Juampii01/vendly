@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import type { StoreConfig } from '@/types'
 
 interface Props {
@@ -23,6 +24,7 @@ interface IntegStatus {
 }
 
 export function StoreConfigForm({ store }: Props) {
+  const router = useRouter()
   const [form, setForm] = useState({
     name: store.name,
     logo_url: store.logo_url ?? '',
@@ -158,6 +160,7 @@ export function StoreConfigForm({ store }: Props) {
       }
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
+      router.refresh() // Refresca Server Components para mostrar datos actualizados
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error desconocido')
     } finally {

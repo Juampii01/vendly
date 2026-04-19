@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { getStoreId } from '@/lib/tenant'
 
@@ -15,7 +16,7 @@ export async function PATCH(req: Request) {
     const allowed = [
       'name', 'logo_url', 'favicon_url',
       'color_primary', 'color_secondary', 'color_accent', 'color_background', 'color_text',
-      'hero_title', 'hero_subtitle', 'hero_cta_label', 'hero_cta_url', 'hero_image_url',
+      'hero_title', 'hero_subtitle', 'hero_cta_label', 'hero_cta_url', 'hero_image_url', 'hero_cta_color',
       'free_shipping_threshold', 'shipping_base_price',
       'whatsapp_number', 'email', 'instagram_url',
       'meta_title', 'meta_description',
@@ -44,6 +45,9 @@ export async function PATCH(req: Request) {
       .eq('id', storeId)
 
     if (error) throw error
+
+    // Invalidar cache del store para que admin y tienda muestren datos frescos
+    revalidatePath('/', 'layout')
 
     return NextResponse.json({ ok: true })
   } catch (e) {

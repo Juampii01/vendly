@@ -5,6 +5,9 @@ import { ProductCard } from '@/components/store/ProductCard'
 import { NewsletterForm } from '@/components/store/NewsletterForm'
 import { LandingPage } from '@/components/store/LandingPage'
 import { ModoHomePage } from '@/components/store/modo/ModoHomePage'
+import { AthleticHomePage } from '@/components/store/athletic/AthleticHomePage'
+import { DealershipHomePage } from '@/components/store/dealership/DealershipHomePage'
+import { VendlyMarketingPage } from '@/components/store/vendly-marketing/VendlyMarketingPage'
 import { FadeUp, SlideLeft, SlideRight, StaggerGrid, StaggerItem } from '@/components/store/motion'
 import { formatPrice } from '@/lib/format'
 import { DEFAULT_SECTIONS } from '@/types'
@@ -49,6 +52,21 @@ export default async function HomePage() {
   // ── Template Modo ──────────────────────────────────────────────────────────
   if (store.site_type === 'modo') {
     return <ModoHomePage store={store} products={all} categories={categories} featured={featured} />
+  }
+
+  // ── Template Athletic (Adidas-style) ──────────────────────────────────────
+  if (store.site_type === 'athletic') {
+    return <AthleticHomePage store={store} products={all} categories={categories} featured={featured} />
+  }
+
+  // ── Template Dealership (Concesionaria) ───────────────────────────────────
+  if (store.site_type === 'dealership') {
+    return <DealershipHomePage store={store} products={all} categories={categories} featured={featured} />
+  }
+
+  // ── Vendly Marketing Landing Page ─────────────────────────────────────────
+  if (store.site_type === 'vendly-marketing') {
+    return <VendlyMarketingPage />
   }
 
   const heroSrc = store.hero_image_url ?? HERO_FALLBACK
