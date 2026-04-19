@@ -4,6 +4,7 @@ import { ProductCard } from '@/components/store/ProductCard'
 import { ModoProductCard } from '@/components/store/modo/ModoProductCard'
 import { AthleticProductCard } from '@/components/store/athletic/AthleticProductCard'
 import { DealershipProductCard } from '@/components/store/dealership/DealershipProductCard'
+import { LibreriaProductCard } from '@/components/store/libreria/LibreriaProductCard'
 import { FilterSidebar } from '@/components/store/FilterSidebar'
 import { SearchInput } from '@/components/store/SearchInput'
 import { FadeUp, StaggerGrid, StaggerItem } from '@/components/store/motion'
@@ -79,7 +80,9 @@ export default async function ProductosPage({ searchParams }: PageProps) {
               <p className="mb-4 text-sm opacity-50">
                 {total} producto{total !== 1 ? 's' : ''}
               </p>
-              <StaggerGrid className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              <StaggerGrid className={store.site_type === 'libreria'
+                ? 'grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'
+                : 'grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4'}>
                 {products.map((product) => (
                   <StaggerItem key={product.id}>
                     {store.site_type === 'modo'
@@ -88,6 +91,8 @@ export default async function ProductosPage({ searchParams }: PageProps) {
                       ? <AthleticProductCard product={product} store={store} />
                       : store.site_type === 'dealership'
                       ? <DealershipProductCard product={product} store={store} features={features} />
+                      : store.site_type === 'libreria'
+                      ? <LibreriaProductCard product={product} store={store} />
                       : <ProductCard product={product} store={store} />
                     }
                   </StaggerItem>

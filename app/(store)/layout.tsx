@@ -9,6 +9,8 @@ import { AthleticHeader } from '@/components/store/athletic/AthleticHeader'
 import { AthleticFooter } from '@/components/store/athletic/AthleticFooter'
 import { DealershipHeader } from '@/components/store/dealership/DealershipHeader'
 import { DealershipFooter } from '@/components/store/dealership/DealershipFooter'
+import { LibreriaHeader } from '@/components/store/libreria/LibreriaHeader'
+import { LibreriaFooter } from '@/components/store/libreria/LibreriaFooter'
 import { PageEnter } from '@/components/store/motion'
 import { getSiteFeatures } from '@/lib/site-features'
 import type { Metadata } from 'next'
@@ -34,6 +36,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   const isModo = store.site_type === 'modo'
   const isAthletic = store.site_type === 'athletic'
   const isDealership = store.site_type === 'dealership'
+  const isLibreria = store.site_type === 'libreria'
   const isVendlyMarketing = store.site_type === 'vendly-marketing'
   const features = getSiteFeatures(store.site_type)
 
@@ -66,6 +69,8 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         ? <AthleticHeader store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
         : isDealership
         ? <DealershipHeader store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
+        : isLibreria
+        ? <LibreriaHeader store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
         : <Header store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
       }
       <main className="flex-1">
@@ -77,6 +82,8 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         ? <AthleticFooter store={store} categories={categories} />
         : isDealership
         ? <DealershipFooter store={store} categories={categories} />
+        : isLibreria
+        ? <LibreriaFooter store={store} categories={categories} />
         : <Footer store={store} categories={categories} />
       }
     </div>

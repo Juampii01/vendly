@@ -48,6 +48,13 @@ const FEATURES_BY_SITE_TYPE: Record<StoreConfig['site_type'], SiteFeatures> = {
     hasWhatsappCTA: true,
     hasProductCatalog: true,
   },
+  // ── Librería — ecommerce completo para venta de libros ──────────────────
+  libreria: {
+    hasCart: true,
+    hasCheckout: true,
+    hasWhatsappCTA: false,
+    hasProductCatalog: true,
+  },
   // ── Páginas sin ecommerce ────────────────────────────────────────────────
   landing: {
     hasCart: false,

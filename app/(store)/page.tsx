@@ -7,6 +7,7 @@ import { LandingPage } from '@/components/store/LandingPage'
 import { ModoHomePage } from '@/components/store/modo/ModoHomePage'
 import { AthleticHomePage } from '@/components/store/athletic/AthleticHomePage'
 import { DealershipHomePage } from '@/components/store/dealership/DealershipHomePage'
+import { LibreriaHomePage } from '@/components/store/libreria/LibreriaHomePage'
 import { VendlyMarketingPage } from '@/components/store/vendly-marketing/VendlyMarketingPage'
 import { FadeUp, SlideLeft, SlideRight, StaggerGrid, StaggerItem } from '@/components/store/motion'
 import { formatPrice } from '@/lib/format'
@@ -62,6 +63,11 @@ export default async function HomePage() {
   // ── Template Dealership (Concesionaria) ───────────────────────────────────
   if (store.site_type === 'dealership') {
     return <DealershipHomePage store={store} products={all} categories={categories} featured={featured} />
+  }
+
+  // ── Template Librería ─────────────────────────────────────────────────────
+  if (store.site_type === 'libreria') {
+    return <LibreriaHomePage store={store} products={all} categories={categories} featured={featured} />
   }
 
   // ── Vendly Marketing Landing Page ─────────────────────────────────────────
