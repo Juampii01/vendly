@@ -14,6 +14,7 @@ interface AdminSidebarProps {
 
 const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard', icon: GridIcon, exact: true },
+  { href: '/admin/estudio', label: 'Editor IA', icon: SparklesIcon, exact: false },
   { href: '/admin/productos', label: 'Productos', icon: BoxIcon, exact: false },
   { href: '/admin/ordenes', label: 'Órdenes', icon: ShoppingBagIcon, exact: false },
   { href: '/admin/clientes', label: 'Clientes', icon: UsersIcon, exact: false },

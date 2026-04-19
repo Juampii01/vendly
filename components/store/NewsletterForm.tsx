@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import type { StoreConfig } from '@/types'
 
-export function NewsletterForm({ store }: { store: StoreConfig }) {
+export function NewsletterForm({ store, dark = false }: { store: StoreConfig; dark?: boolean }) {
   const [email, setEmail] = useState('')
   const [state, setState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
@@ -28,7 +28,7 @@ export function NewsletterForm({ store }: { store: StoreConfig }) {
     }
   }
 
-  const fg = store.color_text
+  const fg = dark ? store.color_background : store.color_text
   const accent = store.color_accent
 
   if (state === 'success') {

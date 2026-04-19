@@ -4,7 +4,8 @@ import { getStoreConfig, getCategories, getProducts } from '@/lib/store'
 import { ProductCard } from '@/components/store/ProductCard'
 import { NewsletterForm } from '@/components/store/NewsletterForm'
 import { LandingPage } from '@/components/store/LandingPage'
-import { FadeUp, FadeIn, SlideLeft, SlideRight, StaggerGrid, StaggerItem } from '@/components/store/motion'
+import { ModoHomePage } from '@/components/store/modo/ModoHomePage'
+import { FadeUp, SlideLeft, SlideRight, StaggerGrid, StaggerItem } from '@/components/store/motion'
 import { formatPrice } from '@/lib/format'
 import { DEFAULT_SECTIONS } from '@/types'
 import type { Metadata } from 'next'
@@ -43,6 +44,11 @@ export default async function HomePage() {
   if (store.site_type === 'landing') {
     const sections = store.sections?.length ? store.sections : DEFAULT_SECTIONS
     return <LandingPage store={store} sections={sections} />
+  }
+
+  // ── Template Modo ──────────────────────────────────────────────────────────
+  if (store.site_type === 'modo') {
+    return <ModoHomePage store={store} products={all} categories={categories} featured={featured} />
   }
 
   const heroSrc = store.hero_image_url ?? HERO_FALLBACK
@@ -259,7 +265,7 @@ export default async function HomePage() {
                 {store.instagram_url ? (
                   <a href={store.instagram_url} target="_blank" rel="noopener noreferrer"
                     className="transition-opacity hover:opacity-60">
-                    @{store.name.toLowerCase().replace(/\s/g, '')}
+                    @{store.instagram_url.replace(/https?:\/\/(www\.)?instagram\.com\/?/, '').replace(/\/$/, '') || store.name}
                   </a>
                 ) : 'Nuestras prendas'}
               </h2>
@@ -289,17 +295,17 @@ export default async function HomePage() {
       })()}
 
       {/* ── NEWSLETTER ──────────────────────────────────────────────────── */}
-      <section className="px-4 py-20 md:px-8" style={{ backgroundColor: store.color_background }}>
+      <section className="px-4 py-20 md:px-8" style={{ backgroundColor: store.color_primary }}>
         <FadeUp className="mx-auto max-w-xl text-center">
           <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.3em]"
             style={{ color: store.color_accent }}>
             Comunidad {store.name}
           </p>
           <h2 className="mb-4 text-3xl font-black uppercase leading-tight tracking-tight md:text-4xl"
-            style={{ color: store.color_text }}>
+            style={{ color: store.color_background }}>
             Primero te enterás vos
           </h2>
-          <p className="mb-8 text-sm opacity-50" style={{ color: store.color_text }}>
+          <p className="mb-8 text-sm opacity-50" style={{ color: store.color_background }}>
             Lanzamientos, preventas y descuentos exclusivos. Sin spam.
           </p>
           <NewsletterForm store={store} />

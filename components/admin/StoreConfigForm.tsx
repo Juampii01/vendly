@@ -49,6 +49,8 @@ export function StoreConfigForm({ store }: Props) {
     home_editorial_label: store.home_editorial_label ?? '',
     home_editorial_title: store.home_editorial_title ?? '',
     home_editorial_body: store.home_editorial_body ?? '',
+    // Hero extras
+    hero_cta_color: store.hero_cta_color ?? '',
     // Avanzado
     base_url: store.base_url ?? '',
     currency: store.currency ?? 'ARS',
@@ -130,7 +132,7 @@ export function StoreConfigForm({ store }: Props) {
       payload.shipping_base_price = Number(form.shipping_base_price)
       // Empty strings → null for nullable fields
       for (const k of [
-        'logo_url', 'hero_subtitle', 'hero_image_url',
+        'logo_url', 'hero_subtitle', 'hero_image_url', 'hero_cta_color',
         'whatsapp_number', 'email', 'instagram_url',
         'meta_title', 'meta_description',
         'home_split_image_url', 'home_editorial_label',
@@ -332,6 +334,13 @@ export function StoreConfigForm({ store }: Props) {
           <Field label="URL del botón CTA" required>
             <Input value={form.hero_cta_url} onChange={(v) => set('hero_cta_url', v)} placeholder="/productos" />
           </Field>
+          <ColorRow
+            label="Color del botón CTA"
+            hint="Dejá vacío para usar el color acento. Solo si querés un color diferente."
+            value={form.hero_cta_color}
+            onChange={(v) => set('hero_cta_color', v)}
+            optional
+          />
           <Field label="Imagen de fondo del hero" hint="URL de imagen de alta resolución (1440×900 mínimo)">
             <Input value={form.hero_image_url} onChange={(v) => set('hero_image_url', v)} placeholder="https://..." />
           </Field>
@@ -725,21 +734,38 @@ function Input({
 }
 
 function ColorRow({
-  label, hint, value, onChange,
+  label, hint, value, onChange, optional,
 }: {
   label: string
   hint?: string
   value: string
   onChange: (v: string) => void
+  optional?: boolean
 }) {
+  // For optional color fields: show a "clear" button when a color is set
+  const hasValue = value && value.startsWith('#')
+  const displayValue = hasValue ? value : '#ffffff'
+
   return (
     <div className="flex items-center gap-3">
-      <input
-        type="color"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-10 w-10 shrink-0 cursor-pointer rounded-lg border border-slate-200 p-0.5"
-      />
+      <div className="relative">
+        <input
+          type="color"
+          value={displayValue}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-10 w-10 shrink-0 cursor-pointer rounded-lg border border-slate-200 p-0.5"
+        />
+        {optional && hasValue && (
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-slate-400 text-white text-[9px] hover:bg-slate-600"
+            title="Restaurar valor por defecto"
+          >
+            ✕
+          </button>
+        )}
+      </div>
       <div className="flex-1">
         <p className="text-sm font-medium text-slate-700">{label}</p>
         {hint && <p className="text-xs text-slate-400">{hint}</p>}
@@ -749,7 +775,7 @@ function ColorRow({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="w-28 rounded-lg border border-slate-200 px-3 py-2 text-sm font-mono outline-none focus:border-slate-400"
-        placeholder="#000000"
+        placeholder={optional ? 'Vacío = acento' : '#000000'}
         maxLength={7}
       />
     </div>

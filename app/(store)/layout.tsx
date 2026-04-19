@@ -3,6 +3,8 @@ import { headers } from 'next/headers'
 import { CartProvider } from '@/components/store/CartProvider'
 import { Header } from '@/components/store/Header'
 import { Footer } from '@/components/store/Footer'
+import { ModoHeader } from '@/components/store/modo/ModoHeader'
+import { ModoFooter } from '@/components/store/modo/ModoFooter'
 import { PageEnter } from '@/components/store/motion'
 import type { Metadata } from 'next'
 
@@ -24,6 +26,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
     getCategories(),
   ])
   const userLoggedIn = Boolean(h.get('x-user-id'))
+  const isModo = store.site_type === 'modo'
 
   const cssVars = `
     :root {
@@ -41,11 +44,17 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       <CartProvider>
         <div className="flex min-h-screen flex-col"
           style={{ backgroundColor: store.color_background, color: store.color_text }}>
-          <Header store={store} categories={categories} userLoggedIn={userLoggedIn} />
+          {isModo
+            ? <ModoHeader store={store} categories={categories} userLoggedIn={userLoggedIn} />
+            : <Header store={store} categories={categories} userLoggedIn={userLoggedIn} />
+          }
           <main className="flex-1">
             <PageEnter>{children}</PageEnter>
           </main>
-          <Footer store={store} categories={categories} />
+          {isModo
+            ? <ModoFooter store={store} categories={categories} />
+            : <Footer store={store} categories={categories} />
+          }
         </div>
       </CartProvider>
     </>

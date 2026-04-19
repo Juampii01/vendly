@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { getStoreConfig, getCategories, getProducts } from '@/lib/store'
 import { ProductCard } from '@/components/store/ProductCard'
+import { ModoProductCard } from '@/components/store/modo/ModoProductCard'
 import { FilterSidebar } from '@/components/store/FilterSidebar'
 import { SearchInput } from '@/components/store/SearchInput'
 import { FadeUp, StaggerGrid, StaggerItem } from '@/components/store/motion'
@@ -77,7 +78,10 @@ export default async function ProductosPage({ searchParams }: PageProps) {
               <StaggerGrid className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                 {products.map((product) => (
                   <StaggerItem key={product.id}>
-                    <ProductCard product={product} store={store} />
+                    {store.site_type === 'modo'
+                      ? <ModoProductCard product={product} store={store} />
+                      : <ProductCard product={product} store={store} />
+                    }
                   </StaggerItem>
                 ))}
               </StaggerGrid>
