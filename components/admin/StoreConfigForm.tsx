@@ -54,6 +54,7 @@ export function StoreConfigForm({ store }: Props) {
     // Hero extras
     hero_cta_color: store.hero_cta_color ?? '',
     // Avanzado
+    site_type: store.site_type ?? 'ecommerce',
     base_url: store.base_url ?? '',
     currency: store.currency ?? 'ARS',
     locale: store.locale ?? 'es-AR',
@@ -491,6 +492,40 @@ export function StoreConfigForm({ store }: Props) {
         <div className="space-y-5">
           <div className="rounded-lg bg-blue-50 border border-blue-100 p-3 text-xs text-blue-700">
             Configuración técnica para multi-tenant y monitoreo.
+          </div>
+
+          {/* Tipo de sitio */}
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-slate-700">
+              Tipo de sitio <span className="ml-1 text-red-500">*</span>
+            </label>
+            <select
+              value={form.site_type}
+              onChange={(e) => set('site_type', e.target.value)}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 bg-white outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400"
+            >
+              <optgroup label="Tiendas con carrito">
+                <option value="ecommerce">Ecommerce — tienda online estándar</option>
+                <option value="modo">Modo — moda premium con carrito</option>
+                <option value="athletic">Athletic — deportes y lifestyle con carrito</option>
+                <option value="restaurant">Restaurant — menú con carrito de pedidos</option>
+                <option value="libreria">Librería — venta de libros</option>
+              </optgroup>
+              <optgroup label="Sin carrito / contacto por WhatsApp">
+                <option value="dealership">Concesionaria — catálogo de vehículos</option>
+                <option value="services">Servicios — contacto por WhatsApp</option>
+              </optgroup>
+              <optgroup label="Sin ecommerce">
+                <option value="landing">Landing page — sin tienda</option>
+                <option value="portfolio">Portfolio — sin tienda</option>
+              </optgroup>
+              <optgroup label="Interno">
+                <option value="vendly-marketing">Vendly Marketing (solo uso interno)</option>
+              </optgroup>
+            </select>
+            <p className="mt-1.5 text-xs text-amber-600">
+              ⚠ Cambiar el tipo de sitio altera qué template y funcionalidades se usan (carrito, checkout, catálogo). Guardá y recargá la tienda para ver el efecto.
+            </p>
           </div>
 
           <Field
