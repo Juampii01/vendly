@@ -111,22 +111,29 @@ export function VendlyMarketingPage() {
             <span className="font-black text-lg tracking-tight">Vendly</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
-            {['Características', 'Templates', 'Precios', 'FAQ'].map(item => (
-              <a key={item} href={`#${item.toLowerCase()}`}
+            {[
+              { label: 'Cómo funciona', href: '#como-funciona' },
+              { label: 'Proyectos', href: '#proyectos' },
+              { label: 'Planes', href: '#planes' },
+              { label: 'FAQ', href: '#faq' },
+            ].map(item => (
+              <a key={item.label} href={item.href}
                 className="text-sm text-white/60 hover:text-white transition-colors">
-                {item}
+                {item.label}
               </a>
             ))}
           </div>
           <div className="flex items-center gap-3">
-            <a href="https://vendly-mod.space/admin/login"
+            <a href="https://wa.me/5491100000000?text=Hola! Quiero información sobre Vendly"
+              target="_blank" rel="noopener noreferrer"
               className="hidden md:block text-sm text-white/60 hover:text-white transition-colors">
-              Entrar
+              Contacto
             </a>
-            <a href="https://vendly-mod.space/admin/login"
+            <a href="https://wa.me/5491100000000?text=Hola! Quiero solicitar mi web"
+              target="_blank" rel="noopener noreferrer"
               className="text-sm font-semibold px-4 py-2 rounded-lg transition-all hover:scale-105"
               style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
-              Crear mi tienda →
+              Solicitar mi web →
             </a>
           </div>
         </div>
@@ -155,34 +162,35 @@ export function VendlyMarketingPage() {
         <div className="relative mb-6 flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium border"
           style={{ borderColor: 'rgba(99,102,241,0.4)', backgroundColor: 'rgba(99,102,241,0.1)', color: '#a5b4fc' }}>
           <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          Plataforma en producción · 5 tiendas activas
+          Servicio activo · webs diseñadas y entregadas
         </div>
 
         {/* Headline */}
         <h1 className="relative text-center font-black leading-[0.9] tracking-tight mb-6 max-w-5xl"
           style={{ fontSize: 'clamp(3rem, 9vw, 7rem)' }}>
-          <span className="block text-white">TU TIENDA ONLINE</span>
+          <span className="block text-white">TENÉ TU WEB LISTA</span>
           <span className="block"
             style={{ background: 'linear-gradient(135deg, #6366f1, #a78bfa, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            EN 5 MINUTOS.
+            EN DÍAS, NO EN MESES.
           </span>
         </h1>
 
         <p className="relative text-center max-w-xl text-lg mb-10"
           style={{ color: 'rgba(255,255,255,0.55)' }}>
-          Creá tu ecommerce profesional, conectá tu dominio propio y empezá a vender.
-          Sin saber programar. Sin complicaciones. Sin excusas.
+          Diseñamos, configuramos y dejamos tu página funcionando
+          para que empieces a vender sin complicarte.
         </p>
 
         {/* CTAs */}
         <div className="relative flex flex-col sm:flex-row items-center gap-4 mb-16">
-          <a href="https://vendly-mod.space/admin/login"
+          <a href="https://wa.me/5491100000000?text=Hola! Quiero solicitar mi web"
+            target="_blank" rel="noopener noreferrer"
             className="group px-8 py-4 rounded-xl font-bold text-base transition-all hover:scale-105 hover:shadow-2xl flex items-center gap-2"
             style={{
               background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
               boxShadow: '0 0 40px rgba(99,102,241,0.4)',
             }}>
-            Crear mi tienda gratis
+            Solicitar mi web
             <span className="group-hover:translate-x-1 transition-transform">→</span>
           </a>
           <button
@@ -193,7 +201,7 @@ export function VendlyMarketingPage() {
               style={{ background: 'rgba(255,255,255,0.1)' }}>
               ▶
             </span>
-            Ver demo en video
+            Ver cómo lo hacemos
           </button>
         </div>
 
@@ -214,7 +222,7 @@ export function VendlyMarketingPage() {
               <div className="flex-1 mx-4">
                 <div className="max-w-xs mx-auto h-5 rounded-md flex items-center px-3 text-[10px]"
                   style={{ backgroundColor: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' }}>
-                  mitienda.com
+                  minegocio.com
                 </div>
               </div>
             </div>
@@ -254,10 +262,10 @@ export function VendlyMarketingPage() {
       <section className="py-20 border-y" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
         <div className="mx-auto max-w-5xl px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
-            { value: 5, suffix: '+', label: 'Tiendas activas' },
-            { value: 4, suffix: '', label: 'Templates únicos' },
-            { value: 100, suffix: '%', label: 'White-label' },
-            { value: 5, suffix: 'min', label: 'Setup promedio' },
+            { value: 8, suffix: '+', label: 'Webs entregadas' },
+            { value: 4, suffix: '', label: 'Diseños exclusivos' },
+            { value: 100, suffix: '%', label: 'Llave en mano' },
+            { value: 7, suffix: 'días', label: 'Entrega promedio' },
           ].map(({ value, suffix, label }) => (
             <div key={label}>
               <div className="text-4xl md:text-5xl font-black mb-2"
@@ -271,33 +279,33 @@ export function VendlyMarketingPage() {
       </section>
 
       {/* ══ CÓMO FUNCIONA ════════════════════════════════════════════════════ */}
-      <section id="características" className="py-28 px-6">
+      <section id="como-funciona" className="py-28 px-6">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#6366f1' }}>Simple como debe ser</p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Tres pasos y estás vendiendo</h2>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#6366f1' }}>Sin vueltas</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Así trabajamos</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
                 step: '01',
-                icon: '🏗️',
-                title: 'Creás tu tienda',
-                desc: 'Elegís el template, le ponés nombre, configurás los colores. En minutos tenés una tienda lista con tu identidad.',
+                icon: '🗣️',
+                title: 'Nos contás qué necesitás',
+                desc: 'Nos contás tu rubro, tus productos y cómo te imaginás la página. Sin formularios eternos — una llamada o un mensaje alcanza.',
                 color: '#6366f1',
               },
               {
                 step: '02',
-                icon: '🤖',
-                title: 'La IA la completa',
-                desc: 'Hablás con el editor y la IA carga productos, ajusta diseño, escribe descripciones. Como tener un equipo de marketing.',
+                icon: '🛠️',
+                title: 'Nosotros la construimos',
+                desc: 'Nuestro equipo diseña, configura y carga todo. Productos, colores, dominio, medios de pago. Vos no tocás nada técnico.',
                 color: '#8b5cf6',
               },
               {
                 step: '03',
-                icon: '🚀',
-                title: 'Conectás tu dominio',
-                desc: 'Apuntás tu dominio propio y listo. Tus clientes entran a mitienda.com — Vendly es completamente invisible.',
+                icon: '✅',
+                title: 'La recibís lista para usar',
+                desc: 'En días tenés tu web funcionando, con tu dominio, lista para vender. Y con soporte para lo que necesites después.',
                 color: '#06b6d4',
               },
             ].map(({ step, icon, title, desc, color }) => (
@@ -324,8 +332,8 @@ export function VendlyMarketingPage() {
       <section className="py-20 px-6">
         <div className="mx-auto max-w-4xl">
           <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-black mb-4">Mirá cómo funciona</h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)' }}>2 minutos y vas a querer empezar hoy mismo</p>
+            <h2 className="text-3xl md:text-4xl font-black mb-4">Mirá cómo construimos una web</h2>
+            <p style={{ color: 'rgba(255,255,255,0.5)' }}>2 minutos que te van a ahorrar meses de trabajo</p>
           </div>
           <button
             onClick={() => setVideoOpen(true)}
@@ -345,7 +353,7 @@ export function VendlyMarketingPage() {
                 }}>
                 <span className="text-3xl ml-1">▶</span>
               </div>
-              <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>Ver presentación completa</p>
+              <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>Ver proceso completo</p>
             </div>
             {/* Glow border */}
             <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"
@@ -358,20 +366,20 @@ export function VendlyMarketingPage() {
       <section className="py-28 px-6" style={{ backgroundColor: 'rgba(255,255,255,0.015)' }}>
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#8b5cf6' }}>Todo incluido</p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Lo que hace especial a Vendly</h2>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#8b5cf6' }}>Todo lo que necesitás, ya incluido</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Lo que entregamos en cada proyecto</h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { icon: '🌐', title: 'Dominio propio', desc: 'Cada cliente tiene su dominio. Tu marca, solo tu marca. Vendly es invisible para el comprador final.' },
-              { icon: '🤖', title: 'Editor con IA', desc: 'Hablás en español y la IA cambia colores, textos, crea productos, ajusta diseño. Sin saber programar.' },
-              { icon: '💳', title: 'MercadoPago integrado', desc: 'Pagos online, cuotas, transferencias. Sin configuración técnica. Empezás a cobrar desde el día uno.' },
-              { icon: '📱', title: '100% responsive', desc: 'Se ve perfecto en celular, tablet y escritorio. Diseño mobile-first para que nadie rebote.' },
-              { icon: '📦', title: 'Catálogo completo', desc: 'Productos con variantes (talle, color), stock, imágenes múltiples, descuentos y categorías.' },
-              { icon: '🔔', title: 'Carritos abandonados', desc: 'El sistema detecta carritos abandonados y manda emails y WhatsApp automáticos para recuperarlos.' },
-              { icon: '🎨', title: '4 templates únicos', desc: 'Default, Editorial, Bold, Concesionaria. Cada uno con su identidad visual y estructura distintas.' },
-              { icon: '📊', title: 'Dashboard de métricas', desc: 'Pedidos del día, facturación, tasa de conversión. Todo en tiempo real desde el admin.' },
-              { icon: '⚡', title: 'Ultra rápido', desc: 'Next.js 15 con Server Components. Carga en milisegundos. Google lo ama. Tus clientes también.' },
+              { icon: '🎨', title: 'Diseño profesional incluido', desc: 'Tu web diseñada desde cero con identidad propia. Colores, tipografías, imágenes y layout pensados para tu marca.' },
+              { icon: '🌐', title: 'Dominio configurado', desc: 'Comprás tu dominio (o ya tenés uno) y nosotros lo conectamos. Tus clientes ven tu dirección, no la nuestra.' },
+              { icon: '💳', title: 'MercadoPago listo para cobrar', desc: 'Pagos online, cuotas y transferencias desde el día uno. Sin configuraciones técnicas de tu parte.' },
+              { icon: '📱', title: 'Optimizada para mobile', desc: 'La mayoría de tus clientes entran desde el celular. Tu web se ve impecable en cualquier pantalla.' },
+              { icon: '📦', title: 'Catálogo de productos cargado', desc: 'Cargamos tus productos con fotos, descripción, precio y variantes. Vos solo empezás a vender.' },
+              { icon: '🔔', title: 'Carritos abandonados automáticos', desc: 'El sistema detecta cuando alguien deja productos sin comprar y manda recordatorios automáticos por email y WhatsApp.' },
+              { icon: '💬', title: 'WhatsApp integrado', desc: 'Tus clientes pueden consultarte directo por WhatsApp. Sin fricción, sin formularios complicados.' },
+              { icon: '📊', title: 'Panel simple para gestionar todo', desc: 'Ves pedidos, métricas y stock en tiempo real. Sin complicaciones técnicas — está hecho para que lo uses vos.' },
+              { icon: '⚡', title: 'Velocidad y SEO desde el día uno', desc: 'Tu web carga rápido y está optimizada para Google desde que se entrega. Sin plugins, sin configuración extra.' },
             ].map(({ icon, title, desc }) => (
               <div key={title}
                 className="p-6 rounded-xl border hover:border-indigo-500/30 transition-all group"
@@ -386,13 +394,13 @@ export function VendlyMarketingPage() {
       </section>
 
       {/* ══ TEMPLATES SHOWCASE ═══════════════════════════════════════════════ */}
-      <section id="templates" className="py-28 px-6 overflow-hidden">
+      <section id="proyectos" className="py-28 px-6 overflow-hidden">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#06b6d4' }}>Diseños listos para usar</p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">Cuatro templates. Infinitas tiendas.</h2>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#06b6d4' }}>Estructuras probadas</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">Estructuras probadas. Resultados garantizados.</h2>
             <p className="max-w-xl mx-auto text-base" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              Cada template tiene su propia identidad. Vos personalizás los colores, imágenes y contenido — el resultado siempre es único.
+              Trabajamos sobre estructuras diseñadas y probadas para acelerar los resultados. Nosotros adaptamos cada una a tu negocio.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 gap-6">
@@ -466,63 +474,60 @@ export function VendlyMarketingPage() {
       </section>
 
       {/* ══ PRICING ══════════════════════════════════════════════════════════ */}
-      <section id="precios" className="py-28 px-6">
+      <section id="planes" className="py-28 px-6">
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-16">
-            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#a78bfa' }}>Sin sorpresas</p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Precios que escalan con vos</h2>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#a78bfa' }}>A tu medida</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Planes según tu proyecto</h2>
+            <p className="mt-4 max-w-md mx-auto text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              Cada proyecto es distinto. Hablamos con vos, entendemos qué necesitás y te damos una propuesta a medida.
+            </p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                name: 'Starter',
-                price: '$0',
-                period: 'para empezar',
+                name: 'Presencia Digital',
+                tagline: 'Ideal para emprendedores y negocios que recién arrancan.',
                 color: 'rgba(255,255,255,0.06)',
                 border: 'rgba(255,255,255,0.1)',
                 highlight: false,
-                features: ['1 tienda', '10 productos', 'Subdominio vendly', 'Template estándar', 'Soporte por email'],
-                cta: 'Empezar gratis',
+                features: ['Diseño personalizado', 'Hasta 20 productos cargados', 'Dominio propio configurado', 'MercadoPago integrado', 'WhatsApp conectado'],
+                cta: 'Consultar',
                 ctaStyle: { border: '1px solid rgba(255,255,255,0.2)', color: 'white' },
               },
               {
-                name: 'Pro',
-                price: '$19.990',
-                period: 'por mes',
+                name: 'Tienda Completa',
+                tagline: 'Para negocios con catálogo amplio que quieren vender más.',
                 color: 'rgba(99,102,241,0.15)',
                 border: 'rgba(99,102,241,0.5)',
                 highlight: true,
-                features: ['1 tienda', 'Productos ilimitados', 'Dominio propio', 'Todos los templates', 'Editor IA incluido', 'MercadoPago', 'Soporte prioritario'],
-                cta: 'Empezar ahora',
+                features: ['Todo del plan Presencia', 'Catálogo ilimitado cargado', 'Carritos abandonados activos', 'Panel de métricas incluido', 'Soporte prioritario post-entrega'],
+                cta: 'Consultar',
                 ctaStyle: { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white' },
               },
               {
-                name: 'Business',
-                price: '$49.990',
-                period: 'por mes',
+                name: 'A Medida',
+                tagline: 'Para proyectos con necesidades específicas o múltiples páginas.',
                 color: 'rgba(255,255,255,0.03)',
                 border: 'rgba(255,255,255,0.08)',
                 highlight: false,
-                features: ['Tiendas ilimitadas', 'Productos ilimitados', 'Dominios propios', 'Template exclusivo', 'Editor IA avanzado', 'WhatsApp automático', 'Métricas avanzadas'],
-                cta: 'Hablar con ventas',
+                features: ['Diseño exclusivo', 'Funcionalidades personalizadas', 'Integraciones especiales', 'Múltiples páginas o secciones', 'Soporte y mantenimiento continuo'],
+                cta: 'Hablemos',
                 ctaStyle: { border: '1px solid rgba(255,255,255,0.2)', color: 'white' },
               },
-            ].map(({ name, price, period, color, border, highlight, features, cta, ctaStyle }) => (
+            ].map(({ name, tagline, color, border, highlight, features, cta, ctaStyle }) => (
               <div key={name}
                 className="relative p-8 rounded-2xl border flex flex-col"
                 style={{ backgroundColor: color, borderColor: border }}>
                 {highlight && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full"
                     style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
-                    Más popular
+                    Más elegido
                   </div>
                 )}
                 <div className="mb-6">
                   <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.5)' }}>{name}</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-black">{price}</span>
-                    <span className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>{period}</span>
-                  </div>
+                  <p className="text-sm leading-snug" style={{ color: 'rgba(255,255,255,0.6)' }}>{tagline}</p>
                 </div>
                 <ul className="flex-1 space-y-3 mb-8">
                   {features.map(f => (
@@ -531,7 +536,8 @@ export function VendlyMarketingPage() {
                     </li>
                   ))}
                 </ul>
-                <a href="https://vendly-mod.space/admin/login"
+                <a href="https://wa.me/5491100000000?text=Hola! Quiero información sobre los planes de Vendly"
+                  target="_blank" rel="noopener noreferrer"
                   className="block text-center py-3 rounded-xl font-bold text-sm transition-all hover:scale-105"
                   style={ctaStyle}>
                   {cta}
@@ -546,29 +552,29 @@ export function VendlyMarketingPage() {
       <section className="py-20 px-6" style={{ backgroundColor: 'rgba(255,255,255,0.015)' }}>
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-black">Lo que dicen los que ya lo usan</h2>
+            <h2 className="text-3xl md:text-4xl font-black">Lo que dicen nuestros clientes</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
                 name: 'Lucía M.',
-                role: 'Dueña de tienda de indumentaria',
+                role: 'Tienda de indumentaria',
                 avatar: 'L',
-                text: 'En una tarde armé toda mi tienda. Antes me pedían $80.000 por algo parecido. Con Vendly lo hice sola y quedó mejor.',
+                text: 'Me entregaron la web en menos de una semana. Yo no tuve que hacer nada más que contarles qué quería. Quedó exactamente como lo imaginé.',
                 stars: 5,
               },
               {
                 name: 'Rodrigo P.',
                 role: 'Concesionaria de autos',
                 avatar: 'R',
-                text: 'El template de concesionaria es exactamente lo que necesitaba. Mis clientes entran a mi dominio y no saben que hay tecnología detrás.',
+                text: 'Le pedí la página para la concesionaria y en pocos días tenía todo funcionando. MercadoPago, WhatsApp, catálogo de autos — me lo entregaron listo para usar.',
                 stars: 5,
               },
               {
                 name: 'Valentina S.',
-                role: 'Emprendedora digital',
+                role: 'Emprendedora',
                 avatar: 'V',
-                text: 'La IA es un golazo. Le digo qué quiero y lo cambia al toque. Es como tener un diseñador disponible las 24 horas.',
+                text: 'Yo no entiendo nada de páginas web. Les mandé referencias por Instagram y ellos lo tradujeron en un diseño increíble. Solo tuve que aprobar.',
                 stars: 5,
               },
             ].map(({ name, role, avatar, text, stars }) => (
@@ -605,12 +611,12 @@ export function VendlyMarketingPage() {
           </div>
           <div className="space-y-2">
             {[
-              { q: '¿Necesito saber programar?', a: 'Para nada. Vendly está diseñado para que cualquier persona pueda crear y gestionar su tienda. El editor con IA hace el trabajo técnico por vos.' },
-              { q: '¿Cómo funciona el dominio propio?', a: 'Comprás tu dominio en cualquier registrador (GoDaddy, Namecheap, NIC Argentina), lo apuntás a nuestros servidores con un registro CNAME, y listo. Los visitantes ven tu dominio — Vendly no aparece.' },
-              { q: '¿Puedo cambiar de template después?', a: 'Sí. Podés cambiar el template en cualquier momento desde el panel de administración. El contenido (productos, categorías, imágenes) se mantiene.' },
-              { q: '¿Cómo cobro los pagos?', a: 'A través de MercadoPago. Los pagos van directamente a tu cuenta de MercadoPago. Vendly no toca tu plata.' },
-              { q: '¿Qué pasa si quiero cancelar?', a: 'Podés cancelar cuando quieras. No hay contratos ni permanencia mínima. En el plan gratuito podés quedarte sin pagar nada.' },
-              { q: '¿Puedo tener varias tiendas?', a: 'Sí, con el plan Business tenés tiendas ilimitadas. Podés tener una para cada cliente si sos agencia, o una para cada rubro si tenés varios negocios.' },
+              { q: '¿Cuánto tarda en estar lista mi web?', a: 'En la mayoría de los proyectos entregamos entre 5 y 10 días hábiles. Depende del alcance y la cantidad de productos, pero siempre te damos un plazo estimado antes de arrancar.' },
+              { q: '¿Qué necesito de mi parte para arrancar?', a: 'Solo contarnos qué vendés, cómo querés que se vea y compartir tus imágenes y productos. Nosotros nos encargamos del resto.' },
+              { q: '¿Puedo pedir cambios después de la entrega?', a: 'Sí. Todos los proyectos incluyen un período de ajustes post-entrega. Y si querés seguir haciendo cambios después, tenemos planes de soporte continuo.' },
+              { q: '¿Cómo funcionan los pagos de mis clientes?', a: 'A través de MercadoPago. Los pagos van directo a tu cuenta — nosotros solo configuramos la integración. Vendly no toca tu plata.' },
+              { q: '¿Mi web es mía o es de Vendly?', a: 'Es tuya. Vos tenés acceso completo y control total sobre el contenido y el panel de administración. Vendly es completamente invisible para tus clientes.' },
+              { q: '¿Qué pasa si quiero cambiar algo del diseño más adelante?', a: 'Podés pedírnoslo cuando quieras. Tenemos planes de mantenimiento o podés contratar cambios puntuales. Siempre vamos a estar disponibles.' },
             ].map(({ q, a }, i) => (
               <div key={i}
                 className="rounded-xl border overflow-hidden"
@@ -644,25 +650,26 @@ export function VendlyMarketingPage() {
         </div>
         <div className="relative mx-auto max-w-3xl text-center">
           <h2 className="text-5xl md:text-6xl font-black tracking-tight mb-6">
-            Tu tienda online.<br />
+            Tu web lista.<br />
             <span style={{ background: 'linear-gradient(135deg, #6366f1, #a78bfa, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              Hoy.
+              En días.
             </span>
           </h2>
           <p className="text-lg mb-10" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            Empezá gratis. Sin tarjeta de crédito. Sin compromiso.<br />
-            En 5 minutos podés estar vendiendo.
+            Días, no meses. Nosotros nos encargamos del diseño,<br />
+            la configuración y la entrega. Vos solo empezás a vender.
           </p>
-          <a href="https://vendly-mod.space/admin/login"
+          <a href="https://wa.me/5491100000000?text=Hola! Quiero solicitar mi web"
+            target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center gap-3 px-10 py-5 rounded-xl font-black text-lg transition-all hover:scale-105"
             style={{
               background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
               boxShadow: '0 0 60px rgba(99,102,241,0.5)',
             }}>
-            Crear mi tienda gratis →
+            Solicitar mi web →
           </a>
           <p className="mt-4 text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>
-            Sin tarjeta. Sin instalación. Sin técnicos.
+            Respondemos en menos de 24 horas.
           </p>
         </div>
       </section>
@@ -681,7 +688,9 @@ export function VendlyMarketingPage() {
           <div className="flex gap-6 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
             <a href="#" className="hover:text-white transition-colors">Términos</a>
             <a href="#" className="hover:text-white transition-colors">Privacidad</a>
-            <a href="https://vendly-mod.space/admin/login" className="hover:text-white transition-colors">Admin</a>
+            <a href="https://wa.me/5491100000000?text=Hola! Quiero información sobre Vendly"
+              target="_blank" rel="noopener noreferrer"
+              className="hover:text-white transition-colors">Contacto</a>
           </div>
         </div>
       </footer>
