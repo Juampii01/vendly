@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/client'
 import { ProductForm, type VariantRow } from './ProductForm'
 import { formatPrice } from '@/lib/format'
 import type { Product, Category, StoreConfig } from '@/types'
@@ -21,26 +20,31 @@ export function ProductsClient({ initialProducts, categories, store, storeId }: 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [saving, setSaving] = useState(false)
 
+  // storeId still used as prop — kept for potential future use
+  void storeId
+
   const filtered = products.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase()),
   )
 
   async function toggleActive(product: Product) {
-    const supabase = createClient()
-    await supabase
-      .from('products')
-      .update({ is_active: !product.is_active })
-      .eq('id', product.id)
+    // Optimistic update
     setProducts((prev) =>
       prev.map((p) => (p.id === product.id ? { ...p, is_active: !p.is_active } : p)),
     )
+    await fetch(`/api/admin/products/${product.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_active: !product.is_active }),
+    })
   }
 
   async function handleDelete(product: Product) {
     if (!confirm(`¿Eliminar "${product.name}"? Esta acción no se puede deshacer.`)) return
-    const supabase = createClient()
-    await supabase.from('products').delete().eq('id', product.id)
-    setProducts((prev) => prev.filter((p) => p.id !== product.id))
+    const res = await fetch(`/api/admin/products/${product.id}`, { method: 'DELETE' })
+    if (res.ok) {
+      setProducts((prev) => prev.filter((p) => p.id !== product.id))
+    }
   }
 
   function handleNew() {
@@ -53,71 +57,31 @@ export function ProductsClient({ initialProducts, categories, store, storeId }: 
     setFormOpen(true)
   }
 
-  // Convierte las filas del formulario al formato que espera Supabase
-  function buildVariantRows(productId: string, variantsData: VariantRow[]) {
-    return variantsData
-      .filter((v) => v.talle || v.color)
-      .map((v) => ({
-        product_id: productId,
-        attributes: {
-          ...(v.talle ? { talle: v.talle } : {}),
-          ...(v.color ? { color: v.color } : {}),
-        },
-        stock: parseInt(v.stock) || 0,
-        price_override: v.price_override ? parseFloat(v.price_override) : null,
-        is_active: true,
-      }))
-  }
-
   async function handleSave(data: Partial<Product> & { variants_data: VariantRow[] }) {
     setSaving(true)
-    const supabase = createClient()
-    const { variants_data, ...productData } = data
-
     try {
       if (editingProduct) {
         // ── Actualizar producto existente ────────────────────────────────────
-        await supabase
-          .from('products')
-          .update({ ...productData, updated_at: new Date().toISOString() })
-          .eq('id', editingProduct.id)
-
-        // Reemplazar variantes: eliminar las viejas e insertar las nuevas
-        await supabase
-          .from('product_variants')
-          .delete()
-          .eq('product_id', editingProduct.id)
-
-        if (variants_data.length > 0) {
-          const variantRows = buildVariantRows(editingProduct.id, variants_data)
-          if (variantRows.length > 0) {
-            await supabase.from('product_variants').insert(variantRows)
-          }
-        }
-
+        const res = await fetch(`/api/admin/products/${editingProduct.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+        if (!res.ok) throw new Error('Error al actualizar')
+        const { data: updated } = await res.json()
         setProducts((prev) =>
-          prev.map((p) =>
-            p.id === editingProduct.id ? { ...p, ...productData } : p,
-          ),
+          prev.map((p) => (p.id === editingProduct.id ? (updated ?? { ...p, ...data }) : p)),
         )
       } else {
         // ── Crear producto nuevo ─────────────────────────────────────────────
-        // Primero insertar el producto para obtener su ID.
-        // Luego insertar las variantes con ese ID.
-        const { data: newProduct } = await supabase
-          .from('products')
-          .insert({ ...productData, store_id: storeId })
-          .select('*, category:categories(id, name, slug), variants:product_variants(*)')
-          .single()
-
+        const res = await fetch('/api/admin/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+        if (!res.ok) throw new Error('Error al crear')
+        const { data: newProduct } = await res.json()
         if (newProduct) {
-          // Ahora tenemos el ID real — insertar variantes con seguridad
-          if (variants_data.length > 0) {
-            const variantRows = buildVariantRows(newProduct.id, variants_data)
-            if (variantRows.length > 0) {
-              await supabase.from('product_variants').insert(variantRows)
-            }
-          }
           setProducts((prev) => [newProduct as Product, ...prev])
         }
       }

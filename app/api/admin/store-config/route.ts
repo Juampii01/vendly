@@ -25,6 +25,8 @@ export async function PATCH(req: Request) {
       'home_editorial_label', 'home_editorial_title', 'home_editorial_body',
       // Multi-tenant + localización
       'base_url', 'currency', 'locale',
+      // Tipo de sitio
+      'site_type',
     ]
 
     const updates: Record<string, unknown> = {}
