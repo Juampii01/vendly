@@ -6,13 +6,19 @@ import Image from 'next/image'
 import { formatPrice } from '@/lib/format'
 import { useCartStore } from '@/lib/cart'
 import type { Product, StoreConfig } from '@/types'
+import type { SiteFeatures } from '@/lib/site-features'
+
+const DEFAULT_FEATURES: SiteFeatures = {
+  hasCart: true, hasCheckout: false, hasWhatsappCTA: true, hasProductCatalog: true,
+}
 
 interface Props {
   product: Product
   store: StoreConfig
+  features?: SiteFeatures
 }
 
-export function DealershipProductCard({ product, store }: Props) {
+export function DealershipProductCard({ product, store, features = DEFAULT_FEATURES }: Props) {
   const addItem = useCartStore((s) => s.addItem)
   const [added, setAdded] = useState(false)
   const GOLD = store.color_accent
@@ -135,13 +141,25 @@ export function DealershipProductCard({ product, store }: Props) {
           }
         </div>
 
-        {/* CTA */}
-        <button
-          onClick={handleConsult}
-          className="w-full py-3 text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:brightness-110 active:scale-95 rounded-sm"
-          style={{ backgroundColor: added ? '#22c55e' : GOLD, color: added ? '#fff' : '#0a0a0f' }}>
-          {added ? '✓ Consulta guardada' : 'Solicitar información'}
-        </button>
+        {/* CTA — con carrito (sidebar de consultas) o directo a WhatsApp */}
+        {features.hasCart ? (
+          <button
+            onClick={handleConsult}
+            className="w-full py-3 text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:brightness-110 active:scale-95 rounded-sm"
+            style={{ backgroundColor: added ? '#22c55e' : GOLD, color: added ? '#fff' : '#0a0a0f' }}>
+            {added ? '✓ Consulta guardada' : 'Solicitar información'}
+          </button>
+        ) : (
+          <a
+            href={store.whatsapp_number
+              ? `https://wa.me/${store.whatsapp_number.replace(/\D/g, '')}?text=Hola! Me interesa el ${encodeURIComponent(product.name)}`
+              : '#'}
+            target="_blank" rel="noopener noreferrer"
+            className="block w-full py-3 text-center text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:brightness-110 active:scale-95 rounded-sm"
+            style={{ backgroundColor: GOLD, color: '#0a0a0f' }}>
+            Solicitar información
+          </a>
+        )}
       </div>
     </Link>
   )

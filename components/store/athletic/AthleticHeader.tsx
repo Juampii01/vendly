@@ -6,14 +6,20 @@ import Image from 'next/image'
 import { useCartStore } from '@/lib/cart'
 import { CartSidebar } from '../CartSidebar'
 import type { StoreConfig, Category } from '@/types'
+import type { SiteFeatures } from '@/lib/site-features'
+
+const DEFAULT_FEATURES: SiteFeatures = {
+  hasCart: true, hasCheckout: true, hasWhatsappCTA: false, hasProductCatalog: true,
+}
 
 interface Props {
   store: StoreConfig
   categories: Category[]
   userLoggedIn?: boolean
+  features?: SiteFeatures
 }
 
-export function AthleticHeader({ store, categories, userLoggedIn = false }: Props) {
+export function AthleticHeader({ store, categories, userLoggedIn = false, features = DEFAULT_FEATURES }: Props) {
   const [cartOpen, setCartOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
@@ -99,24 +105,26 @@ export function AthleticHeader({ store, categories, userLoggedIn = false }: Prop
             )}
 
             {/* Cart */}
-            <button
-              onClick={() => setCartOpen(true)}
-              className="relative flex items-center gap-1 transition-opacity hover:opacity-40"
-              style={{ color: store.color_text }}
-              aria-label="Carrito"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
-              </svg>
-              {itemCount > 0 && (
-                <span
-                  className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center"
-                  style={{ backgroundColor: store.color_primary, color: store.color_background }}
-                >
-                  {itemCount}
-                </span>
-              )}
-            </button>
+            {features.hasCart && (
+              <button
+                onClick={() => setCartOpen(true)}
+                className="relative flex items-center gap-1 transition-opacity hover:opacity-40"
+                style={{ color: store.color_text }}
+                aria-label="Carrito"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
+                </svg>
+                {itemCount > 0 && (
+                  <span
+                    className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center"
+                    style={{ backgroundColor: store.color_primary, color: store.color_background }}
+                  >
+                    {itemCount}
+                  </span>
+                )}
+              </button>
+            )}
           </div>
         </div>
 
@@ -144,24 +152,26 @@ export function AthleticHeader({ store, categories, userLoggedIn = false }: Prop
             }
           </Link>
 
-          <button
-            onClick={() => setCartOpen(true)}
-            className="relative p-1.5"
-            style={{ color: store.color_text }}
-            aria-label="Carrito"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
-            </svg>
-            {itemCount > 0 && (
-              <span
-                className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center"
-                style={{ backgroundColor: store.color_primary, color: store.color_background }}
-              >
-                {itemCount}
-              </span>
-            )}
-          </button>
+          {features.hasCart ? (
+            <button
+              onClick={() => setCartOpen(true)}
+              className="relative p-1.5"
+              style={{ color: store.color_text }}
+              aria-label="Carrito"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
+              </svg>
+              {itemCount > 0 && (
+                <span
+                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center"
+                  style={{ backgroundColor: store.color_primary, color: store.color_background }}
+                >
+                  {itemCount}
+                </span>
+              )}
+            </button>
+          ) : <div />}
         </div>
 
         {/* Search bar */}
@@ -259,7 +269,9 @@ export function AthleticHeader({ store, categories, userLoggedIn = false }: Prop
         </div>
       )}
 
-      <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} store={store} />
+      {features.hasCart && (
+        <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} store={store} />
+      )}
     </>
   )
 }

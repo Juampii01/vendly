@@ -6,14 +6,20 @@ import Image from 'next/image'
 import { useCartStore } from '@/lib/cart'
 import { CartSidebar } from '../CartSidebar'
 import type { StoreConfig, Category } from '@/types'
+import type { SiteFeatures } from '@/lib/site-features'
+
+const DEFAULT_FEATURES: SiteFeatures = {
+  hasCart: true, hasCheckout: false, hasWhatsappCTA: true, hasProductCatalog: true,
+}
 
 interface Props {
   store: StoreConfig
   categories: Category[]
   userLoggedIn?: boolean
+  features?: SiteFeatures
 }
 
-export function DealershipHeader({ store, categories, userLoggedIn = false }: Props) {
+export function DealershipHeader({ store, categories, userLoggedIn = false, features = DEFAULT_FEATURES }: Props) {
   const [cartOpen, setCartOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -98,20 +104,22 @@ export function DealershipHeader({ store, categories, userLoggedIn = false }: Pr
               Test Drive
             </a>
 
-            <button onClick={() => setCartOpen(true)}
-              className="relative p-2.5 rounded-lg transition-colors hover:bg-white/10"
-              style={{ color: 'rgba(255,255,255,0.6)' }}
-              aria-label="Consultas guardadas">
-              <svg width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.7" viewBox="0 0 24 24">
-                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-              </svg>
-              {itemCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center"
-                  style={{ backgroundColor: GOLD, color: store.color_primary }}>
-                  {itemCount}
-                </span>
-              )}
-            </button>
+            {features.hasCart && (
+              <button onClick={() => setCartOpen(true)}
+                className="relative p-2.5 rounded-lg transition-colors hover:bg-white/10"
+                style={{ color: 'rgba(255,255,255,0.6)' }}
+                aria-label="Consultas guardadas">
+                <svg width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.7" viewBox="0 0 24 24">
+                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                </svg>
+                {itemCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center"
+                    style={{ backgroundColor: GOLD, color: store.color_primary }}>
+                    {itemCount}
+                  </span>
+                )}
+              </button>
+            )}
 
             <button onClick={() => setMobileOpen(!mobileOpen)}
               className="lg:hidden p-2.5 rounded-lg hover:bg-white/10 transition-colors"
@@ -150,7 +158,9 @@ export function DealershipHeader({ store, categories, userLoggedIn = false }: Pr
         )}
       </header>
 
-      <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} store={store} />
+      {features.hasCart && (
+        <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} store={store} />
+      )}
     </>
   )
 }

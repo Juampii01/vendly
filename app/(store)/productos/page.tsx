@@ -3,9 +3,11 @@ import { getStoreConfig, getCategories, getProducts } from '@/lib/store'
 import { ProductCard } from '@/components/store/ProductCard'
 import { ModoProductCard } from '@/components/store/modo/ModoProductCard'
 import { AthleticProductCard } from '@/components/store/athletic/AthleticProductCard'
+import { DealershipProductCard } from '@/components/store/dealership/DealershipProductCard'
 import { FilterSidebar } from '@/components/store/FilterSidebar'
 import { SearchInput } from '@/components/store/SearchInput'
 import { FadeUp, StaggerGrid, StaggerItem } from '@/components/store/motion'
+import { getSiteFeatures } from '@/lib/site-features'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 
@@ -35,6 +37,7 @@ export default async function ProductosPage({ searchParams }: PageProps) {
     }),
   ])
 
+  const features = getSiteFeatures(store.site_type)
   const totalPages = Math.ceil(total / PER_PAGE)
 
   return (
@@ -83,6 +86,8 @@ export default async function ProductosPage({ searchParams }: PageProps) {
                       ? <ModoProductCard product={product} store={store} />
                       : store.site_type === 'athletic'
                       ? <AthleticProductCard product={product} store={store} />
+                      : store.site_type === 'dealership'
+                      ? <DealershipProductCard product={product} store={store} features={features} />
                       : <ProductCard product={product} store={store} />
                     }
                   </StaggerItem>

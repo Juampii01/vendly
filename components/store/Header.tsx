@@ -6,14 +6,20 @@ import Image from 'next/image'
 import { useCartStore } from '@/lib/cart'
 import { CartSidebar } from './CartSidebar'
 import type { StoreConfig, Category } from '@/types'
+import type { SiteFeatures } from '@/lib/site-features'
+
+const DEFAULT_FEATURES: SiteFeatures = {
+  hasCart: true, hasCheckout: true, hasWhatsappCTA: false, hasProductCatalog: true,
+}
 
 interface HeaderProps {
   store: StoreConfig
   categories: Category[]
   userLoggedIn?: boolean
+  features?: SiteFeatures
 }
 
-export function Header({ store, categories, userLoggedIn = false }: HeaderProps) {
+export function Header({ store, categories, userLoggedIn = false, features = DEFAULT_FEATURES }: HeaderProps) {
   const [cartOpen, setCartOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const itemCount = useCartStore((s) => s.getItemCount())
@@ -64,18 +70,20 @@ export function Header({ store, categories, userLoggedIn = false }: HeaderProps)
               <UserIcon color={fg} loggedIn={userLoggedIn} />
             </Link>
 
-            {/* Carrito */}
-            <button onClick={() => setCartOpen(true)}
-              className="relative flex h-10 w-10 items-center justify-center transition-opacity hover:opacity-60"
-              aria-label="Abrir carrito">
-              <BagIcon color={fg} />
-              {itemCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black"
-                  style={{ backgroundColor: store.color_accent, color: '#fff' }}>
-                  {itemCount > 9 ? '9+' : itemCount}
-                </span>
-              )}
-            </button>
+            {/* Carrito — solo si el site_type lo habilita */}
+            {features.hasCart && (
+              <button onClick={() => setCartOpen(true)}
+                className="relative flex h-10 w-10 items-center justify-center transition-opacity hover:opacity-60"
+                aria-label="Abrir carrito">
+                <BagIcon color={fg} />
+                {itemCount > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black"
+                    style={{ backgroundColor: store.color_accent, color: '#fff' }}>
+                    {itemCount > 9 ? '9+' : itemCount}
+                  </span>
+                )}
+              </button>
+            )}
 
             {/* Hamburger mobile */}
             <button className="flex h-10 w-10 items-center justify-center md:hidden"
@@ -118,7 +126,9 @@ export function Header({ store, categories, userLoggedIn = false }: HeaderProps)
         )}
       </header>
 
-      <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} store={store} />
+      {features.hasCart && (
+        <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} store={store} />
+      )}
     </>
   )
 }

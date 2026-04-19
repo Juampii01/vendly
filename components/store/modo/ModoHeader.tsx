@@ -6,14 +6,20 @@ import Image from 'next/image'
 import { useCartStore } from '@/lib/cart'
 import { CartSidebar } from '../CartSidebar'
 import type { StoreConfig, Category } from '@/types'
+import type { SiteFeatures } from '@/lib/site-features'
+
+const DEFAULT_FEATURES: SiteFeatures = {
+  hasCart: true, hasCheckout: true, hasWhatsappCTA: false, hasProductCatalog: true,
+}
 
 interface Props {
   store: StoreConfig
   categories: Category[]
   userLoggedIn?: boolean
+  features?: SiteFeatures
 }
 
-export function ModoHeader({ store, categories, userLoggedIn = false }: Props) {
+export function ModoHeader({ store, categories, userLoggedIn = false, features = DEFAULT_FEATURES }: Props) {
   const [cartOpen, setCartOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const itemCount = useCartStore((s) => s.getItemCount())
@@ -77,20 +83,22 @@ export function ModoHeader({ store, categories, userLoggedIn = false }: Props) {
             >
               {userLoggedIn ? 'Cuenta' : 'Ingresar'}
             </Link>
-            <button
-              onClick={() => setCartOpen(true)}
-              className="relative flex items-center gap-1.5 transition-opacity hover:opacity-50"
-            >
-              <BagIcon color={store.color_text} />
-              {itemCount > 0 && (
-                <span
-                  className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black text-white"
-                  style={{ backgroundColor: store.color_accent }}
-                >
-                  {itemCount > 9 ? '9+' : itemCount}
-                </span>
-              )}
-            </button>
+            {features.hasCart && (
+              <button
+                onClick={() => setCartOpen(true)}
+                className="relative flex items-center gap-1.5 transition-opacity hover:opacity-50"
+              >
+                <BagIcon color={store.color_text} />
+                {itemCount > 0 && (
+                  <span
+                    className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black text-white"
+                    style={{ backgroundColor: store.color_accent }}
+                  >
+                    {itemCount > 9 ? '9+' : itemCount}
+                  </span>
+                )}
+              </button>
+            )}
           </div>
         </div>
 
@@ -107,15 +115,17 @@ export function ModoHeader({ store, categories, userLoggedIn = false }: Props) {
             }
           </Link>
 
-          <button onClick={() => setCartOpen(true)} className="relative">
-            <BagIcon color={store.color_text} />
-            {itemCount > 0 && (
-              <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black text-white"
-                style={{ backgroundColor: store.color_accent }}>
-                {itemCount > 9 ? '9+' : itemCount}
-              </span>
-            )}
-          </button>
+          {features.hasCart && (
+            <button onClick={() => setCartOpen(true)} className="relative">
+              <BagIcon color={store.color_text} />
+              {itemCount > 0 && (
+                <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black text-white"
+                  style={{ backgroundColor: store.color_accent }}>
+                  {itemCount > 9 ? '9+' : itemCount}
+                </span>
+              )}
+            </button>
+          )}
         </div>
 
         {/* Mobile drawer */}
@@ -141,7 +151,9 @@ export function ModoHeader({ store, categories, userLoggedIn = false }: Props) {
         )}
       </header>
 
-      <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} store={store} />
+      {features.hasCart && (
+        <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} store={store} />
+      )}
     </>
   )
 }

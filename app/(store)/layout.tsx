@@ -10,6 +10,7 @@ import { AthleticFooter } from '@/components/store/athletic/AthleticFooter'
 import { DealershipHeader } from '@/components/store/dealership/DealershipHeader'
 import { DealershipFooter } from '@/components/store/dealership/DealershipFooter'
 import { PageEnter } from '@/components/store/motion'
+import { getSiteFeatures } from '@/lib/site-features'
 import type { Metadata } from 'next'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -34,6 +35,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   const isAthletic = store.site_type === 'athletic'
   const isDealership = store.site_type === 'dealership'
   const isVendlyMarketing = store.site_type === 'vendly-marketing'
+  const features = getSiteFeatures(store.site_type)
 
   const cssVars = `
     :root {
@@ -50,38 +52,40 @@ export default async function StoreLayout({ children }: { children: React.ReactN
     return (
       <>
         <style dangerouslySetInnerHTML={{ __html: cssVars }} />
-        <CartProvider>{children}</CartProvider>
+        {children}
       </>
     )
   }
 
+  const pageContent = (
+    <div className="flex min-h-screen flex-col"
+      style={{ backgroundColor: store.color_background, color: store.color_text }}>
+      {isModo
+        ? <ModoHeader store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
+        : isAthletic
+        ? <AthleticHeader store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
+        : isDealership
+        ? <DealershipHeader store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
+        : <Header store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
+      }
+      <main className="flex-1">
+        <PageEnter>{children}</PageEnter>
+      </main>
+      {isModo
+        ? <ModoFooter store={store} categories={categories} />
+        : isAthletic
+        ? <AthleticFooter store={store} categories={categories} />
+        : isDealership
+        ? <DealershipFooter store={store} categories={categories} />
+        : <Footer store={store} categories={categories} />
+      }
+    </div>
+  )
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: cssVars }} />
-      <CartProvider>
-        <div className="flex min-h-screen flex-col"
-          style={{ backgroundColor: store.color_background, color: store.color_text }}>
-          {isModo
-            ? <ModoHeader store={store} categories={categories} userLoggedIn={userLoggedIn} />
-            : isAthletic
-            ? <AthleticHeader store={store} categories={categories} userLoggedIn={userLoggedIn} />
-            : isDealership
-            ? <DealershipHeader store={store} categories={categories} userLoggedIn={userLoggedIn} />
-            : <Header store={store} categories={categories} userLoggedIn={userLoggedIn} />
-          }
-          <main className="flex-1">
-            <PageEnter>{children}</PageEnter>
-          </main>
-          {isModo
-            ? <ModoFooter store={store} categories={categories} />
-            : isAthletic
-            ? <AthleticFooter store={store} categories={categories} />
-            : isDealership
-            ? <DealershipFooter store={store} categories={categories} />
-            : <Footer store={store} categories={categories} />
-          }
-        </div>
-      </CartProvider>
+      {features.hasCart ? <CartProvider>{pageContent}</CartProvider> : pageContent}
     </>
   )
 }
