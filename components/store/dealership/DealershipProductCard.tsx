@@ -14,129 +14,134 @@ interface Props {
 
 export function DealershipProductCard({ product, store }: Props) {
   const addItem = useCartStore((s) => s.addItem)
-  const [inquired, setInquired] = useState(false)
-
+  const [added, setAdded] = useState(false)
   const GOLD = store.color_accent
+
   const hasDiscount = product.compare_at_price && product.compare_at_price > product.price
+  const img = product.images?.[0]
 
-  // Extraer año y km de los tags si existen (ej: "2023", "45.000 km")
-  const yearTag = product.tags?.find(t => /^\d{4}$/.test(t))
-  const kmTag = product.tags?.find(t => /km/i.test(t))
+  // Extraer specs de los tags: año (4 dígitos), km, combustible, transmisión
+  const yearTag    = product.tags?.find(t => /^\d{4}$/.test(t))
+  const kmTag      = product.tags?.find(t => /km/i.test(t))
+  const fuelTag    = product.tags?.find(t => /nafta|diesel|híbrido|eléctrico|gnc/i.test(t))
+  const transTag   = product.tags?.find(t => /manual|automático|cvt/i.test(t))
+  const isNew      = product.tags?.some(t => /0\s*km|nuevo/i.test(t))
+  const isFeatured = product.is_featured
 
-  function handleInquiry(e: React.MouseEvent) {
+  function handleConsult(e: React.MouseEvent) {
     e.preventDefault()
     addItem(product, null, 1)
-    setInquired(true)
-    setTimeout(() => setInquired(false), 2000)
+    setAdded(true)
+    setTimeout(() => setAdded(false), 2500)
   }
 
   return (
-    <Link href={`/productos/${product.slug}`} className="group block">
-      {/* Imagen — ratio apaisado para autos */}
-      <div
-        className="relative w-full overflow-hidden"
-        style={{ aspectRatio: '16/10', backgroundColor: `${store.color_text}08` }}
-      >
-        {product.images?.length > 0 ? (
-          <Image
-            src={product.images[0]}
-            alt={product.name}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center"
-            style={{ backgroundColor: `${store.color_text}08` }}>
-            <svg className="w-16 h-16 opacity-10" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24"
-              style={{ color: store.color_text }}>
-              <path d="M19 17H5a2 2 0 01-2-2V9a2 2 0 012-2h1l2-3h8l2 3h1a2 2 0 012 2v6a2 2 0 01-2 2z"/>
-              <circle cx="7.5" cy="17" r="1.5"/><circle cx="16.5" cy="17" r="1.5"/>
-            </svg>
-          </div>
-        )}
+    <Link href={`/productos/${product.slug}`}
+      className="group block rounded-xl overflow-hidden border transition-all duration-300 hover:translate-y-[-4px] hover:shadow-2xl"
+      style={{
+        backgroundColor: 'rgba(255,255,255,0.03)',
+        borderColor: 'rgba(255,255,255,0.07)',
+        boxShadow: '0 2px 20px rgba(0,0,0,0.3)',
+      }}>
 
-        {/* Gold line accent top */}
-        <div className="absolute inset-x-0 top-0 h-0.5 transition-opacity duration-300 opacity-0 group-hover:opacity-100"
-          style={{ backgroundColor: GOLD }} />
+      {/* Image */}
+      <div className="relative overflow-hidden" style={{ aspectRatio: '16/10' }}>
+        {img
+          ? <Image src={img} alt={product.name} fill sizes="(max-width: 768px) 100vw, 33vw"
+              className="object-cover object-center transition-transform duration-700 group-hover:scale-105" />
+          : <div className="w-full h-full flex items-center justify-center"
+              style={{ backgroundColor: 'rgba(255,255,255,0.04)' }}>
+              <span className="text-5xl opacity-20">🚗</span>
+            </div>
+        }
+
+        {/* Gradient overlay */}
+        <div className="absolute inset-0"
+          style={{ background: 'linear-gradient(to top, rgba(10,10,18,0.7) 0%, transparent 60%)' }} />
 
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-          {product.is_featured && (
-            <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.15em]"
-              style={{ backgroundColor: GOLD, color: store.color_primary }}>
+          {isNew && (
+            <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-sm"
+              style={{ backgroundColor: GOLD, color: '#0a0a0f' }}>
+              0 km
+            </span>
+          )}
+          {isFeatured && !isNew && (
+            <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-sm"
+              style={{ backgroundColor: '#6366f1', color: '#fff' }}>
               Destacado
             </span>
           )}
           {hasDiscount && (
-            <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.15em] bg-red-600 text-white">
+            <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-widest rounded-sm"
+              style={{ backgroundColor: '#ef4444', color: '#fff' }}>
               Oferta
             </span>
           )}
         </div>
 
-        {/* Hover overlay — Consultar */}
-        <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-200">
-          <button
-            onClick={handleInquiry}
-            className="w-full py-3.5 text-[10px] font-black uppercase tracking-[0.2em]"
-            style={{ backgroundColor: store.color_primary, color: GOLD }}
-          >
-            {inquired ? '✓ Agregado a consultas' : 'Consultar precio'}
-          </button>
-        </div>
-      </div>
-
-      {/* Info */}
-      <div className="mt-4 px-1">
-        {/* Año + km */}
-        {(yearTag || kmTag) && (
-          <div className="flex items-center gap-3 mb-1.5">
-            {yearTag && (
-              <span className="text-[10px] font-bold uppercase tracking-[0.12em] opacity-40"
-                style={{ color: store.color_text }}>
-                {yearTag}
-              </span>
-            )}
-            {yearTag && kmTag && <span className="opacity-20 text-[10px]" style={{ color: store.color_text }}>·</span>}
-            {kmTag && (
-              <span className="text-[10px] font-bold uppercase tracking-[0.12em] opacity-40"
-                style={{ color: store.color_text }}>
-                {kmTag}
-              </span>
-            )}
+        {/* Year bottom-left */}
+        {yearTag && (
+          <div className="absolute bottom-3 left-3">
+            <span className="text-[10px] font-black tracking-wider" style={{ color: GOLD }}>
+              {yearTag}
+            </span>
           </div>
         )}
+      </div>
 
-        {/* Nombre del modelo */}
-        <p className="text-base font-black uppercase tracking-[-0.01em] leading-tight"
-          style={{ color: store.color_text }}>
-          {product.name}
-        </p>
-
-        {/* Categoría */}
-        {product.category && (
-          <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] opacity-40"
-            style={{ color: store.color_text }}>
+      {/* Content */}
+      <div className="p-5">
+        {/* Category label */}
+        {product.category?.name && (
+          <p className="text-[9px] font-bold uppercase tracking-[0.3em] mb-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
             {product.category.name}
           </p>
         )}
 
-        {/* Precio */}
-        <div className="mt-3 flex items-baseline gap-3">
-          <span className="text-lg font-black" style={{ color: store.color_text }}>
-            {formatPrice(product.price, store.currency, store.locale)}
-          </span>
-          {hasDiscount && (
-            <span className="text-sm line-through opacity-30" style={{ color: store.color_text }}>
-              {formatPrice(product.compare_at_price!, store.currency, store.locale)}
-            </span>
-          )}
+        {/* Name */}
+        <h3 className="font-black text-base leading-tight mb-3 text-white group-hover:opacity-90 transition-opacity">
+          {product.name}
+        </h3>
+
+        {/* Specs row */}
+        {(kmTag || fuelTag || transTag) && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {[kmTag, fuelTag, transTag].filter(Boolean).map((spec, i) => (
+              <span key={i}
+                className="px-2 py-1 text-[9px] font-semibold uppercase tracking-wide rounded-md"
+                style={{ backgroundColor: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>
+                {spec}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Price */}
+        <div className="flex items-baseline gap-2 mb-4">
+          {product.price > 0
+            ? <>
+                <span className="text-xl font-black text-white">{formatPrice(product.price)}</span>
+                {hasDiscount && (
+                  <span className="text-sm line-through" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                    {formatPrice(product.compare_at_price!)}
+                  </span>
+                )}
+              </>
+            : <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                Consultar precio
+              </span>
+          }
         </div>
 
-        {/* Gold separator */}
-        <div className="mt-3 h-px w-8 transition-all duration-300 group-hover:w-full"
-          style={{ backgroundColor: GOLD, opacity: 0.4 }} />
+        {/* CTA */}
+        <button
+          onClick={handleConsult}
+          className="w-full py-3 text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:brightness-110 active:scale-95 rounded-sm"
+          style={{ backgroundColor: added ? '#22c55e' : GOLD, color: added ? '#fff' : '#0a0a0f' }}>
+          {added ? '✓ Consulta guardada' : 'Solicitar información'}
+        </button>
       </div>
     </Link>
   )
