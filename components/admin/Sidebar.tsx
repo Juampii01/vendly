@@ -104,7 +104,7 @@ export function AdminSidebar({ store, userEmail }: AdminSidebarProps) {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-56 shrink-0 flex-col bg-slate-800">
+      <aside className="hidden md:flex w-56 shrink-0 flex-col bg-slate-800 h-full">
         <SidebarContent />
       </aside>
 
