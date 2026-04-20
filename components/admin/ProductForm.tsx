@@ -370,7 +370,7 @@ export function ProductForm({ product, categories, store, storeId, saving, saveE
                   } catch (e) {
                     setSeoAiError(e instanceof Error ? e.message : 'Error de IA.')
                   } finally {
-                    setSeoAiLoading(null)
+                    setSeoAiLoading(false)
                   }
                 }}
                 className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium border border-slate-200 text-slate-500 hover:border-slate-400 hover:text-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
