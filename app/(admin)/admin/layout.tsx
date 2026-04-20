@@ -49,9 +49,27 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       .eq('store_id', storeId)
 
     if (count && count > 0) {
+      // Ya hay admins configurados y este usuario no es uno → sin acceso
       redirect('/admin/login?error=sin_acceso')
     }
-    // count === 0 → modo bootstrap: primer usuario autenticado pasa
+
+    // ── Bootstrap: 0 admins registrados ─────────────────────────────────────
+    //
+    // Solo permitimos el acceso si el email del usuario coincide con el email
+    // de contacto del store. Esto previene que cualquier usuario autenticado
+    // de otra tienda acceda en modo bootstrap.
+    //
+    // Si no hay email de store configurado → denegar por seguridad.
+    //
+    if (!store.email || userEmail.toLowerCase() !== store.email.toLowerCase()) {
+      redirect('/admin/login?error=sin_acceso')
+    }
+
+    // Bootstrap válido → auto-crear el primer owner
+    await service
+      .from('admin_users')
+      .insert({ store_id: storeId, email: userEmail.toLowerCase(), role: 'owner' })
+      .throwOnError()
   }
 
   return (

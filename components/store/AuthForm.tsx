@@ -10,7 +10,7 @@ interface AuthFormProps {
   redirectTo?: string
 }
 
-type Mode = 'login' | 'register' | 'sent'
+type Mode = 'login' | 'register' | 'sent' | 'not_registered'
 
 export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
   const [mode, setMode] = useState<Mode>('login')
@@ -24,6 +24,11 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
   const bg = store.color_primary
   const fg = store.color_background
 
+  // ── Registrar al usuario en este store (llamada al server) ─────────────────
+  async function registerInStore() {
+    await fetch('/api/auth/store-register', { method: 'POST' })
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
@@ -34,12 +39,24 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
       const { error: err } = await supabase.auth.signInWithPassword({ email, password })
       if (err) {
         setError('Email o contraseña incorrectos.')
-      } else {
+        setLoading(false)
+        return
+      }
+
+      // Verificar si el usuario ya tiene cuenta en ESTE store
+      const res = await fetch('/api/auth/store-register')
+      const { registered } = await res.json()
+
+      if (registered) {
+        // Ya está registrado → entrar directo
         router.push(redirectTo)
         router.refresh()
+      } else {
+        // Autenticado pero sin cuenta en esta tienda → pedir confirmación
+        setLoading(false)
+        setMode('not_registered')
       }
-    } else {
-      // register
+    } else if (mode === 'register') {
       if (password.length < 6) {
         setError('La contraseña debe tener al menos 6 caracteres.')
         setLoading(false)
@@ -56,12 +73,39 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
       if (err) {
         setError(err.message)
       } else {
-        setMode('sent')
+        // Si Supabase devuelve sesión directa (confirmación deshabilitada)
+        // registramos en el store de inmediato
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          await registerInStore()
+          router.push(redirectTo)
+          router.refresh()
+        } else {
+          setMode('sent')
+        }
       }
+      setLoading(false)
     }
-    setLoading(false)
   }
 
+  // ── El usuario logueado quiere crear cuenta en esta tienda ─────────────────
+  async function handleJoinStore() {
+    setLoading(true)
+    await registerInStore()
+    router.push(redirectTo)
+    router.refresh()
+  }
+
+  // ── El usuario logueado NO quiere crear cuenta aquí → cerrar sesión ────────
+  async function handleDeclineStore() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    setMode('login')
+    setEmail('')
+    setPassword('')
+  }
+
+  // ── Estado: confirmación de email enviada ──────────────────────────────────
   if (mode === 'sent') {
     return (
       <div className="text-center py-8">
@@ -71,7 +115,7 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
         </h2>
         <p className="text-sm opacity-60" style={{ color: store.color_text }}>
           Enviamos un link de confirmación a <strong>{email}</strong>.
-          Hacé click en el link y ya podés ingresar.
+          Hacé click en el link para activar tu cuenta.
         </p>
         <button
           onClick={() => setMode('login')}
@@ -84,6 +128,38 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
     )
   }
 
+  // ── Estado: usuario autenticado pero sin cuenta en esta tienda ─────────────
+  if (mode === 'not_registered') {
+    return (
+      <div className="text-center py-8">
+        <div className="text-4xl mb-4">🔒</div>
+        <h2 className="text-xl font-bold mb-3" style={{ color: store.color_text }}>
+          No tenés cuenta en {store.name}
+        </h2>
+        <p className="text-sm opacity-60 mb-6" style={{ color: store.color_text }}>
+          Tu email <strong>{email}</strong> tiene cuenta en Vendly,
+          pero todavía no está registrado en esta tienda.
+        </p>
+        <button
+          onClick={handleJoinStore}
+          disabled={loading}
+          className="w-full py-3.5 mb-3 text-xs font-black uppercase tracking-[0.15em] transition-opacity hover:opacity-80 disabled:opacity-40"
+          style={{ backgroundColor: bg, color: fg }}
+        >
+          {loading ? '...' : `Crear cuenta en ${store.name}`}
+        </button>
+        <button
+          onClick={handleDeclineStore}
+          className="text-xs opacity-40 hover:opacity-70 underline"
+          style={{ color: store.color_text }}
+        >
+          Cancelar
+        </button>
+      </div>
+    )
+  }
+
+  // ── Login / Register normal ────────────────────────────────────────────────
   return (
     <div>
       {/* Tabs */}
@@ -93,9 +169,12 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
             key={m}
             onClick={() => { setMode(m); setError('') }}
             className={`flex-1 pb-3 text-sm font-bold uppercase tracking-wider transition-opacity border-b-2 -mb-px ${
-              mode === m ? 'opacity-100 border-current' : 'opacity-30 border-transparent hover:opacity-50'
+              mode === m ? 'opacity-100' : 'opacity-30 border-transparent hover:opacity-50'
             }`}
-            style={{ color: store.color_text, borderColor: mode === m ? store.color_primary : 'transparent' }}
+            style={{
+              color: store.color_text,
+              borderColor: mode === m ? store.color_primary : 'transparent',
+            }}
           >
             {m === 'login' ? 'Ingresar' : 'Registrarse'}
           </button>
@@ -105,8 +184,10 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
       <form onSubmit={handleSubmit} className="space-y-4">
         {mode === 'register' && (
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5 opacity-60"
-              style={{ color: store.color_text }}>
+            <label
+              className="block text-xs font-semibold uppercase tracking-wider mb-1.5 opacity-60"
+              style={{ color: store.color_text }}
+            >
               Nombre completo
             </label>
             <input
@@ -122,8 +203,10 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
         )}
 
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5 opacity-60"
-            style={{ color: store.color_text }}>
+          <label
+            className="block text-xs font-semibold uppercase tracking-wider mb-1.5 opacity-60"
+            style={{ color: store.color_text }}
+          >
             Email
           </label>
           <input
@@ -139,8 +222,10 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
         </div>
 
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5 opacity-60"
-            style={{ color: store.color_text }}>
+          <label
+            className="block text-xs font-semibold uppercase tracking-wider mb-1.5 opacity-60"
+            style={{ color: store.color_text }}
+          >
             Contraseña
           </label>
           <input

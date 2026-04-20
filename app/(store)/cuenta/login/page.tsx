@@ -9,13 +9,23 @@ export const metadata: Metadata = { title: 'Mi cuenta — Ingresar' }
 export default async function CuentaLoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>
+  searchParams: Promise<{ next?: string; error?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { next } = await searchParams
-  if (user) redirect(next ?? '/cuenta')
+  const { next, error } = await searchParams
+
+  // Si viene con error=not_registered: el usuario está logueado pero sin cuenta
+  // en esta tienda → cerrar sesión y mostrar el mensaje de error
+  if (user && error !== 'not_registered') {
+    redirect(next ?? '/cuenta')
+  }
+
+  // Si viene con not_registered, forzar logout del server para limpiar sesión
+  if (user && error === 'not_registered') {
+    await supabase.auth.signOut()
+  }
 
   const store = await getStoreConfig()
 
@@ -31,6 +41,21 @@ export default async function CuentaLoginPage({
         >
           Mi cuenta
         </h1>
+
+        {error === 'not_registered' && (
+          <div
+            className="mb-6 rounded-lg border px-4 py-3 text-sm"
+            style={{
+              borderColor: '#fca5a5',
+              backgroundColor: '#fef2f2',
+              color: '#b91c1c',
+            }}
+          >
+            Tu cuenta no está registrada en <strong>{store.name}</strong>.
+            Podés registrarte desde esta pantalla.
+          </div>
+        )}
+
         <AuthForm store={store} redirectTo={next ?? '/cuenta'} />
       </div>
     </div>

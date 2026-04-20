@@ -15,6 +15,24 @@ export default async function CuentaPage() {
   const store = await getStoreConfig()
   const service = createServiceClient()
 
+  // ── Verificar que este usuario tenga cuenta en ESTE store ─────────────────
+  //
+  // Un usuario autenticado en otro store NO debe poder acceder a /cuenta aquí.
+  // Si no está registrado → redirigir al login con mensaje claro.
+  //
+  const storeId = await getStoreId()
+  const { data: storeCustomer } = await service
+    .from('store_customers')
+    .select('id')
+    .eq('store_id', storeId)
+    .eq('auth_user_id', user.id)
+    .maybeSingle()
+
+  if (!storeCustomer) {
+    // Autenticado pero sin cuenta en esta tienda → cerrar sesión y redirigir
+    redirect('/cuenta/login?error=not_registered')
+  }
+
   // Órdenes del cliente por email
   const { data: orders } = await service
     .from('orders')
