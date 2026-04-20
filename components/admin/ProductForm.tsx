@@ -52,8 +52,12 @@ export function ProductForm({ product, categories, store, storeId, saving, saveE
   const [isFeatured, setIsFeatured] = useState(product?.is_featured ?? false)
   const [isActive, setIsActive] = useState(product?.is_active ?? true)
   const [images, setImages] = useState<string[]>(product?.images ?? [])
+  const [metaTitle, setMetaTitle] = useState(product?.meta_title ?? '')
+  const [metaDescription, setMetaDescription] = useState(product?.meta_description ?? '')
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState<string | null>(null)
+  const [seoAiLoading, setSeoAiLoading] = useState<'title' | 'desc' | null>(null)
+  const [seoAiError, setSeoAiError] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [variants, setVariants] = useState<VariantRow[]>(
     product?.variants?.length
@@ -138,6 +142,8 @@ export function ProductForm({ product, categories, store, storeId, saving, saveE
       is_featured: isFeatured,
       is_active: isActive,
       images,
+      meta_title: metaTitle || null,
+      meta_description: metaDescription || null,
       variants_data: variants,
     })
   }
@@ -335,6 +341,86 @@ export function ProductForm({ product, categories, store, storeId, saving, saveE
                     </button>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+
+          {/* SEO */}
+          <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-700">SEO</p>
+                <p className="text-xs text-slate-400 mt-0.5">Aparece en Google y redes sociales</p>
+              </div>
+              <button
+                type="button"
+                disabled={!!seoAiLoading || !name.trim()}
+                onClick={async () => {
+                  if (!name.trim()) return
+                  setSeoAiLoading('title')
+                  setSeoAiError(null)
+                  try {
+                    const catName = categories.find(c => c.id === categoryId)?.name
+                    const [t, d] = await Promise.all([
+                      generateWithAI({ target: 'product_meta_title', productName: name, productCategory: catName }),
+                      generateWithAI({ target: 'product_meta_description', productName: name, productCategory: catName }),
+                    ])
+                    setMetaTitle(t.slice(0, 60))
+                    setMetaDescription(d.slice(0, 155))
+                  } catch (e) {
+                    setSeoAiError(e instanceof Error ? e.message : 'Error de IA.')
+                  } finally {
+                    setSeoAiLoading(null)
+                  }
+                }}
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium border border-slate-200 text-slate-500 hover:border-slate-400 hover:text-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                title={!name.trim() ? 'Ingresá el nombre del producto primero' : 'Generar SEO con IA'}
+              >
+                <SparklesIcon />
+                {seoAiLoading ? 'Generando...' : 'Generar SEO con IA'}
+              </button>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-medium text-slate-500">Meta título</label>
+                <span className={`text-[10px] tabular-nums ${metaTitle.length > 55 ? 'text-amber-500' : 'text-slate-400'}`}>
+                  {metaTitle.length}/60
+                </span>
+              </div>
+              <input
+                value={metaTitle}
+                onChange={(e) => setMetaTitle(e.target.value.slice(0, 60))}
+                className={inputCls}
+                placeholder="Remera básica manga corta | Spriovani"
+              />
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-medium text-slate-500">Meta descripción</label>
+                <span className={`text-[10px] tabular-nums ${metaDescription.length > 140 ? 'text-amber-500' : 'text-slate-400'}`}>
+                  {metaDescription.length}/155
+                </span>
+              </div>
+              <textarea
+                value={metaDescription}
+                onChange={(e) => setMetaDescription(e.target.value.slice(0, 155))}
+                rows={2}
+                className={`${inputCls} resize-none`}
+                placeholder="Descripción corta para buscadores (120-155 caracteres)"
+              />
+            </div>
+
+            {seoAiError && <p className="text-xs text-red-500">{seoAiError}</p>}
+
+            {/* Preview estilo Google */}
+            {(metaTitle || metaDescription) && (
+              <div className="rounded-lg border border-slate-200 bg-white p-3">
+                <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">Vista previa en Google</p>
+                <p className="text-sm font-medium text-blue-700 truncate">{metaTitle || name}</p>
+                <p className="text-xs text-green-700 truncate">tutienda.com/productos/{slug}</p>
+                <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">{metaDescription || description || '—'}</p>
               </div>
             )}
           </div>

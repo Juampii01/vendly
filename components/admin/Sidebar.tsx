@@ -21,6 +21,7 @@ const NAV_ITEMS = [
   { href: '/admin/carritos', label: 'Carritos', icon: CartIcon, exact: false },
   { href: '/admin/cupones', label: 'Cupones', icon: TagIcon, exact: false },
   { href: '/admin/usuarios', label: 'Usuarios', icon: KeyIcon, exact: false },
+  { href: '/admin/generar', label: 'Asistente IA', icon: SparklesIcon, exact: false },
   { href: '/admin/configuracion', label: 'Configuración', icon: SettingsIcon, exact: false },
 ]
 

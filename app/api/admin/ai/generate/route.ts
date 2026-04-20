@@ -5,7 +5,13 @@ import { getStoreConfig } from '@/lib/store'
 
 // ─── Tipos ─────────────────────────────────────────────────────────────────────
 
-type GenerateTarget = 'product_description' | 'hero_title' | 'hero_subtitle' | 'meta_title'
+type GenerateTarget =
+  | 'product_description'
+  | 'hero_title'
+  | 'hero_subtitle'
+  | 'meta_title'
+  | 'product_meta_title'
+  | 'product_meta_description'
 
 interface GenerateRequest {
   target: GenerateTarget
@@ -100,7 +106,33 @@ Rules:
     }
   }
 
-  // meta_title
+  if (target === 'product_meta_title') {
+    return {
+      system: `You are an SEO copywriter for ${storeName}.
+Write in ${lang}.
+Rules:
+- 40-60 characters total
+- Include the product name, optionally the store name at the end with " | "
+- Compelling, keyword-rich, natural
+- Return only the title text, nothing else`,
+      user: `Write an SEO meta title for the product "${req.productName}"${req.productCategory ? ` in category "${req.productCategory}"` : ''}.`,
+    }
+  }
+
+  if (target === 'product_meta_description') {
+    return {
+      system: `You are an SEO copywriter for ${storeName}.
+Write in ${lang}.
+Rules:
+- 120-155 characters total
+- Describe the product clearly, include a benefit and a subtle call to action
+- Natural, not robotic
+- Return only the description text, nothing else`,
+      user: `Write an SEO meta description for the product "${req.productName}"${req.productCategory ? ` in category "${req.productCategory}"` : ''}.`,
+    }
+  }
+
+  // meta_title (store-level)
   return {
     system: `You are an SEO copywriter for ${storeName}${req.storeCategory ? `, a ${req.storeCategory} store` : ''}.
 Write in ${lang}.
@@ -129,7 +161,10 @@ export async function POST(req: Request) {
     const body = await req.json() as GenerateRequest
     const { target } = body
 
-    const validTargets: GenerateTarget[] = ['product_description', 'hero_title', 'hero_subtitle', 'meta_title']
+    const validTargets: GenerateTarget[] = [
+      'product_description', 'hero_title', 'hero_subtitle',
+      'meta_title', 'product_meta_title', 'product_meta_description',
+    ]
     if (!validTargets.includes(target)) {
       return NextResponse.json({ error: 'target inválido.' }, { status: 400 })
     }

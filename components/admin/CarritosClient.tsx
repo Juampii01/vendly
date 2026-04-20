@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import type { AbandonedCart, Coupon } from '@/types'
+import { useState, useCallback, useRef } from 'react'
+import type { AbandonedCart } from '@/types'
 
 interface Props {
   initialCarts: AbandonedCart[]
@@ -226,6 +226,131 @@ function WAModal({ cart, storeUrl, storeName, onClose, onSent }: WAModalProps) {
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 
+// ─── AI Insights panel ────────────────────────────────────────────────────────
+
+function buildInsightsPrompt(carts: AbandonedCart[], storeName: string): string {
+  const total = carts.reduce((s, c) => s + c.subtotal, 0)
+  const productCount: Record<string, number> = {}
+  for (const cart of carts) {
+    for (const item of cart.cart_data ?? []) {
+      const n = item.product?.name ?? 'Producto desconocido'
+      productCount[n] = (productCount[n] ?? 0) + item.quantity
+    }
+  }
+  const topProducts = Object.entries(productCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([name, qty]) => `  • ${name} (×${qty})`)
+    .join('\n')
+  const avg = carts.length > 0 ? total / carts.length : 0
+  const withPhone = carts.filter(c => c.phone).length
+  const withEmail = carts.filter(c => c.email).length
+
+  return `Sos analista de ecommerce para la tienda "${storeName}". Analizá estos datos de carritos abandonados y dá recomendaciones concretas:
+
+Datos:
+- Carritos sin recuperar: ${carts.length}
+- Valor total en riesgo: ${formatPrice(total)}
+- Ticket promedio: ${formatPrice(avg)}
+- Con teléfono (pueden recibir WhatsApp): ${withPhone}/${carts.length}
+- Con email: ${withEmail}/${carts.length}
+- Productos más abandonados:
+${topProducts || '  (sin datos de productos)'}
+
+Generá 3-4 insights accionables y específicos para este negocio. Cada insight debe tener una acción clara. En español. Sin introducción ni conclusión genérica. Directo al punto.`
+}
+
+function AIInsightsPanel({ carts, storeName }: { carts: AbandonedCart[]; storeName: string }) {
+  const [insights, setInsights] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [open, setOpen] = useState(false)
+  const outputRef = useRef<HTMLPreElement>(null)
+
+  async function handleAnalyze() {
+    setOpen(true)
+    setInsights('')
+    setError(null)
+    setLoading(true)
+    try {
+      const res = await fetch('/api/admin/ai/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: buildInsightsPrompt(carts, storeName),
+          storeName,
+        }),
+      })
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}))
+        setError(json.error ?? 'Error al generar análisis.')
+        return
+      }
+      const reader = res.body!.getReader()
+      const decoder = new TextDecoder()
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        const text = decoder.decode(value, { stream: true })
+        setInsights(prev => {
+          const next = prev + text
+          setTimeout(() => outputRef.current?.scrollTo({ top: outputRef.current.scrollHeight, behavior: 'smooth' }), 10)
+          return next
+        })
+      }
+    } catch {
+      setError('Error de conexión.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="mb-6 rounded-2xl border border-slate-700 bg-slate-900 overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4">
+        <div className="flex items-center gap-2.5">
+          <span className="text-base">✦</span>
+          <div>
+            <p className="text-sm font-semibold text-white">Análisis con IA</p>
+            <p className="text-xs text-slate-500 mt-0.5">Insights y recomendaciones sobre tus carritos</p>
+          </div>
+        </div>
+        <button
+          onClick={handleAnalyze}
+          disabled={loading}
+          className="flex items-center gap-1.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 text-xs font-semibold px-3 py-2 transition-colors disabled:opacity-40"
+        >
+          {loading ? (
+            <>
+              <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
+              Analizando...
+            </>
+          ) : (
+            <>✦ {open ? 'Regenerar' : 'Analizar'}</>
+          )}
+        </button>
+      </div>
+
+      {open && (
+        <div className="border-t border-slate-800 px-5 py-4">
+          {error ? (
+            <p className="text-sm text-red-400">{error}</p>
+          ) : (
+            <pre
+              ref={outputRef}
+              className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap font-sans max-h-64 overflow-y-auto"
+            >
+              {insights || <span className="text-slate-600">Generando análisis...</span>}
+            </pre>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Componente principal ─────────────────────────────────────────────────────
+
 export function CarritosClient({ initialCarts, storeUrl, storeName }: Props) {
   const [carts, setCarts] = useState(initialCarts)
   const [activeModal, setActiveModal] = useState<AbandonedCart | null>(null)
@@ -268,6 +393,8 @@ export function CarritosClient({ initialCarts, storeUrl, storeName }: Props) {
         <h1 className="text-2xl font-black text-white mb-1">Carritos abandonados</h1>
         <p className="text-slate-500 text-sm">{carts.length} carrito{carts.length !== 1 ? 's' : ''} sin recuperar</p>
       </div>
+
+      <AIInsightsPanel carts={carts} storeName={storeName} />
 
       <div className="space-y-3">
         {carts.map(cart => (
