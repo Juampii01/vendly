@@ -686,8 +686,8 @@ export function VendlyMarketingPage() {
             <span className="text-xs ml-2" style={{ color: 'rgba(255,255,255,0.25)' }}>© 2026</span>
           </div>
           <div className="flex gap-6 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            <a href="#" className="hover:text-white transition-colors">Términos</a>
-            <a href="#" className="hover:text-white transition-colors">Privacidad</a>
+            <a href="/terminos" className="hover:text-white transition-colors">Términos</a>
+            <a href="/privacidad" className="hover:text-white transition-colors">Privacidad</a>
             <a href="https://wa.me/5491100000000?text=Hola! Quiero información sobre Vendly"
               target="_blank" rel="noopener noreferrer"
               className="hover:text-white transition-colors">Contacto</a>

@@ -56,7 +56,7 @@ export function ProductForm({ product, categories, store, storeId, saving, saveE
   const [metaDescription, setMetaDescription] = useState(product?.meta_description ?? '')
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState<string | null>(null)
-  const [seoAiLoading, setSeoAiLoading] = useState<'title' | 'desc' | null>(null)
+  const [seoAiLoading, setSeoAiLoading] = useState(false)
   const [seoAiError, setSeoAiError] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [variants, setVariants] = useState<VariantRow[]>(
@@ -357,7 +357,7 @@ export function ProductForm({ product, categories, store, storeId, saving, saveE
                 disabled={!!seoAiLoading || !name.trim()}
                 onClick={async () => {
                   if (!name.trim()) return
-                  setSeoAiLoading('title')
+                  setSeoAiLoading(true)
                   setSeoAiError(null)
                   try {
                     const catName = categories.find(c => c.id === categoryId)?.name

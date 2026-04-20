@@ -1,17 +1,30 @@
 import 'server-only'
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { getStoreId } from '@/lib/tenant'
 
 export async function POST(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
+  // Verificar que el usuario es admin de este store
+  const storeId = await getStoreId()
+  const service = createServiceClient()
+  const { data: adminRow } = await service
+    .from('admin_users')
+    .select('role')
+    .eq('store_id', storeId)
+    .eq('email', user.email!.toLowerCase())
+    .maybeSingle()
+  if (!adminRow) return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) return NextResponse.json({ error: 'API de IA no configurada.' }, { status: 503 })
 
   const { prompt, storeName } = await req.json()
   if (!prompt?.trim()) return NextResponse.json({ error: 'Prompt requerido.' }, { status: 400 })
+  if (prompt.length > 8000) return NextResponse.json({ error: 'Prompt demasiado largo.' }, { status: 400 })
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',

@@ -16,8 +16,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const [store, product] = await Promise.all([getStoreConfig(), getProductBySlug(slug)])
   if (!product) return { title: 'Producto no encontrado' }
   return {
-    title: `${product.name} — ${store.name}`,
-    description: product.description ?? undefined,
+    title: product.meta_title ?? `${product.name} — ${store.name}`,
+    description: product.meta_description ?? product.description ?? undefined,
     openGraph: { images: product.images[0] ? [{ url: product.images[0] }] : [] },
   }
 }

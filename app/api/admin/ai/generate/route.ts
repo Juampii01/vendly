@@ -1,7 +1,8 @@
 import 'server-only'
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { getStoreConfig } from '@/lib/store'
+import { getStoreId } from '@/lib/tenant'
 
 // ─── Tipos ─────────────────────────────────────────────────────────────────────
 
@@ -152,6 +153,17 @@ export async function POST(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+
+  // Verificar que el usuario es admin de este store
+  const storeId = await getStoreId()
+  const service = createServiceClient()
+  const { data: adminRow } = await service
+    .from('admin_users')
+    .select('role')
+    .eq('store_id', storeId)
+    .eq('email', user.email!.toLowerCase())
+    .maybeSingle()
+  if (!adminRow) return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
 
   if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: 'API de IA no configurada.' }, { status: 503 })
