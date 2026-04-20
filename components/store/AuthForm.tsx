@@ -10,8 +10,7 @@ interface AuthFormProps {
   redirectTo?: string
 }
 
-// login | register | sent | join_confirm
-type Mode = 'login' | 'register' | 'sent' | 'join_confirm'
+type Mode = 'login' | 'register' | 'sent'
 
 export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
   const [mode, setMode] = useState<Mode>('login')
@@ -44,6 +43,7 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
         return
       }
 
+      // Verificar si tiene cuenta en ESTA tienda específica
       const res = await fetch('/api/auth/store-register')
       const { registered } = await res.json()
 
@@ -51,19 +51,12 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
         router.push(redirectTo)
         router.refresh()
       } else {
-        // Sesión válida pero sin cuenta en ESTE store.
-        // Ofrecemos unirse sin cerrar sesión — el usuario ya está autenticado.
+        // Credenciales válidas globalmente pero SIN cuenta en esta tienda.
+        // Cerramos sesión y mostramos error genérico — cada tienda es independiente.
+        await supabase.auth.signOut()
+        setError('Email o contraseña incorrectos.')
         setLoading(false)
-        setMode('join_confirm')
       }
-      return
-    }
-
-    // ── CONFIRMAR UNIRSE A ESTE STORE (usuario ya autenticado) ───────────────
-    if (mode === 'join_confirm') {
-      await registerInStore()
-      router.push(redirectTo)
-      router.refresh()
       return
     }
 
@@ -91,18 +84,20 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
         (data.user.identities?.length === 0 || data.user.identities === null)
 
       if (emailAlreadyExists) {
-        // El email ya existe en Supabase (registrado en otra tienda).
-        // Intentamos loguearlo con la contraseña que ingresó.
+        // El email existe en el sistema global. Intentamos loguear con la
+        // contraseña que ingresó. Si coincide, lo registramos en esta tienda
+        // de forma transparente — el usuario siente que simplemente "se registró".
         const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password })
 
         if (loginErr) {
-          // Contraseña incorrecta → ya tiene cuenta con otra contraseña
-          setError('Ya existe una cuenta con ese email. Ingresá desde la pestaña "Ingresar" con tu contraseña.')
+          // Contraseña incorrecta → ese email ya está en uso con otra contraseña
+          await supabase.auth.signOut()
+          setError('Ese email ya está registrado. Intentá con otro o ingresá con tu contraseña.')
           setLoading(false)
           return
         }
 
-        // Login OK → registrar en este store y entrar
+        // Login OK → registrar en esta tienda y entrar (transparente para el usuario)
         await registerInStore()
         router.push(redirectTo)
         router.refresh()
@@ -115,20 +110,22 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
         return
       }
 
-      // Registro nuevo: si hay sesión activa (confirmación deshabilitada) → entrar
+      // Registro nuevo exitoso
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
+        // Supabase con confirmación deshabilitada → sesión activa de inmediato
         await registerInStore()
         router.push(redirectTo)
         router.refresh()
       } else {
+        // Confirmación por email habilitada → mostrar pantalla de espera
         setMode('sent')
       }
       setLoading(false)
     }
   }
 
-  // ── Email de confirmación enviado ──────────────────────────────────────────
+  // ── Confirmación de email enviada ──────────────────────────────────────────
   if (mode === 'sent') {
     return (
       <div className="text-center py-8">
@@ -146,49 +143,6 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
           style={{ color: store.color_text }}
         >
           Ya confirmé, quiero ingresar
-        </button>
-      </div>
-    )
-  }
-
-  // ── Confirmar unirse a este store ──────────────────────────────────────────
-  if (mode === 'join_confirm') {
-    async function handleJoin() {
-      setLoading(true)
-      await registerInStore()
-      router.push(redirectTo)
-      router.refresh()
-    }
-    async function handleDecline() {
-      const supabase = createClient()
-      await supabase.auth.signOut()
-      setMode('login')
-      setError('')
-    }
-    return (
-      <div className="text-center py-8">
-        <div className="text-4xl mb-4">👋</div>
-        <h2 className="text-xl font-bold mb-2" style={{ color: store.color_text }}>
-          ¡Bienvenido/a de vuelta!
-        </h2>
-        <p className="text-sm opacity-60 mb-6" style={{ color: store.color_text }}>
-          Tu cuenta no está registrada en <strong>{store.name}</strong> todavía.
-          ¿Querés agregarla?
-        </p>
-        <button
-          onClick={handleJoin}
-          disabled={loading}
-          className="w-full py-3.5 text-xs font-black uppercase tracking-[0.15em] transition-opacity hover:opacity-80 disabled:opacity-40 mb-3"
-          style={{ backgroundColor: bg, color: fg }}
-        >
-          {loading ? '...' : `Unirme a ${store.name}`}
-        </button>
-        <button
-          onClick={handleDecline}
-          className="text-xs opacity-40 hover:opacity-70 transition-opacity"
-          style={{ color: store.color_text }}
-        >
-          No, cerrar sesión
         </button>
       </div>
     )
