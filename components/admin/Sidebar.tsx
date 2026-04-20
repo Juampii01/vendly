@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { getSiteFeatures } from '@/lib/site-features'
 import type { StoreConfig } from '@/types'
 
 interface AdminSidebarProps {
@@ -12,17 +13,35 @@ interface AdminSidebarProps {
   userEmail: string
 }
 
-const NAV_ITEMS = [
-  { href: '/admin', label: 'Dashboard', icon: GridIcon, exact: true },
-  { href: '/admin/productos', label: 'Productos', icon: BoxIcon, exact: false },
-  { href: '/admin/categorias', label: 'Categorías', icon: FolderIcon, exact: false },
-  { href: '/admin/ordenes', label: 'Órdenes', icon: ShoppingBagIcon, exact: false },
-  { href: '/admin/clientes', label: 'Clientes', icon: UsersIcon, exact: false },
-  { href: '/admin/carritos', label: 'Carritos', icon: CartIcon, exact: false },
-  { href: '/admin/cupones', label: 'Cupones', icon: TagIcon, exact: false },
-  { href: '/admin/usuarios', label: 'Usuarios', icon: KeyIcon, exact: false },
-  { href: '/admin/generar', label: 'Asistente IA', icon: SparklesIcon, exact: false },
-  { href: '/admin/configuracion', label: 'Configuración', icon: SettingsIcon, exact: false },
+// requires: clave de SiteFeatures que debe ser true para mostrar el item.
+// labelOverride: permite renombrar el item según el site_type (ej. "Carritos" → "Consultas").
+type NavItem = {
+  href: string
+  label: string
+  icon: React.ComponentType<{ size?: number }>
+  exact: boolean
+  requires?: 'hasProductCatalog' | 'hasCheckout' | 'hasCart'
+  labelBySiteType?: Partial<Record<StoreConfig['site_type'], string>>
+}
+
+const NAV_ITEMS: NavItem[] = [
+  { href: '/admin',             label: 'Dashboard',     icon: GridIcon,       exact: true  },
+  { href: '/admin/productos',   label: 'Productos',     icon: BoxIcon,        exact: false, requires: 'hasProductCatalog' },
+  { href: '/admin/categorias',  label: 'Categorías',    icon: FolderIcon,     exact: false, requires: 'hasProductCatalog' },
+  { href: '/admin/ordenes',     label: 'Órdenes',       icon: ShoppingBagIcon,exact: false, requires: 'hasCheckout' },
+  { href: '/admin/clientes',    label: 'Clientes',      icon: UsersIcon,      exact: false, requires: 'hasCheckout' },
+  {
+    href: '/admin/carritos',
+    label: 'Carritos',
+    icon: CartIcon,
+    exact: false,
+    requires: 'hasCart',
+    labelBySiteType: { dealership: 'Consultas' },
+  },
+  { href: '/admin/cupones',     label: 'Cupones',       icon: TagIcon,        exact: false, requires: 'hasCheckout' },
+  { href: '/admin/usuarios',    label: 'Usuarios',      icon: KeyIcon,        exact: false },
+  { href: '/admin/generar',     label: 'Asistente IA',  icon: SparklesIcon,   exact: false },
+  { href: '/admin/configuracion',label: 'Configuración',icon: SettingsIcon,   exact: false },
 ]
 
 export function AdminSidebar({ store, userEmail }: AdminSidebarProps) {
@@ -37,6 +56,13 @@ export function AdminSidebar({ store, userEmail }: AdminSidebarProps) {
     await supabase.auth.signOut()
     router.push('/admin/login')
   }
+
+  const features = getSiteFeatures(store.site_type)
+
+  const visibleItems = NAV_ITEMS.filter(({ requires }) => {
+    if (!requires) return true
+    return features[requires]
+  })
 
   const SidebarContent = () => (
     <div className="flex h-full flex-col">
@@ -54,8 +80,9 @@ export function AdminSidebar({ store, userEmail }: AdminSidebarProps) {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-        {NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
+        {visibleItems.map(({ href, label, icon: Icon, exact, labelBySiteType }) => {
           const active = exact ? pathname === href : pathname.startsWith(href)
+          const displayLabel = labelBySiteType?.[store.site_type] ?? label
           return (
             <Link
               key={href}
@@ -68,7 +95,7 @@ export function AdminSidebar({ store, userEmail }: AdminSidebarProps) {
               }`}
             >
               <Icon size={18} />
-              {label}
+              {displayLabel}
             </Link>
           )
         })}
