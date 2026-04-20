@@ -12,6 +12,9 @@ interface OrdersClientProps {
   initialOrders: Order[]
   activeStatus?: string
   openOrderId?: string
+  page?: number
+  total?: number
+  perPage?: number
 }
 
 const STATUS_TABS = [
@@ -30,7 +33,7 @@ const ORDER_STATUSES: { value: OrderStatus; label: string }[] = [
   { value: 'cancelled', label: 'Cancelada' },
 ]
 
-export function OrdersClient({ initialOrders, activeStatus, openOrderId }: OrdersClientProps) {
+export function OrdersClient({ initialOrders, activeStatus, openOrderId, total = 0 }: OrdersClientProps) {
   const [orders, setOrders] = useState<Order[]>(initialOrders)
   const [selectedId, setSelectedId] = useState<string | null>(openOrderId ?? null)
   const router = useRouter()
@@ -57,7 +60,10 @@ export function OrdersClient({ initialOrders, activeStatus, openOrderId }: Order
       {/* Lista */}
       <div className={`flex flex-col ${selected ? 'hidden md:flex md:w-96 md:shrink-0' : 'flex-1'}`}>
         <div className="border-b border-slate-200 bg-white px-6 py-4">
-          <h1 className="mb-4 text-xl font-bold text-slate-900">Órdenes</h1>
+          <div className="mb-4 flex items-baseline gap-2">
+            <h1 className="text-xl font-bold text-slate-900">Órdenes</h1>
+            {total > 0 && <span className="text-sm text-slate-400">{total} en total</span>}
+          </div>
           {/* Tabs de estado */}
           <div className="flex gap-1 overflow-x-auto">
             {STATUS_TABS.map((tab) => (

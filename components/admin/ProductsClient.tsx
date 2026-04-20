@@ -15,17 +15,12 @@ interface ProductsClientProps {
 
 export function ProductsClient({ initialProducts, categories, store, storeId }: ProductsClientProps) {
   const [products, setProducts] = useState<Product[]>(initialProducts)
-  const [search, setSearch] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [saving, setSaving] = useState(false)
 
   // storeId still used as prop — kept for potential future use
   void storeId
-
-  const filtered = products.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase()),
-  )
 
   async function toggleActive(product: Product) {
     // Optimistic update
@@ -94,10 +89,9 @@ export function ProductsClient({ initialProducts, categories, store, storeId }: 
   }
 
   return (
-    <div className="p-6 md:p-8">
+    <div>
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-slate-900">Productos</h1>
+      <div className="mb-5 flex items-center justify-end">
         <button
           onClick={handleNew}
           className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-opacity hover:opacity-80"
@@ -108,25 +102,11 @@ export function ProductsClient({ initialProducts, categories, store, storeId }: 
         </button>
       </div>
 
-      {/* Search */}
-      <div className="relative mb-5">
-        <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center opacity-40">
-          <SearchIcon />
-        </span>
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar productos..."
-          className="w-full max-w-sm rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm outline-none focus:border-slate-400"
-        />
-      </div>
-
       {/* Table */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-        {filtered.length === 0 ? (
+        {products.length === 0 ? (
           <div className="py-16 text-center text-sm text-slate-400">
-            {search ? 'No se encontraron productos' : 'Todavía no hay productos'}
+            No se encontraron productos
           </div>
         ) : (
           <table className="w-full text-sm">
@@ -140,7 +120,7 @@ export function ProductsClient({ initialProducts, categories, store, storeId }: 
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filtered.map((product) => (
+              {products.map((product) => (
                 <tr key={product.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
