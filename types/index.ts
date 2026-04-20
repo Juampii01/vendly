@@ -114,6 +114,8 @@ export interface Product {
   is_active: boolean
   is_featured: boolean
   tags: string[]
+  meta_title: string | null
+  meta_description: string | null
   variants?: ProductVariant[]
   created_at: string
   updated_at: string
