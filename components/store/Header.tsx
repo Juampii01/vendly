@@ -9,7 +9,7 @@ import type { StoreConfig, Category } from '@/types'
 import type { SiteFeatures } from '@/lib/site-features'
 
 const DEFAULT_FEATURES: SiteFeatures = {
-  hasCart: true, hasCheckout: true, hasWhatsappCTA: false, hasProductCatalog: true,
+  hasCart: true, hasCheckout: true, hasWhatsappCTA: false, hasProductCatalog: true, hasUserAccount: true,
 }
 
 interface HeaderProps {
@@ -64,11 +64,13 @@ export function Header({ store, categories, userLoggedIn = false, features = DEF
           {/* Acciones */}
           <div className="flex items-center gap-2">
             {/* Mi cuenta */}
-            <Link href={userLoggedIn ? '/cuenta' : '/cuenta/login'}
-              className="hidden md:flex h-10 w-10 items-center justify-center transition-opacity hover:opacity-60"
-              aria-label="Mi cuenta">
-              <UserIcon color={fg} loggedIn={userLoggedIn} />
-            </Link>
+            {features.hasUserAccount && (
+              <Link href={userLoggedIn ? '/cuenta' : '/cuenta/login'}
+                className="hidden md:flex h-10 w-10 items-center justify-center transition-opacity hover:opacity-60"
+                aria-label={userLoggedIn ? 'Mi cuenta' : 'Iniciar sesión'}>
+                <UserIcon color={fg} loggedIn={userLoggedIn} />
+              </Link>
+            )}
 
             {/* Carrito — solo si el site_type lo habilita */}
             {features.hasCart && (
@@ -115,12 +117,14 @@ export function Header({ store, categories, userLoggedIn = false, features = DEF
                   {cat.name}
                 </Link>
               ))}
-              <Link href={userLoggedIn ? '/cuenta' : '/cuenta/login'}
-                className="py-4 text-sm font-black uppercase tracking-[0.15em] transition-opacity hover:opacity-60"
-                style={{ color: fg }}
-                onClick={() => setMenuOpen(false)}>
-                {userLoggedIn ? 'Mi cuenta' : 'Ingresar'}
-              </Link>
+              {features.hasUserAccount && (
+                <Link href={userLoggedIn ? '/cuenta' : '/cuenta/login'}
+                  className="py-4 text-sm font-black uppercase tracking-[0.15em] transition-opacity hover:opacity-60"
+                  style={{ color: fg }}
+                  onClick={() => setMenuOpen(false)}>
+                  {userLoggedIn ? 'Mi cuenta' : 'Ingresar'}
+                </Link>
+              )}
             </nav>
           </div>
         )}

@@ -9,7 +9,7 @@ import type { StoreConfig, Category } from '@/types'
 import type { SiteFeatures } from '@/lib/site-features'
 
 const DEFAULT_FEATURES: SiteFeatures = {
-  hasCart: true, hasCheckout: true, hasWhatsappCTA: false, hasProductCatalog: true,
+  hasCart: true, hasCheckout: true, hasWhatsappCTA: false, hasProductCatalog: true, hasUserAccount: true,
 }
 
 interface Props {
@@ -93,13 +93,13 @@ export function AthleticHeader({ store, categories, userLoggedIn = false, featur
               </svg>
             </button>
 
-            {userLoggedIn && (
+            {features.hasUserAccount && (
               <Link
-                href="/cuenta"
+                href={userLoggedIn ? '/cuenta' : '/cuenta/login'}
                 className="text-[11px] font-black uppercase tracking-wide transition-opacity hover:opacity-40"
                 style={{ color: store.color_text }}
               >
-                Mi cuenta
+                {userLoggedIn ? 'Mi cuenta' : 'Ingresar'}
               </Link>
             )}
 
@@ -254,14 +254,14 @@ export function AthleticHeader({ store, categories, userLoggedIn = false, featur
               Sale
             </Link>
           </nav>
-          {userLoggedIn && (
+          {features.hasUserAccount && (
             <div className="px-6 pb-8">
               <Link
-                href="/cuenta"
+                href={userLoggedIn ? '/cuenta' : '/cuenta/login'}
                 className="text-sm font-black uppercase tracking-wide opacity-50"
                 style={{ color: store.color_background }}
               >
-                Mi cuenta
+                {userLoggedIn ? 'Mi cuenta' : 'Ingresar'}
               </Link>
             </div>
           )}

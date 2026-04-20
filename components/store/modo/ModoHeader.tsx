@@ -9,7 +9,7 @@ import type { StoreConfig, Category } from '@/types'
 import type { SiteFeatures } from '@/lib/site-features'
 
 const DEFAULT_FEATURES: SiteFeatures = {
-  hasCart: true, hasCheckout: true, hasWhatsappCTA: false, hasProductCatalog: true,
+  hasCart: true, hasCheckout: true, hasWhatsappCTA: false, hasProductCatalog: true, hasUserAccount: true,
 }
 
 interface Props {
@@ -76,13 +76,15 @@ export function ModoHeader({ store, categories, userLoggedIn = false, features =
 
           {/* Acciones derecha */}
           <div className="flex items-center justify-end gap-4">
-            <Link
-              href={userLoggedIn ? '/cuenta' : '/cuenta/login'}
-              className="text-[11px] font-bold uppercase tracking-[0.18em] transition-opacity hover:opacity-50"
-              style={{ color: store.color_text }}
-            >
-              {userLoggedIn ? 'Cuenta' : 'Ingresar'}
-            </Link>
+            {features.hasUserAccount && (
+              <Link
+                href={userLoggedIn ? '/cuenta' : '/cuenta/login'}
+                className="text-[11px] font-bold uppercase tracking-[0.18em] transition-opacity hover:opacity-50"
+                style={{ color: store.color_text }}
+              >
+                {userLoggedIn ? 'Cuenta' : 'Ingresar'}
+              </Link>
+            )}
             {features.hasCart && (
               <button
                 onClick={() => setCartOpen(true)}
@@ -141,12 +143,14 @@ export function ModoHeader({ store, categories, userLoggedIn = false, features =
                 {cat.name}
               </Link>
             ))}
-            <div className="pt-2 border-t" style={{ borderColor: '#e8e8e8' }}>
-              <Link href={userLoggedIn ? '/cuenta' : '/cuenta/login'} onClick={() => setMenuOpen(false)}
-                className="block text-sm font-black uppercase tracking-[0.18em]" style={{ color: store.color_text }}>
-                {userLoggedIn ? 'Mi cuenta' : 'Ingresar'}
-              </Link>
-            </div>
+            {features.hasUserAccount && (
+              <div className="pt-2 border-t" style={{ borderColor: '#e8e8e8' }}>
+                <Link href={userLoggedIn ? '/cuenta' : '/cuenta/login'} onClick={() => setMenuOpen(false)}
+                  className="block text-sm font-black uppercase tracking-[0.18em]" style={{ color: store.color_text }}>
+                  {userLoggedIn ? 'Mi cuenta' : 'Ingresar'}
+                </Link>
+              </div>
+            )}
           </div>
         )}
       </header>
