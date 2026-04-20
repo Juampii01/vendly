@@ -403,41 +403,78 @@ export function VendlyMarketingPage() {
               Trabajamos sobre estructuras diseñadas y probadas para acelerar los resultados. Nosotros adaptamos cada una a tu negocio.
             </p>
           </div>
+          {/* Proyecto destacado */}
+          {(() => {
+            const featured = {
+              name: 'El Rincón del Libro',
+              desc: 'Librería independiente con catálogo completo, filtros por categoría, carrito y pago online. Diseño cálido y editorial pensado para lectores.',
+              tag: 'Librería',
+              color: '#f59e0b',
+              img: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1200&q=75',
+              demo: 'el-rincon-del-libro.vendly-mod.space',
+            }
+            return (
+              <div className="group relative rounded-2xl overflow-hidden border mb-6 hover:scale-[1.005] transition-transform"
+                style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+                <div className="relative overflow-hidden" style={{ aspectRatio: '21/9' }}>
+                  <Image src={featured.img} alt={featured.name} fill className="object-cover object-center brightness-60 group-hover:brightness-75 transition-all group-hover:scale-105 duration-700" />
+                  <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 30%, rgba(5,5,8,0.97) 100%)' }} />
+                  <div className="absolute top-4 left-4 flex items-center gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
+                      style={{ backgroundColor: `${featured.color}25`, color: featured.color, border: `1px solid ${featured.color}40` }}>
+                      {featured.tag}
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
+                      style={{ backgroundColor: 'rgba(99,102,241,0.15)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.3)' }}>
+                      Proyecto real
+                    </span>
+                  </div>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+                  <h3 className="text-2xl font-black mb-2">{featured.name}</h3>
+                  <p className="text-sm mb-5 max-w-xl" style={{ color: 'rgba(255,255,255,0.55)' }}>{featured.desc}</p>
+                  <a href={`https://${featured.demo}`} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-sm font-semibold transition-all hover:gap-3"
+                    style={{ color: featured.color }}>
+                    Ver en vivo →
+                  </a>
+                </div>
+              </div>
+            )
+          })()}
+
+          {/* Resto de proyectos */}
           <div className="grid sm:grid-cols-2 gap-6">
             {[
               {
-                name: 'Default',
-                desc: 'Oscuro, elegante, minimalista. Para marcas de indumentaria premium.',
-                tag: 'Moda / Lifestyle',
+                name: 'Spriovani',
+                desc: 'Indumentaria premium. Diseño oscuro y minimalista, variantes de talle y color, carrito con animaciones.',
+                tag: 'Indumentaria',
                 color: '#f59e0b',
-                bg: 'from-yellow-900/20 to-transparent',
                 img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=70',
                 demo: 'spriovani-indumentaria.vendly-mod.space',
               },
               {
-                name: 'Editorial (Modo)',
-                desc: 'Crema, rojo fuego, tipografía de revista. Hero split 50/50 y carrusel.',
-                tag: 'Moda / Editorial',
+                name: 'Modo',
+                desc: 'Moda editorial. Paleta crema y rojo fuego, tipografía de revista, hero de impacto.',
+                tag: 'Moda',
                 color: '#ef4444',
-                bg: 'from-red-900/20 to-transparent',
                 img: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&q=70',
                 demo: 'pagina-prueba.vendly-mod.space',
               },
               {
-                name: 'Bold (Athletic)',
-                desc: 'Negro absoluto, blanco, impacto total. Para marcas deportivas y urbanas.',
-                tag: 'Deportivo / Streetwear',
+                name: 'Adidas',
+                desc: 'Streetwear y deporte. Negro absoluto, blanco, impacto máximo con cards de producto bold.',
+                tag: 'Deportivo',
                 color: '#6366f1',
-                bg: 'from-indigo-900/20 to-transparent',
                 img: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=600&q=70',
                 demo: 'adidas.vendly-mod.space',
               },
               {
-                name: 'Dealership',
-                desc: 'Azul noche y dorado. Cards de vehículos, ficha técnica, consulta por WhatsApp.',
-                tag: 'Autos / Concesionaria',
+                name: 'Peugeot',
+                desc: 'Concesionaria de autos. Azul noche y dorado, ficha técnica por vehículo y consulta directa por WhatsApp.',
+                tag: 'Automotriz',
                 color: '#f59e0b',
-                bg: 'from-amber-900/20 to-transparent',
                 img: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=70',
                 demo: 'ona-store.vendly-mod.space',
               },
@@ -445,11 +482,9 @@ export function VendlyMarketingPage() {
               <div key={name}
                 className="group relative rounded-2xl overflow-hidden border hover:scale-[1.01] transition-transform"
                 style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-                {/* Image */}
                 <div className="relative aspect-video overflow-hidden">
                   <Image src={img} alt={name} fill className="object-cover object-top brightness-75 group-hover:brightness-90 transition-all group-hover:scale-105 duration-700" />
                   <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 40%, rgba(5,5,8,0.95) 100%)' }} />
-                  {/* Tag */}
                   <div className="absolute top-4 left-4">
                     <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
                       style={{ backgroundColor: `${color}25`, color: color, border: `1px solid ${color}40` }}>
@@ -457,14 +492,13 @@ export function VendlyMarketingPage() {
                     </span>
                   </div>
                 </div>
-                {/* Content */}
                 <div className="absolute bottom-0 left-0 right-0 p-6">
                   <h3 className="text-lg font-black mb-1">{name}</h3>
                   <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.55)' }}>{desc}</p>
                   <a href={`https://${demo}`} target="_blank" rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-xs font-semibold transition-all hover:gap-3"
                     style={{ color: color }}>
-                    Ver demo en vivo →
+                    Ver en vivo →
                   </a>
                 </div>
               </div>
