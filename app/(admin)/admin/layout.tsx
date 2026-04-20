@@ -66,10 +66,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     }
 
     // Bootstrap válido → auto-crear el primer owner
-    await service
+    // Usamos upsert para que sea idempotente en caso de condición de carrera.
+    const { error: insertErr } = await service
       .from('admin_users')
-      .insert({ store_id: storeId, email: userEmail.toLowerCase(), role: 'owner' })
-      .throwOnError()
+      .upsert(
+        { store_id: storeId, email: userEmail.toLowerCase(), role: 'owner' },
+        { onConflict: 'store_id,email', ignoreDuplicates: true },
+      )
+    if (insertErr) {
+      console.error('[bootstrap] No se pudo crear owner:', insertErr)
+      redirect('/admin/login?error=bootstrap_failed')
+    }
   }
 
   return (

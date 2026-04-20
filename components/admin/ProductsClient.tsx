@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { ProductForm, type VariantRow } from './ProductForm'
 import { formatPrice } from '@/lib/format'
@@ -14,6 +15,7 @@ interface ProductsClientProps {
 }
 
 export function ProductsClient({ initialProducts, categories, store, storeId }: ProductsClientProps) {
+  const router = useRouter()
   const [products, setProducts] = useState<Product[]>(initialProducts)
   const [formOpen, setFormOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
@@ -53,6 +55,9 @@ export function ProductsClient({ initialProducts, categories, store, storeId }: 
     const res = await fetch(`/api/admin/products/${product.id}`, { method: 'DELETE' })
     if (res.ok) {
       setProducts((prev) => prev.filter((p) => p.id !== product.id))
+      router.refresh()
+    } else {
+      showToast(`No se pudo eliminar "${product.name}"`)
     }
   }
 
@@ -105,6 +110,7 @@ export function ProductsClient({ initialProducts, categories, store, storeId }: 
       setFormOpen(false)
       setEditingProduct(null)
       setSaveError(null)
+      router.refresh() // sync server state: total count, pagination
     } finally {
       setSaving(false)
     }
