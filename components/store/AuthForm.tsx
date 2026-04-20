@@ -10,7 +10,7 @@ interface AuthFormProps {
   redirectTo?: string
 }
 
-type Mode = 'login' | 'register' | 'sent' | 'not_registered'
+type Mode = 'login' | 'register' | 'sent'
 
 export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
   const [mode, setMode] = useState<Mode>('login')
@@ -48,13 +48,17 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
       const { registered } = await res.json()
 
       if (registered) {
-        // Ya está registrado → entrar directo
+        // Ya está registrado en este store → entrar directo
         router.push(redirectTo)
         router.refresh()
       } else {
-        // Autenticado pero sin cuenta en esta tienda → pedir confirmación
+        // Credenciales válidas pero sin cuenta en ESTE store.
+        // Cerramos la sesión para no dejar al usuario autenticado
+        // y mostramos un mensaje claro. La única forma de crear
+        // una cuenta aquí es usando el tab "Registrarse".
+        await supabase.auth.signOut()
         setLoading(false)
-        setMode('not_registered')
+        setError(`No tenés cuenta en ${store.name}. Usá "Registrarse" para crear una.`)
       }
     } else if (mode === 'register') {
       if (password.length < 6) {
@@ -88,23 +92,6 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
     }
   }
 
-  // ── El usuario logueado quiere crear cuenta en esta tienda ─────────────────
-  async function handleJoinStore() {
-    setLoading(true)
-    await registerInStore()
-    router.push(redirectTo)
-    router.refresh()
-  }
-
-  // ── El usuario logueado NO quiere crear cuenta aquí → cerrar sesión ────────
-  async function handleDeclineStore() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    setMode('login')
-    setEmail('')
-    setPassword('')
-  }
-
   // ── Estado: confirmación de email enviada ──────────────────────────────────
   if (mode === 'sent') {
     return (
@@ -123,37 +110,6 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
           style={{ color: store.color_text }}
         >
           Ya confirmé, quiero ingresar
-        </button>
-      </div>
-    )
-  }
-
-  // ── Estado: usuario autenticado pero sin cuenta en esta tienda ─────────────
-  if (mode === 'not_registered') {
-    return (
-      <div className="text-center py-8">
-        <div className="text-4xl mb-4">🔒</div>
-        <h2 className="text-xl font-bold mb-3" style={{ color: store.color_text }}>
-          No tenés cuenta en {store.name}
-        </h2>
-        <p className="text-sm opacity-60 mb-6" style={{ color: store.color_text }}>
-          Tu email <strong>{email}</strong> tiene cuenta en Vendly,
-          pero todavía no está registrado en esta tienda.
-        </p>
-        <button
-          onClick={handleJoinStore}
-          disabled={loading}
-          className="w-full py-3.5 mb-3 text-xs font-black uppercase tracking-[0.15em] transition-opacity hover:opacity-80 disabled:opacity-40"
-          style={{ backgroundColor: bg, color: fg }}
-        >
-          {loading ? '...' : `Crear cuenta en ${store.name}`}
-        </button>
-        <button
-          onClick={handleDeclineStore}
-          className="text-xs opacity-40 hover:opacity-70 underline"
-          style={{ color: store.color_text }}
-        >
-          Cancelar
         </button>
       </div>
     )
