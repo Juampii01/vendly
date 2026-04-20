@@ -1,12 +1,18 @@
 import Link from 'next/link'
 import type { StoreConfig, Category } from '@/types'
+import type { SiteFeatures } from '@/lib/site-features'
+
+const DEFAULT_FEATURES: SiteFeatures = {
+  hasCart: true, hasCheckout: true, hasWhatsappCTA: false, hasProductCatalog: true, hasUserAccount: true,
+}
 
 interface Props {
   store: StoreConfig
   categories: Category[]
+  features?: SiteFeatures
 }
 
-export function ModoFooter({ store, categories }: Props) {
+export function ModoFooter({ store, categories, features = DEFAULT_FEATURES }: Props) {
   return (
     <footer style={{ backgroundColor: store.color_text, color: store.color_background }}>
 
@@ -88,16 +94,20 @@ export function ModoFooter({ store, categories }: Props) {
                   </li>
                 </>
               )}
-              <li>
-                <Link href="/carrito" className="text-xs opacity-60 hover:opacity-100 transition-opacity">
-                  Mi carrito
-                </Link>
-              </li>
-              <li>
-                <Link href="/cuenta" className="text-xs opacity-60 hover:opacity-100 transition-opacity">
-                  Mi cuenta
-                </Link>
-              </li>
+              {features.hasCart && (
+                <li>
+                  <Link href="/carrito" className="text-xs opacity-60 hover:opacity-100 transition-opacity">
+                    Mi carrito
+                  </Link>
+                </li>
+              )}
+              {features.hasUserAccount && (
+                <li>
+                  <Link href="/cuenta" className="text-xs opacity-60 hover:opacity-100 transition-opacity">
+                    Mi cuenta
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
 
