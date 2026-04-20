@@ -15,6 +15,7 @@ interface AdminSidebarProps {
 const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard', icon: GridIcon, exact: true },
   { href: '/admin/productos', label: 'Productos', icon: BoxIcon, exact: false },
+  { href: '/admin/categorias', label: 'Categorías', icon: FolderIcon, exact: false },
   { href: '/admin/ordenes', label: 'Órdenes', icon: ShoppingBagIcon, exact: false },
   { href: '/admin/clientes', label: 'Clientes', icon: UsersIcon, exact: false },
   { href: '/admin/carritos', label: 'Carritos', icon: CartIcon, exact: false },
@@ -176,6 +177,9 @@ function LayoutIcon({ size = 20 }: { size?: number }) {
 }
 function CartIcon({ size = 20 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+}
+function FolderIcon({ size = 20 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
 }
 function TagIcon({ size = 20 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
