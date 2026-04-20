@@ -34,7 +34,15 @@ export async function PATCH(req: Request, { params }: RouteContext) {
       .from('products')
       .update({ ...sanitizeProduct(productData), updated_at: new Date().toISOString() })
       .eq('id', id)
-    if (productError) throw productError
+    if (productError) {
+      if (productError.code === '23505') {
+        return NextResponse.json(
+          { error: 'Ya existe un producto con ese slug. Cambiá el nombre o el slug manualmente.' },
+          { status: 409 },
+        )
+      }
+      throw productError
+    }
 
     // Reemplazar variantes: delete old → insert new
     await service.from('product_variants').delete().eq('product_id', id)

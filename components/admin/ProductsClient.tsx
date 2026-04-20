@@ -18,6 +18,13 @@ export function ProductsClient({ initialProducts, categories, store, storeId }: 
   const [formOpen, setFormOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [toast, setToast] = useState<{ msg: string; type: 'error' | 'success' } | null>(null)
+
+  function showToast(msg: string, type: 'error' | 'success' = 'error') {
+    setToast({ msg, type })
+    setTimeout(() => setToast(null), 4000)
+  }
 
   // storeId still used as prop — kept for potential future use
   void storeId
@@ -27,11 +34,18 @@ export function ProductsClient({ initialProducts, categories, store, storeId }: 
     setProducts((prev) =>
       prev.map((p) => (p.id === product.id ? { ...p, is_active: !p.is_active } : p)),
     )
-    await fetch(`/api/admin/products/${product.id}`, {
+    const res = await fetch(`/api/admin/products/${product.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ is_active: !product.is_active }),
     })
+    if (!res.ok) {
+      // Revert + notificar
+      setProducts((prev) =>
+        prev.map((p) => (p.id === product.id ? { ...p, is_active: product.is_active } : p)),
+      )
+      showToast(`No se pudo ${product.is_active ? 'desactivar' : 'activar'} "${product.name}"`)
+    }
   }
 
   async function handleDelete(product: Product) {
@@ -54,6 +68,7 @@ export function ProductsClient({ initialProducts, categories, store, storeId }: 
 
   async function handleSave(data: Partial<Product> & { variants_data: VariantRow[] }) {
     setSaving(true)
+    setSaveError(null)
     try {
       if (editingProduct) {
         // ── Actualizar producto existente ────────────────────────────────────
@@ -62,10 +77,13 @@ export function ProductsClient({ initialProducts, categories, store, storeId }: 
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         })
-        if (!res.ok) throw new Error('Error al actualizar')
-        const { data: updated } = await res.json()
+        const json = await res.json()
+        if (!res.ok) {
+          setSaveError(json.error ?? 'Error al actualizar')
+          return
+        }
         setProducts((prev) =>
-          prev.map((p) => (p.id === editingProduct.id ? (updated ?? { ...p, ...data }) : p)),
+          prev.map((p) => (p.id === editingProduct.id ? (json.data ?? { ...p, ...data }) : p)),
         )
       } else {
         // ── Crear producto nuevo ─────────────────────────────────────────────
@@ -74,15 +92,19 @@ export function ProductsClient({ initialProducts, categories, store, storeId }: 
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         })
-        if (!res.ok) throw new Error('Error al crear')
-        const { data: newProduct } = await res.json()
-        if (newProduct) {
-          setProducts((prev) => [newProduct as Product, ...prev])
+        const json = await res.json()
+        if (!res.ok) {
+          setSaveError(json.error ?? 'Error al crear')
+          return
+        }
+        if (json.data) {
+          setProducts((prev) => [json.data as Product, ...prev])
         }
       }
 
       setFormOpen(false)
       setEditingProduct(null)
+      setSaveError(null)
     } finally {
       setSaving(false)
     }
@@ -90,6 +112,16 @@ export function ProductsClient({ initialProducts, categories, store, storeId }: 
 
   return (
     <div>
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white shadow-lg transition-all ${
+          toast.type === 'error' ? 'bg-red-500' : 'bg-green-500'
+        }`}>
+          {toast.type === 'error' ? '⚠' : '✓'} {toast.msg}
+          <button onClick={() => setToast(null)} className="ml-1 opacity-70 hover:opacity-100">✕</button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-5 flex items-center justify-end">
         <button
@@ -193,8 +225,9 @@ export function ProductsClient({ initialProducts, categories, store, storeId }: 
           store={store}
           storeId={storeId}
           saving={saving}
+          saveError={saveError}
           onSave={handleSave}
-          onClose={() => { setFormOpen(false); setEditingProduct(null) }}
+          onClose={() => { setFormOpen(false); setEditingProduct(null); setSaveError(null) }}
         />
       )}
     </div>

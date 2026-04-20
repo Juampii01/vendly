@@ -40,7 +40,15 @@ export async function POST(req: Request) {
       .select('*, category:categories(id, name, slug), variants:product_variants(*)')
       .single()
 
-    if (productError) throw productError
+    if (productError) {
+      if (productError.code === '23505') {
+        return NextResponse.json(
+          { error: 'Ya existe un producto con ese slug. Cambiá el nombre o el slug manualmente.' },
+          { status: 409 },
+        )
+      }
+      throw productError
+    }
 
     // Insertar variantes si las hay
     if (variants_data?.length > 0) {

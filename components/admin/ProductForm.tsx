@@ -37,11 +37,12 @@ interface ProductFormProps {
   store: StoreConfig
   storeId: string
   saving: boolean
+  saveError?: string | null
   onSave: (data: Partial<Product> & { variants_data: VariantRow[] }) => Promise<void>
   onClose: () => void
 }
 
-export function ProductForm({ product, categories, store, storeId, saving, onSave, onClose }: ProductFormProps) {
+export function ProductForm({ product, categories, store, storeId, saving, saveError, onSave, onClose }: ProductFormProps) {
   const [name, setName] = useState(product?.name ?? '')
   const [slug, setSlug] = useState(product?.slug ?? '')
   const [description, setDescription] = useState(product?.description ?? '')
@@ -173,9 +174,12 @@ export function ProductForm({ product, categories, store, storeId, saving, onSav
                 value={slug}
                 onChange={(e) => setSlug(e.target.value)}
                 required
-                className={inputCls}
+                className={`${inputCls} ${saveError?.includes('slug') ? 'border-red-400 focus:border-red-400 focus:ring-red-100' : ''}`}
                 placeholder="remera-basica-manga-corta"
               />
+              {saveError?.includes('slug') && (
+                <p className="mt-1 text-xs text-red-500 font-medium">{saveError}</p>
+              )}
             </FormField>
             <FormField label="Categoría">
               <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className={inputCls}>
@@ -336,6 +340,11 @@ export function ProductForm({ product, categories, store, storeId, saving, onSav
           </div>
 
           {/* Footer */}
+          {saveError && !saveError.includes('slug') && (
+            <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600 font-medium">
+              ⚠ {saveError}
+            </div>
+          )}
           <div className="flex gap-3 border-t border-slate-100 pt-4">
             <button
               type="button"
