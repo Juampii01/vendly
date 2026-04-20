@@ -9,7 +9,7 @@ import type { Product, StoreConfig } from '@/types'
 import type { SiteFeatures } from '@/lib/site-features'
 
 const DEFAULT_FEATURES: SiteFeatures = {
-  hasCart: true, hasCheckout: false, hasWhatsappCTA: true, hasProductCatalog: true,
+  hasCart: true, hasCheckout: false, hasWhatsappCTA: true, hasProductCatalog: true, hasUserAccount: false,
 }
 
 interface Props {
