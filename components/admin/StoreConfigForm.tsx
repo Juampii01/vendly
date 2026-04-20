@@ -367,12 +367,32 @@ export function StoreConfigForm({ store }: Props) {
             Los campos vacíos usan valores por defecto.
           </div>
 
-          <Field label="Textos del ticker / marquee" hint="Uno por línea. Si está vacío se generan automáticamente desde los datos de la tienda.">
+          <div className="rounded-lg bg-blue-50 border border-blue-100 p-3 text-xs text-blue-700">
+            <strong>Barra superior</strong> y <strong>Carrusel</strong> son campos independientes.
+            La barra muestra un mensaje fijo; el carrusel anima varios textos en loop.
+          </div>
+
+          <Field label="Barra de anuncio superior" hint="Un solo texto corto. Aparece en la franja negra sobre el header.">
+            <Input
+              value={form.home_marquee_items.split('\n')[0] ?? ''}
+              onChange={(v) => {
+                const rest = form.home_marquee_items.split('\n').slice(1).join('\n')
+                set('home_marquee_items', rest ? `${v}\n${rest}` : v)
+              }}
+              placeholder="ENVÍOS GRATIS A PARTIR DE $20.000"
+            />
+          </Field>
+
+          <Field label="Textos del carrusel animado" hint="Uno por línea. Son los textos que se animan en loop debajo del hero.">
             <textarea
-              value={form.home_marquee_items}
-              onChange={(e) => set('home_marquee_items', e.target.value)}
-              rows={5}
-              placeholder={'NUEVA COLECCIÓN\nENVÍO GRATIS\nPIEZAS ÚNICAS'}
+              value={form.home_marquee_items.split('\n').slice(1).join('\n')}
+              onChange={(e) => {
+                const first = form.home_marquee_items.split('\n')[0] ?? ''
+                const rest = e.target.value
+                set('home_marquee_items', rest ? `${first}\n${rest}` : first)
+              }}
+              rows={4}
+              placeholder={'NUEVA COLECCIÓN\nENVÍO A TODO EL PAÍS\nPIEZAS ÚNICAS'}
               className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-mono outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 resize-none"
             />
           </Field>

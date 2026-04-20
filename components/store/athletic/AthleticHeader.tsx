@@ -34,7 +34,6 @@ export function AthleticHeader({ store, categories, userLoggedIn = false, featur
       >
         {store.home_marquee_items?.[0]
           ?? `Envío gratis desde $${store.free_shipping_threshold?.toLocaleString('es-AR') ?? '50.000'}`}
-        &nbsp;·&nbsp;Nueva colección disponible
       </div>
 
       {/* ── Main header ───────────────────────────────────────────────────── */}

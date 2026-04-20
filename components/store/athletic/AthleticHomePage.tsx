@@ -18,9 +18,14 @@ const HERO_FALLBACK_2 = 'https://images.unsplash.com/photo-1571019614242-c5c5dee
 export function AthleticHomePage({ store, products, featured, categories }: Props) {
   const heroSrc = store.hero_image_url ?? HERO_FALLBACK
   const editorialSrc = store.home_split_image_url ?? HERO_FALLBACK_2
-  const marqueeItems = store.home_marquee_items?.length
-    ? store.home_marquee_items
-    : ['Nueva colección', store.name.toUpperCase(), 'Envío a todo el país', 'Performance · Style', 'Talles S al XXL']
+  // home_marquee_items[0] = barra de anuncio superior (usada en AthleticHeader)
+  // home_marquee_items[1..] = items del carrusel animado
+  const rawItems = store.home_marquee_items ?? []
+  const marqueeItems = rawItems.length > 1
+    ? rawItems.slice(1)
+    : rawItems.length === 1
+      ? [rawItems[0]]  // si solo hay 1 item, úsalo también en el carrusel
+      : ['Nueva colección', store.name.toUpperCase(), 'Envío a todo el país', 'Performance · Style', 'Talles S al XXL']
 
   return (
     <div style={{ backgroundColor: store.color_background, color: store.color_text }}>
