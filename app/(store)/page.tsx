@@ -9,6 +9,7 @@ import { AthleticHomePage } from '@/components/store/athletic/AthleticHomePage'
 import { DealershipHomePage } from '@/components/store/dealership/DealershipHomePage'
 import { LibreriaHomePage } from '@/components/store/libreria/LibreriaHomePage'
 import { VendlyMarketingPage } from '@/components/store/vendly-marketing/VendlyMarketingPage'
+import { RealEstateHomePage } from '@/components/store/real-estate/RealEstateHomePage'
 import { FadeUp, SlideLeft, SlideRight, StaggerGrid, StaggerItem } from '@/components/store/motion'
 import { formatPrice } from '@/lib/format'
 import { DEFAULT_SECTIONS } from '@/types'
@@ -73,6 +74,11 @@ export default async function HomePage() {
   // ── Vendly Marketing Landing Page ─────────────────────────────────────────
   if (store.site_type === 'vendly-marketing') {
     return <VendlyMarketingPage />
+  }
+
+  // ── Template Inmobiliaria ─────────────────────────────────────────────────
+  if (store.site_type === 'real-estate') {
+    return <RealEstateHomePage store={store} products={all} categories={categories} featured={featured} />
   }
 
   const heroSrc = store.hero_image_url ?? HERO_FALLBACK

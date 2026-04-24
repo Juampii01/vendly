@@ -533,6 +533,7 @@ export function StoreConfigForm({ store }: Props) {
               </optgroup>
               <optgroup label="Sin carrito / contacto por WhatsApp">
                 <option value="dealership">Concesionaria — catálogo de vehículos</option>
+                <option value="real-estate">Inmobiliaria — propiedades en venta y alquiler</option>
                 <option value="services">Servicios — contacto por WhatsApp</option>
               </optgroup>
               <optgroup label="Sin ecommerce">

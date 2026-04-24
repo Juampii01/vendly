@@ -16,6 +16,8 @@ export interface SiteFeatures {
   hasWhatsappCTA: boolean
   /** Tiene página /productos con catálogo */
   hasProductCatalog: boolean
+  /** Muestra link de cuenta/login y permite registro de usuarios */
+  hasUserAccount: boolean
 }
 
 const FEATURES_BY_SITE_TYPE: Record<StoreConfig['site_type'], SiteFeatures> = {
@@ -25,6 +27,7 @@ const FEATURES_BY_SITE_TYPE: Record<StoreConfig['site_type'], SiteFeatures> = {
     hasCheckout: true,
     hasWhatsappCTA: false,
     hasProductCatalog: true,
+    hasUserAccount: true,
   },
   // ── Templates de tienda con carrito ─────────────────────────────────────
   modo: {
@@ -32,21 +35,22 @@ const FEATURES_BY_SITE_TYPE: Record<StoreConfig['site_type'], SiteFeatures> = {
     hasCheckout: true,
     hasWhatsappCTA: false,
     hasProductCatalog: true,
+    hasUserAccount: true,
   },
   athletic: {
     hasCart: true,
     hasCheckout: true,
     hasWhatsappCTA: false,
     hasProductCatalog: true,
+    hasUserAccount: true,
   },
-  // ── Concesionaria — usa "consultas guardadas" en lugar de carrito real ──
-  // hasCart: true conserva el sidebar de consultas (reutiliza Zustand)
-  // hasCheckout: false bloquea /carrito y /checkout
+  // ── Concesionaria — consultas por WhatsApp, sin cuenta ni checkout real ──
   dealership: {
     hasCart: true,
     hasCheckout: false,
     hasWhatsappCTA: true,
     hasProductCatalog: true,
+    hasUserAccount: false,
   },
   // ── Librería — ecommerce completo para venta de libros ──────────────────
   libreria: {
@@ -54,6 +58,7 @@ const FEATURES_BY_SITE_TYPE: Record<StoreConfig['site_type'], SiteFeatures> = {
     hasCheckout: true,
     hasWhatsappCTA: false,
     hasProductCatalog: true,
+    hasUserAccount: true,
   },
   // ── Páginas sin ecommerce ────────────────────────────────────────────────
   landing: {
@@ -61,26 +66,30 @@ const FEATURES_BY_SITE_TYPE: Record<StoreConfig['site_type'], SiteFeatures> = {
     hasCheckout: false,
     hasWhatsappCTA: false,
     hasProductCatalog: false,
+    hasUserAccount: false,
   },
   portfolio: {
     hasCart: false,
     hasCheckout: false,
     hasWhatsappCTA: false,
     hasProductCatalog: false,
+    hasUserAccount: false,
   },
-  // ── Servicios — contacto por WhatsApp, sin catálogo de productos ─────────
+  // ── Servicios — contacto por WhatsApp, sin catálogo ni cuenta ───────────
   services: {
     hasCart: false,
     hasCheckout: false,
     hasWhatsappCTA: true,
     hasProductCatalog: false,
+    hasUserAccount: false,
   },
-  // ── Restaurant — pedidos con carrito ────────────────────────────────────
+  // ── Restaurant — pedidos con carrito, cuenta para historial ─────────────
   restaurant: {
     hasCart: true,
     hasCheckout: true,
     hasWhatsappCTA: false,
     hasProductCatalog: true,
+    hasUserAccount: true,
   },
   // ── Marketing page de Vendly ─────────────────────────────────────────────
   'vendly-marketing': {
@@ -88,6 +97,15 @@ const FEATURES_BY_SITE_TYPE: Record<StoreConfig['site_type'], SiteFeatures> = {
     hasCheckout: false,
     hasWhatsappCTA: false,
     hasProductCatalog: false,
+    hasUserAccount: false,
+  },
+  // ── Inmobiliaria — consultas por WhatsApp, sin carrito ni cuenta ──────────
+  'real-estate': {
+    hasCart: false,
+    hasCheckout: false,
+    hasWhatsappCTA: true,
+    hasProductCatalog: true,
+    hasUserAccount: false,
   },
 }
 

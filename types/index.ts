@@ -46,7 +46,7 @@ export interface StoreConfig {
   plan_expires_at: string | null
   template_id: string | null
   // Site type
-  site_type: 'ecommerce' | 'landing' | 'portfolio' | 'restaurant' | 'services' | 'modo' | 'athletic' | 'dealership' | 'libreria' | 'vendly-marketing'
+  site_type: 'ecommerce' | 'landing' | 'portfolio' | 'restaurant' | 'services' | 'modo' | 'athletic' | 'dealership' | 'libreria' | 'vendly-marketing' | 'real-estate'
   sections: LandingSection[] | null
   created_at: string
   updated_at: string
