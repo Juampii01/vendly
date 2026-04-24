@@ -180,6 +180,8 @@ export interface StoreListItem {
   currency: string
   base_url: string | null
   created_at: string
+  color_accent: string | null
+  site_type: string | null
   _admin_count?: number
 }
 
@@ -187,7 +189,7 @@ export async function listAllStores(): Promise<StoreListItem[]> {
   const supabase = createServiceClient()
   const { data } = await supabase
     .from('store_config')
-    .select('id, name, slug, status, plan, currency, base_url, created_at')
+    .select('id, name, slug, status, plan, currency, base_url, created_at, color_accent, site_type')
     .order('created_at', { ascending: false })
   return (data ?? []) as StoreListItem[]
 }
