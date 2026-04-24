@@ -1,8 +1,11 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { formatPrice } from '@/lib/format'
 import { FavoritesButton } from './FavoritesButton'
 import type { Product, StoreConfig } from '@/types'
+
+function formatUSD(n: number): string {
+  return `USD ${n.toLocaleString('es-AR')}`
+}
 
 interface Props {
   product: Product
@@ -100,11 +103,11 @@ export function RealEstatePropertyCard({ product, store, featured = false }: Pro
         {/* Precio sobre imagen */}
         <div className="absolute bottom-3 left-3">
           <p className="text-white font-black text-xl leading-none drop-shadow-md">
-            {formatPrice(product.price)}
+            {product.price > 0 ? formatUSD(product.price) : 'Consultar'}
           </p>
-          {product.compare_at_price && (
+          {product.compare_at_price && product.compare_at_price > product.price && (
             <p className="text-white/60 text-xs line-through mt-0.5">
-              {formatPrice(product.compare_at_price)}
+              {formatUSD(product.compare_at_price)}
             </p>
           )}
         </div>

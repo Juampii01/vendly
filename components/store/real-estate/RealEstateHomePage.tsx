@@ -154,28 +154,38 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
       </div>
 
       {/* ══ BÚSQUEDA RÁPIDA ══════════════════════════════════════════════════════ */}
-      <section className="px-4 py-10 md:px-8" style={{ backgroundColor: '#fff' }}>
-        <div className="mx-auto max-w-4xl">
-          <FadeUp className="mb-6 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-2" style={{ color: ACCENT }}>Buscá tu propiedad</p>
-            <h2 className="text-2xl md:text-3xl font-black tracking-tight">¿Qué estás buscando?</h2>
+      <section className="border-b border-gray-100 px-4 py-12 md:px-8">
+        <div className="mx-auto max-w-7xl">
+          <FadeUp className="mb-8">
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-2" style={{ color: ACCENT }}>Buscá tu inmueble</p>
+            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">¿Qué estás buscando?</h2>
           </FadeUp>
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex flex-wrap gap-2">
             {[
-              { label: '🏠  Casas en venta', href: '/productos?tag=venta&categoria=casa' },
-              { label: '🏢  Departamentos', href: '/productos?categoria=departamento' },
-              { label: '📦  Alquileres', href: '/productos?tag=alquiler' },
-              { label: '🌿  Terrenos', href: '/productos?categoria=terreno' },
-              { label: '🏪  Comerciales', href: '/productos?categoria=comercial' },
-              { label: '⭐  Destacados', href: '/productos?featured=true' },
+              { label: 'Casas en venta',  href: '/productos?tag=venta&categoria=casa' },
+              { label: 'Departamentos',   href: '/productos?categoria=departamento' },
+              { label: 'Alquileres',      href: '/productos?tag=alquiler' },
+              { label: 'Terrenos',        href: '/productos?categoria=terreno' },
+              { label: 'Comerciales',     href: '/productos?categoria=local-comercial' },
+              { label: 'Destacados',      href: '/productos?featured=true' },
             ].map(({ label, href }) => (
               <Link
                 key={href}
                 href={href}
-                className="rounded-full border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 transition-all hover:border-transparent hover:text-white hover:scale-105"
-                style={{ ['--accent' as string]: ACCENT }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = ACCENT; (e.currentTarget as HTMLElement).style.borderColor = ACCENT }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = ''; (e.currentTarget as HTMLElement).style.borderColor = '' }}
+                className="border px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.15em] transition-all"
+                style={{ borderColor: '#e5e7eb', color: '#4b5563' }}
+                onMouseEnter={e => {
+                  const el = e.currentTarget as HTMLElement
+                  el.style.backgroundColor = ACCENT
+                  el.style.borderColor = ACCENT
+                  el.style.color = '#fff'
+                }}
+                onMouseLeave={e => {
+                  const el = e.currentTarget as HTMLElement
+                  el.style.backgroundColor = ''
+                  el.style.borderColor = '#e5e7eb'
+                  el.style.color = '#4b5563'
+                }}
               >
                 {label}
               </Link>
@@ -184,17 +194,17 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
         </div>
       </section>
 
-      {/* ══ TIPOS DE PROPIEDAD ═══════════════════════════════════════════════════ */}
+      {/* ══ TIPOS DE INMUEBLE ════════════════════════════════════════════════════ */}
       {categories.length > 0 && (
         <section className="px-4 py-16 md:px-8 bg-gray-50">
           <div className="mx-auto max-w-7xl">
             <FadeUp className="mb-10 flex items-end justify-between">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-2" style={{ color: ACCENT }}>Explorá por tipo</p>
-                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">Tipos de propiedad</h2>
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">Tipos de inmueble</h2>
               </div>
               <Link href="/productos" className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors">
-                Ver todas →
+                Ver todos →
               </Link>
             </FadeUp>
             <StaggerGrid className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
@@ -202,23 +212,36 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
                 <StaggerItem key={cat.id}>
                   <Link
                     href={`/productos?categoria=${cat.slug}`}
-                    className="group relative overflow-hidden rounded-xl"
-                    style={{ aspectRatio: i === 0 ? '2/1.2' : '3/4' }}
+                    className="group relative flex flex-col justify-between overflow-hidden border border-gray-200 bg-white p-6 transition-all duration-300 hover:border-transparent hover:text-white"
+                    style={{ minHeight: 160 }}
+                    onMouseEnter={e => {
+                      const el = e.currentTarget as HTMLElement
+                      el.style.backgroundColor = '#111'
+                      el.style.borderColor = 'transparent'
+                    }}
+                    onMouseLeave={e => {
+                      const el = e.currentTarget as HTMLElement
+                      el.style.backgroundColor = ''
+                      el.style.borderColor = ''
+                    }}
                   >
-                    <div className="absolute inset-0">
-                      {cat.image_url ? (
-                        <Image src={cat.image_url} alt={cat.name} fill sizes="20vw"
-                          className="object-cover transition-transform duration-700 group-hover:scale-105" />
-                      ) : (
-                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-4xl opacity-20">🏘</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,10,20,0.75) 0%, rgba(10,10,20,0.1) 60%)' }} />
-                    <div className="absolute bottom-0 left-0 w-full p-4">
-                      <div className="w-5 h-px mb-2 transition-all group-hover:w-8" style={{ backgroundColor: ACCENT }} />
-                      <p className="text-xs font-black uppercase tracking-[0.15em] text-white">{cat.name}</p>
+                    {/* Número */}
+                    <span
+                      className="text-4xl font-black leading-none transition-colors"
+                      style={{ color: ACCENT, opacity: 0.25 }}
+                    >
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+
+                    {/* Nombre + flecha */}
+                    <div>
+                      <div className="mb-3 w-6 h-px transition-all duration-300 group-hover:w-10" style={{ backgroundColor: ACCENT }} />
+                      <p className="text-sm font-black uppercase tracking-[0.15em] text-gray-900 group-hover:text-white transition-colors">
+                        {cat.name}
+                      </p>
+                      <p className="mt-2 text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-60 transition-opacity" style={{ color: '#fff' }}>
+                        Explorar →
+                      </p>
                     </div>
                   </Link>
                 </StaggerItem>
@@ -235,10 +258,10 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
             <FadeUp className="mb-10 flex items-end justify-between">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-2" style={{ color: ACCENT }}>Selección especial</p>
-                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">Propiedades destacadas</h2>
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">Inmuebles destacados</h2>
               </div>
               <Link href="/productos" className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors">
-                Ver todas →
+                Ver todos →
               </Link>
             </FadeUp>
             <StaggerGrid className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -275,7 +298,7 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
               <Link href="/productos"
                 className="px-7 py-3.5 text-[10px] font-black uppercase tracking-[0.2em] text-white transition-all hover:brightness-110"
                 style={{ backgroundColor: ACCENT }}>
-                Ver propiedades
+                Ver inmuebles
               </Link>
               {whatsappHref && (
                 <a href={whatsappHref} target="_blank" rel="noopener noreferrer"
@@ -349,7 +372,7 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
           </div>
           <h2 className="font-black uppercase leading-[0.9] text-white mb-6"
             style={{ fontSize: 'clamp(2.5rem, 5.5vw, 4.5rem)', letterSpacing: '-0.02em' }}>
-            ENCONTRÁ<br />TU PROPIEDAD IDEAL
+            ENCONTRÁ<br />TU INMUEBLE IDEAL
           </h2>
           <p className="text-base mb-10" style={{ color: 'rgba(255,255,255,0.55)' }}>
             Nuestros asesores te acompañan en cada paso del proceso.<br />Consulta sin compromiso.
@@ -365,7 +388,7 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
             <Link href="/productos"
               className="px-10 py-4 text-[11px] font-black uppercase tracking-[0.25em] border transition-all hover:bg-white/10"
               style={{ borderColor: 'rgba(255,255,255,0.3)', color: 'rgba(255,255,255,0.85)' }}>
-              Ver propiedades
+              Ver inmuebles
             </Link>
           </div>
         </div>
