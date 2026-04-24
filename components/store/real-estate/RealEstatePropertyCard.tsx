@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/format'
+import { FavoritesButton } from './FavoritesButton'
 import type { Product, StoreConfig } from '@/types'
 
 interface Props {
@@ -12,12 +13,11 @@ interface Props {
 // ─── Tag extractors ──────────────────────────────────────────────────────────
 
 function extractTag(tags: string[], pattern: RegExp): string | null {
-  const match = tags.find(t => pattern.test(t))
-  return match ?? null
+  return tags.find(t => pattern.test(t)) ?? null
 }
 
 function getAmbientes(tags: string[]): string | null {
-  const t = extractTag(tags, /^\d+\s*(amb|ambiente|ambientes|dorm|dormitorio|dormitorios|rec|recámara)/i)
+  const t = extractTag(tags, /^\d+\s*(amb|ambiente|ambientes|dorm|dormitorio|dormitorios|rec)/i)
   return t ? t.replace(/^(\d+).*/i, '$1 amb.') : null
 }
 
@@ -27,22 +27,17 @@ function getBaños(tags: string[]): string | null {
 }
 
 function getSuperficie(tags: string[]): string | null {
-  const t = extractTag(tags, /\d+\s*m[²2]/i)
-  return t ?? null
+  return extractTag(tags, /\d+\s*m[²2]/i)
 }
 
 function getOperacion(tags: string[]): 'venta' | 'alquiler' | null {
-  if (tags.some(t => /venta|sale|sell/i.test(t))) return 'venta'
-  if (tags.some(t => /alquiler|rent|arriendo/i.test(t))) return 'alquiler'
+  if (tags.some(t => /\bventa\b|for sale/i.test(t))) return 'venta'
+  if (tags.some(t => /\balquiler\b|rent|arriendo/i.test(t))) return 'alquiler'
   return null
 }
 
 function getGaraje(tags: string[]): boolean {
   return tags.some(t => /garaje|garage|cochera|estacionamiento|parking/i.test(t))
-}
-
-function getPiscina(tags: string[]): boolean {
-  return tags.some(t => /piscina|pileta|pool/i.test(t))
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -56,19 +51,13 @@ export function RealEstatePropertyCard({ product, store, featured = false }: Pro
   const superficie = getSuperficie(tags)
   const operacion = getOperacion(tags)
   const tieneGaraje = getGaraje(tags)
-  const tienePiscina = getPiscina(tags)
 
   const amenities = [
     ambientes && { icon: '🛏', label: ambientes },
     baños && { icon: '🚿', label: baños },
     superficie && { icon: '📐', label: superficie },
     tieneGaraje && { icon: '🚗', label: 'Garaje' },
-    tienePiscina && { icon: '🏊', label: 'Piscina' },
   ].filter(Boolean) as { icon: string; label: string }[]
-
-  const operacionColor = operacion === 'alquiler'
-    ? '#0EA5E9'
-    : ACCENT
 
   return (
     <Link
@@ -91,35 +80,31 @@ export function RealEstatePropertyCard({ product, store, featured = false }: Pro
           </div>
         )}
 
-        {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
         {/* Badge operación */}
         {operacion && (
           <div
             className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white"
-            style={{ backgroundColor: operacionColor }}
+            style={{ backgroundColor: operacion === 'alquiler' ? '#0EA5E9' : ACCENT }}
           >
             En {operacion}
           </div>
         )}
 
-        {/* Destacado badge */}
-        {product.is_featured && (
-          <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-white"
-            style={{ color: ACCENT }}>
-            Destacado
-          </div>
-        )}
+        {/* Favoritos button */}
+        <div className="absolute top-3 right-3">
+          <FavoritesButton product={product} accent={ACCENT} size="sm" />
+        </div>
 
         {/* Precio sobre imagen */}
         <div className="absolute bottom-3 left-3">
           <p className="text-white font-black text-xl leading-none drop-shadow-md">
-            {store.currency === 'USD' ? 'USD ' : ''}{formatPrice(product.price)}
+            {formatPrice(product.price)}
           </p>
           {product.compare_at_price && (
             <p className="text-white/60 text-xs line-through mt-0.5">
-              {store.currency === 'USD' ? 'USD ' : ''}{formatPrice(product.compare_at_price)}
+              {formatPrice(product.compare_at_price)}
             </p>
           )}
         </div>
@@ -127,21 +112,18 @@ export function RealEstatePropertyCard({ product, store, featured = false }: Pro
 
       {/* Info */}
       <div className="flex flex-col gap-2 p-4">
-        {/* Categoria */}
         {product.category?.name && (
           <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: ACCENT }}>
             {product.category.name}
           </p>
         )}
 
-        {/* Nombre */}
         <h3 className="font-bold text-gray-900 leading-snug line-clamp-2 text-sm group-hover:text-gray-700 transition-colors">
           {product.name}
         </h3>
 
-        {/* Amenities */}
         {amenities.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-1">
+          <div className="flex flex-wrap gap-3 mt-1">
             {amenities.map(({ icon, label }) => (
               <span key={label} className="flex items-center gap-1 text-[11px] text-gray-500 font-medium">
                 <span>{icon}</span> {label}
@@ -150,9 +132,8 @@ export function RealEstatePropertyCard({ product, store, featured = false }: Pro
           </div>
         )}
 
-        {/* Descripción corta */}
         {product.description && (
-          <p className="text-xs text-gray-400 line-clamp-2 mt-1 leading-relaxed">
+          <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
             {product.description}
           </p>
         )}

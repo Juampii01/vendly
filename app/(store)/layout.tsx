@@ -11,8 +11,6 @@ import { DealershipHeader } from '@/components/store/dealership/DealershipHeader
 import { DealershipFooter } from '@/components/store/dealership/DealershipFooter'
 import { LibreriaHeader } from '@/components/store/libreria/LibreriaHeader'
 import { LibreriaFooter } from '@/components/store/libreria/LibreriaFooter'
-import { RealEstateHeader } from '@/components/store/real-estate/RealEstateHeader'
-import { RealEstateFooter } from '@/components/store/real-estate/RealEstateFooter'
 import { PageEnter } from '@/components/store/motion'
 import { getSiteFeatures } from '@/lib/site-features'
 import type { Metadata } from 'next'
@@ -27,8 +25,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function StoreLayout({ children }: { children: React.ReactNode }) {
-  // El middleware inyecta x-user-id cuando hay sesión activa.
-  // Leer de headers elimina el roundtrip a Supabase Auth en cada page load de la tienda.
   const [h, store, categories] = await Promise.all([
     headers(),
     getStoreConfig(),
@@ -39,8 +35,9 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   const isAthletic = store.site_type === 'athletic'
   const isDealership = store.site_type === 'dealership'
   const isLibreria = store.site_type === 'libreria'
-  const isRealEstate = store.site_type === 'real-estate'
   const isVendlyMarketing = store.site_type === 'vendly-marketing'
+  // real-estate maneja su propio header, footer y sidebar de favoritos internamente
+  const isRealEstate = store.site_type === 'real-estate'
   const features = getSiteFeatures(store.site_type)
 
   const cssVars = `
@@ -53,8 +50,8 @@ export default async function StoreLayout({ children }: { children: React.ReactN
     }
   `
 
-  // La marketing page de Vendly tiene su propio navbar/footer embebido
-  if (isVendlyMarketing) {
+  // Templates que manejan su propio layout completo
+  if (isVendlyMarketing || isRealEstate) {
     return (
       <>
         <style dangerouslySetInnerHTML={{ __html: cssVars }} />
@@ -74,8 +71,6 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         ? <DealershipHeader store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
         : isLibreria
         ? <LibreriaHeader store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
-        : isRealEstate
-        ? <RealEstateHeader store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
         : <Header store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
       }
       <main className="flex-1">
@@ -89,8 +84,6 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         ? <DealershipFooter store={store} categories={categories} />
         : isLibreria
         ? <LibreriaFooter store={store} categories={categories} />
-        : isRealEstate
-        ? <RealEstateFooter store={store} categories={categories} />
         : <Footer store={store} categories={categories} features={features} />
       }
     </div>
