@@ -62,6 +62,7 @@ export interface ProductFilters {
   page?: number
   per_page?: number
   featured?: boolean
+  tag?: string
 }
 
 export async function getProducts(filters: ProductFilters = {}): Promise<{
@@ -69,7 +70,7 @@ export async function getProducts(filters: ProductFilters = {}): Promise<{
   total: number
 }> {
   const [supabase, storeId] = await Promise.all([createClient(), getStoreId()])
-  const { category_slug, search, page = 1, per_page = 24, featured } = filters
+  const { category_slug, search, page = 1, per_page = 24, featured, tag } = filters
 
   let categoryId: string | null = null
   if (category_slug) {
@@ -101,6 +102,10 @@ export async function getProducts(filters: ProductFilters = {}): Promise<{
 
   if (search) {
     query = query.ilike('name', `%${search}%`)
+  }
+
+  if (tag) {
+    query = query.contains('tags', [tag])
   }
 
   const from = (page - 1) * per_page

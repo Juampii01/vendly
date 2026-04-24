@@ -4,6 +4,7 @@ import { getStoreConfig, getProductBySlug, getRelatedProducts } from '@/lib/stor
 import { ProductGallery } from '@/components/store/ProductGallery'
 import { AddToCartSection } from '@/components/store/AddToCartSection'
 import { ProductCard } from '@/components/store/ProductCard'
+import { RealEstatePropertyDetail } from '@/components/store/real-estate/RealEstatePropertyDetail'
 import { FadeUp, SlideLeft, SlideRight, StaggerGrid, StaggerItem } from '@/components/store/motion'
 import { getSiteFeatures } from '@/lib/site-features'
 import type { Metadata } from 'next'
@@ -15,7 +16,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
   const [store, product] = await Promise.all([getStoreConfig(), getProductBySlug(slug)])
-  if (!product) return { title: 'Producto no encontrado' }
+  if (!product) return { title: store.site_type === 'real-estate' ? 'Inmueble no encontrado' : 'Producto no encontrado' }
   return {
     title: product.meta_title ?? `${product.name} — ${store.name}`,
     description: product.meta_description ?? product.description ?? undefined,
@@ -32,6 +33,12 @@ export default async function ProductoPage({ params }: PageProps) {
     ),
   ])
   if (!product) notFound()
+
+  // Real-estate uses its own full-page detail with header/footer
+  if (store.site_type === 'real-estate') {
+    return <RealEstatePropertyDetail product={product} store={store} related={related} />
+  }
+
   const features = getSiteFeatures(store.site_type)
   const isOnSale = product.compare_at_price !== null && product.compare_at_price > product.price
   const discount = isOnSale

@@ -5,6 +5,7 @@ import { ModoProductCard } from '@/components/store/modo/ModoProductCard'
 import { AthleticProductCard } from '@/components/store/athletic/AthleticProductCard'
 import { DealershipProductCard } from '@/components/store/dealership/DealershipProductCard'
 import { LibreriaProductCard } from '@/components/store/libreria/LibreriaProductCard'
+import { RealEstateProductsPage } from '@/components/store/real-estate/RealEstateProductsPage'
 import { FilterSidebar } from '@/components/store/FilterSidebar'
 import { SearchInput } from '@/components/store/SearchInput'
 import { FadeUp, StaggerGrid, StaggerItem } from '@/components/store/motion'
@@ -13,12 +14,13 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 interface PageProps {
-  searchParams: Promise<{ categoria?: string; busqueda?: string; pagina?: string }>
+  searchParams: Promise<{ categoria?: string; busqueda?: string; pagina?: string; tag?: string; featured?: string }>
 }
 
 export async function generateMetadata(): Promise<Metadata> {
   const store = await getStoreConfig()
-  return { title: `Productos — ${store.name}` }
+  const label = store.site_type === 'real-estate' ? 'Inmuebles' : 'Productos'
+  return { title: `${label} — ${store.name}` }
 }
 
 const PER_PAGE = 24
@@ -33,6 +35,8 @@ export default async function ProductosPage({ searchParams }: PageProps) {
     getProducts({
       category_slug: params.categoria,
       search: params.busqueda,
+      tag: params.tag,
+      featured: params.featured === 'true' ? true : undefined,
       page,
       per_page: PER_PAGE,
     }),
@@ -40,6 +44,21 @@ export default async function ProductosPage({ searchParams }: PageProps) {
 
   const features = getSiteFeatures(store.site_type)
   const totalPages = Math.ceil(total / PER_PAGE)
+
+  // Real-estate has its own full-page layout with header/footer
+  if (store.site_type === 'real-estate') {
+    return (
+      <RealEstateProductsPage
+        store={store}
+        categories={categories}
+        products={products}
+        total={total}
+        page={page}
+        totalPages={totalPages}
+        params={params}
+      />
+    )
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
