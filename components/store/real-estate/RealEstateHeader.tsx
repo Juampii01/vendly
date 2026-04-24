@@ -95,13 +95,40 @@ export function RealEstateHeader({
             )}
           </button>
 
+          {/* Cuenta — desktop */}
+          {!userLoggedIn ? (
+            <div className="hidden md:flex items-center gap-1">
+              <Link
+                href="/cuenta/login"
+                className="rounded-full px-3 py-2 text-xs font-semibold text-gray-600 transition-colors hover:text-gray-900 hover:bg-gray-100"
+              >
+                Iniciar sesión
+              </Link>
+              <Link
+                href="/cuenta/register"
+                className="rounded-full px-4 py-2 text-xs font-bold text-white transition-all hover:brightness-110"
+                style={{ backgroundColor: ACCENT }}
+              >
+                Crear cuenta
+              </Link>
+            </div>
+          ) : (
+            <Link
+              href="/cuenta"
+              className="hidden md:flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-100"
+            >
+              <UserIcon />
+              Mi cuenta
+            </Link>
+          )}
+
           {/* WhatsApp CTA — desktop */}
           {whatsappHref && (
             <a
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden md:flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider text-white transition-all hover:brightness-110"
+              className="hidden lg:flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider text-white transition-all hover:brightness-110"
               style={{ backgroundColor: ACCENT }}
             >
               <WAIcon />
@@ -137,13 +164,45 @@ export function RealEstateHeader({
               </Link>
             ))}
           </nav>
+          {/* Cuenta — mobile */}
+          <div className="mt-3 flex flex-col gap-2">
+            {!userLoggedIn ? (
+              <>
+                <Link
+                  href="/cuenta/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-3 text-sm font-semibold text-gray-700"
+                >
+                  Iniciar sesión
+                </Link>
+                <Link
+                  href="/cuenta/register"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-black text-white"
+                  style={{ backgroundColor: ACCENT }}
+                >
+                  Crear cuenta
+                </Link>
+              </>
+            ) : (
+              <Link
+                href="/cuenta"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-3 text-sm font-semibold text-gray-700"
+              >
+                <UserIcon />
+                Mi cuenta
+              </Link>
+            )}
+          </div>
+
           {whatsappHref && (
             <a
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 flex items-center justify-center gap-2 rounded-full py-3 text-sm font-black uppercase tracking-wider text-white"
-              style={{ backgroundColor: ACCENT }}
+              className="mt-2 flex items-center justify-center gap-2 rounded-full py-3 text-sm font-black uppercase tracking-wider text-white"
+              style={{ backgroundColor: '#25D366' }}
             >
               <WAIcon />
               Consultar por WhatsApp
@@ -164,6 +223,15 @@ function HeartIcon({ color, filled }: { color: string; filled: boolean }) {
       stroke={filled ? 'none' : color}
       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+    </svg>
+  )
+}
+
+function UserIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
     </svg>
   )
 }

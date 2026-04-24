@@ -6,6 +6,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useDebouncedCallback } from 'use-debounce'
 import { RealEstateHeader } from './RealEstateHeader'
 import { RealEstateFooter } from './RealEstateFooter'
+import { RealEstateFloatingWhatsApp } from './RealEstateFloatingWhatsApp'
 import { FavoritesSidebar } from './FavoritesSidebar'
 import { RealEstatePropertyCard } from './RealEstatePropertyCard'
 import { hydrateFavorites } from '@/lib/favorites'
@@ -300,6 +301,10 @@ export function RealEstateProductsPage({
       </section>
 
       <RealEstateFooter store={store} categories={categories} />
+
+      {store.whatsapp_number && (
+        <RealEstateFloatingWhatsApp phoneNumber={store.whatsapp_number} />
+      )}
     </div>
   )
 }

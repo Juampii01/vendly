@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { RealEstateHeader } from './RealEstateHeader'
 import { RealEstateFooter } from './RealEstateFooter'
+import { RealEstateFloatingWhatsApp } from './RealEstateFloatingWhatsApp'
 import { RealEstatePropertyCard } from './RealEstatePropertyCard'
 import { FavoritesSidebar } from './FavoritesSidebar'
 import { NewsletterForm } from '@/components/store/NewsletterForm'
@@ -468,6 +469,11 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
 
       {/* ══ FOOTER ══════════════════════════════════════════════════════════════ */}
       <RealEstateFooter store={store} />
+
+      {/* ══ FLOATING WHATSAPP ════════════════════════════════════════════════════ */}
+      {store.whatsapp_number && (
+        <RealEstateFloatingWhatsApp phoneNumber={store.whatsapp_number} />
+      )}
     </div>
   )
 }

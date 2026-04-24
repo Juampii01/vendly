@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { FavoritesButton } from './FavoritesButton'
 import { RealEstateHeader } from './RealEstateHeader'
 import { RealEstateFooter } from './RealEstateFooter'
+import { RealEstateFloatingWhatsApp } from './RealEstateFloatingWhatsApp'
 import { FavoritesSidebar } from './FavoritesSidebar'
 import { hydrateFavorites } from '@/lib/favorites'
 import { FadeUp, SlideLeft, SlideRight } from '@/components/store/motion'
@@ -369,6 +370,10 @@ export function RealEstatePropertyDetail({ product, store, related }: Props) {
       )}
 
       <RealEstateFooter store={store} />
+
+      {store.whatsapp_number && (
+        <RealEstateFloatingWhatsApp phoneNumber={store.whatsapp_number} />
+      )}
     </div>
   )
 }
