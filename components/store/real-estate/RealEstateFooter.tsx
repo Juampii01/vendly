@@ -1,5 +1,8 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
+import { useState } from 'react'
 import type { StoreConfig, Category } from '@/types'
 
 interface Props {
@@ -9,6 +12,7 @@ interface Props {
 
 export function RealEstateFooter({ store, categories = [] }: Props) {
   const ACCENT = store.color_accent
+  const [logoError, setLogoError] = useState(false)
 
   const whatsappHref = store.whatsapp_number
     ? `https://wa.me/${store.whatsapp_number}?text=Hola! Me gustaría consultar sobre una propiedad.`
@@ -22,12 +26,13 @@ export function RealEstateFooter({ store, categories = [] }: Props) {
 
           {/* Brand */}
           <div className="md:col-span-1">
-            {store.logo_url ? (
+            {store.logo_url && !logoError ? (
               <Image
                 src={store.logo_url}
                 alt={store.name}
                 width={120}
                 height={40}
+                onError={() => setLogoError(true)}
                 className="h-10 w-auto object-contain mb-4"
               />
             ) : (

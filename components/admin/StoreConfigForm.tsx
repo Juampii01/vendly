@@ -246,7 +246,12 @@ export function StoreConfigForm({ store }: Props) {
           </Field>
           {form.logo_url && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={form.logo_url} alt="Logo preview" className="h-10 object-contain rounded border border-slate-200 p-1" />
+            <img
+              src={form.logo_url}
+              alt="Logo preview"
+              className="h-10 object-contain rounded border border-slate-200 p-1"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+            />
           )}
         </div>
       )}

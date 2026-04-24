@@ -23,6 +23,7 @@ export function RealEstateHeader({
   onFavoritesOpen,
 }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [logoError, setLogoError] = useState(false)
   const ACCENT = store.color_accent
   const count = useFavoritesStore((s) => s.getCount())
 
@@ -46,13 +47,14 @@ export function RealEstateHeader({
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          {store.logo_url ? (
+          {store.logo_url && !logoError ? (
             <Image
               src={store.logo_url}
               alt={store.name}
               width={120}
               height={40}
               className="h-10 w-auto object-contain"
+              onError={() => setLogoError(true)}
             />
           ) : (
             <span className="text-lg font-black tracking-tight" style={{ color: ACCENT }}>
