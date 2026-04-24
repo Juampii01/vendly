@@ -24,7 +24,6 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
   const bg = store.color_primary
   const fg = store.color_background
 
-  // ── Registrar al usuario en este store (llamada al server) ─────────────────
   async function registerInStore() {
     await fetch('/api/auth/store-register', { method: 'POST' })
   }
@@ -35,6 +34,7 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
     setError('')
     const supabase = createClient()
 
+    // ── INGRESAR ────────────────────────────────────────────────────────────
     if (mode === 'login') {
       const { error: err } = await supabase.auth.signInWithPassword({ email, password })
       if (err) {
@@ -43,30 +43,32 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
         return
       }
 
-      // Verificar si el usuario ya tiene cuenta en ESTE store
+      // Verificar si tiene cuenta en ESTA tienda específica
       const res = await fetch('/api/auth/store-register')
       const { registered } = await res.json()
 
       if (registered) {
-        // Ya está registrado en este store → entrar directo
         router.push(redirectTo)
         router.refresh()
       } else {
-        // Credenciales válidas pero sin cuenta en ESTE store.
-        // Cerramos la sesión para no dejar al usuario autenticado
-        // y mostramos un mensaje claro. La única forma de crear
-        // una cuenta aquí es usando el tab "Registrarse".
+        // Credenciales válidas globalmente pero SIN cuenta en esta tienda.
+        // Cerramos sesión y mostramos error genérico — cada tienda es independiente.
         await supabase.auth.signOut()
+        setError('Email o contraseña incorrectos.')
         setLoading(false)
-        setError(`No tenés cuenta en ${store.name}. Usá "Registrarse" para crear una.`)
       }
-    } else if (mode === 'register') {
+      return
+    }
+
+    // ── REGISTRARSE ──────────────────────────────────────────────────────────
+    if (mode === 'register') {
       if (password.length < 6) {
         setError('La contraseña debe tener al menos 6 caracteres.')
         setLoading(false)
         return
       }
-      const { error: err } = await supabase.auth.signUp({
+
+      const { data, error: signUpErr } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -74,25 +76,56 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
           emailRedirectTo: `${window.location.origin}/auth/callback?next=${redirectTo}`,
         },
       })
-      if (err) {
-        setError(err.message)
-      } else {
-        // Si Supabase devuelve sesión directa (confirmación deshabilitada)
-        // registramos en el store de inmediato
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          await registerInStore()
-          router.push(redirectTo)
-          router.refresh()
-        } else {
-          setMode('sent')
+
+      // Supabase devuelve identities vacío cuando el email ya existe globalmente
+      const emailAlreadyExists =
+        !signUpErr &&
+        data.user !== null &&
+        (data.user.identities?.length === 0 || data.user.identities === null)
+
+      if (emailAlreadyExists) {
+        // El email existe en el sistema global. Intentamos loguear con la
+        // contraseña que ingresó. Si coincide, lo registramos en esta tienda
+        // de forma transparente — el usuario siente que simplemente "se registró".
+        const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password })
+
+        if (loginErr) {
+          // Contraseña incorrecta → ese email ya está en uso con otra contraseña
+          await supabase.auth.signOut()
+          setError('Ese email ya está registrado. Intentá con otro o ingresá con tu contraseña.')
+          setLoading(false)
+          return
         }
+
+        // Login OK → registrar en esta tienda y entrar (transparente para el usuario)
+        await registerInStore()
+        router.push(redirectTo)
+        router.refresh()
+        return
+      }
+
+      if (signUpErr) {
+        setError(signUpErr.message)
+        setLoading(false)
+        return
+      }
+
+      // Registro nuevo exitoso
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        // Supabase con confirmación deshabilitada → sesión activa de inmediato
+        await registerInStore()
+        router.push(redirectTo)
+        router.refresh()
+      } else {
+        // Confirmación por email habilitada → mostrar pantalla de espera
+        setMode('sent')
       }
       setLoading(false)
     }
   }
 
-  // ── Estado: confirmación de email enviada ──────────────────────────────────
+  // ── Confirmación de email enviada ──────────────────────────────────────────
   if (mode === 'sent') {
     return (
       <div className="text-center py-8">
@@ -115,7 +148,7 @@ export function AuthForm({ store, redirectTo = '/cuenta' }: AuthFormProps) {
     )
   }
 
-  // ── Login / Register normal ────────────────────────────────────────────────
+  // ── Login / Register ───────────────────────────────────────────────────────
   return (
     <div>
       {/* Tabs */}

@@ -9,7 +9,7 @@ import type { StoreConfig, Category } from '@/types'
 import type { SiteFeatures } from '@/lib/site-features'
 
 const DEFAULT_FEATURES: SiteFeatures = {
-  hasCart: true, hasCheckout: true, hasWhatsappCTA: false, hasProductCatalog: true,
+  hasCart: true, hasCheckout: true, hasWhatsappCTA: false, hasProductCatalog: true, hasUserAccount: true,
 }
 
 interface Props {
@@ -84,9 +84,9 @@ export function LibreriaHeader({ store, categories, userLoggedIn = false, featur
                 <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
               </svg>
             </button>
-            {userLoggedIn && (
-              <Link href="/cuenta" className="text-[11px] font-semibold uppercase tracking-wide transition-opacity hover:opacity-50" style={{ color: TEXT }}>
-                Mi cuenta
+            {features.hasUserAccount && (
+              <Link href={userLoggedIn ? '/cuenta' : '/cuenta/login'} className="text-[11px] font-semibold uppercase tracking-wide transition-opacity hover:opacity-50" style={{ color: TEXT }}>
+                {userLoggedIn ? 'Mi cuenta' : 'Ingresar'}
               </Link>
             )}
             {features.hasCart && (
@@ -168,6 +168,11 @@ export function LibreriaHeader({ store, categories, userLoggedIn = false, featur
                 {cat.name}
               </Link>
             ))}
+            {features.hasUserAccount && (
+              <Link href={userLoggedIn ? '/cuenta' : '/cuenta/login'} onClick={() => setMobileOpen(false)} className="py-4 mt-2 text-sm font-semibold uppercase tracking-wide" style={{ color: `${BG}80` }}>
+                {userLoggedIn ? 'Mi cuenta' : 'Ingresar / Registrarse'}
+              </Link>
+            )}
           </nav>
         </div>
       )}

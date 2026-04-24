@@ -82,7 +82,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         <PageEnter>{children}</PageEnter>
       </main>
       {isModo
-        ? <ModoFooter store={store} categories={categories} />
+        ? <ModoFooter store={store} categories={categories} features={features} />
         : isAthletic
         ? <AthleticFooter store={store} categories={categories} />
         : isDealership
@@ -91,7 +91,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         ? <LibreriaFooter store={store} categories={categories} />
         : isRealEstate
         ? <RealEstateFooter store={store} categories={categories} />
-        : <Footer store={store} categories={categories} />
+        : <Footer store={store} categories={categories} features={features} />
       }
     </div>
   )

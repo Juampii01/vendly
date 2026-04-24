@@ -5,6 +5,7 @@ import { ProductGallery } from '@/components/store/ProductGallery'
 import { AddToCartSection } from '@/components/store/AddToCartSection'
 import { ProductCard } from '@/components/store/ProductCard'
 import { FadeUp, SlideLeft, SlideRight, StaggerGrid, StaggerItem } from '@/components/store/motion'
+import { getSiteFeatures } from '@/lib/site-features'
 import type { Metadata } from 'next'
 
 interface PageProps {
@@ -31,6 +32,7 @@ export default async function ProductoPage({ params }: PageProps) {
     ),
   ])
   if (!product) notFound()
+  const features = getSiteFeatures(store.site_type)
   const isOnSale = product.compare_at_price !== null && product.compare_at_price > product.price
   const discount = isOnSale
     ? Math.round(((product.compare_at_price! - product.price) / product.compare_at_price!) * 100)
@@ -139,7 +141,7 @@ export default async function ProductoPage({ params }: PageProps) {
           )}
 
           {/* Variantes + carrito */}
-          <AddToCartSection product={product} store={store} />
+          <AddToCartSection product={product} store={store} features={features} />
 
           {/* Envío gratis */}
           {qualifiesFreeShipping && (
