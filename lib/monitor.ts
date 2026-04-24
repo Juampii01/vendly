@@ -68,30 +68,37 @@ function storeBaseUrl(slug: string, baseUrl: string | null): string {
   return baseUrl ?? `https://${slug}.${ROOT_DOMAIN}`
 }
 
-async function runStoreChecks(slug: string, url: string): Promise<CheckResult[]> {
-  const PAGE_CHECKS = [
-    { name: 'page_home',     label: 'Home (/)',               url: `${url}/`,            statuses: [200, 307] },
-    { name: 'page_products', label: 'Productos (/productos)',  url: `${url}/productos`,   statuses: [200] },
-    { name: 'page_cart',     label: 'Carrito (/carrito)',     url: `${url}/carrito`,     statuses: [200] },
-    { name: 'page_checkout', label: 'Checkout (/checkout)',   url: `${url}/checkout`,    statuses: [200] },
-  ] as const
+// Site types que NO tienen carrito ni checkout
+const NO_CART_TYPES  = new Set(['real-estate', 'dealership', 'vendly-marketing', 'landing'])
+const NO_CHECKOUT_TYPES = new Set(['real-estate', 'dealership', 'vendly-marketing', 'landing'])
+
+async function runStoreChecks(slug: string, url: string, siteType?: string | null): Promise<CheckResult[]> {
+  const hasCart     = !NO_CART_TYPES.has(siteType ?? '')
+  const hasCheckout = !NO_CHECKOUT_TYPES.has(siteType ?? '')
+
+  const pageChecks = [
+    { name: 'page_home',     label: 'Home (/)',              url: `${url}/`,          statuses: [200, 307] },
+    { name: 'page_products', label: 'Productos (/productos)', url: `${url}/productos`, statuses: [200] },
+    ...(hasCart     ? [{ name: 'page_cart',     label: 'Carrito (/carrito)',   url: `${url}/carrito`,   statuses: [200] }] : []),
+    ...(hasCheckout ? [{ name: 'page_checkout', label: 'Checkout (/checkout)', url: `${url}/checkout`,  statuses: [200] }] : []),
+  ]
 
   const SEO_CHECKS = [
-    { name: 'seo_sitemap',  label: 'Sitemap',   url: `${url}/sitemap.xml`,          statuses: [200] },
-    { name: 'seo_robots',   label: 'Robots',    url: `${url}/robots.txt`,           statuses: [200] },
-    { name: 'pwa_manifest', label: 'Manifest',  url: `${url}/manifest.webmanifest`, statuses: [200] },
+    { name: 'seo_sitemap',  label: 'Sitemap',  url: `${url}/sitemap.xml`,          statuses: [200] },
+    { name: 'seo_robots',   label: 'Robots',   url: `${url}/robots.txt`,           statuses: [200] },
+    { name: 'pwa_manifest', label: 'Manifest', url: `${url}/manifest.webmanifest`, statuses: [200] },
   ] as const
 
-  const API_CHECKS = [
-    { name: 'api_checkout', label: 'API Checkout',   url: `${url}/api/checkout`,    statuses: [405] },
-    { name: 'api_webhook',  label: 'API Webhook MP', url: `${url}/api/webhooks/mp`, statuses: [200] },
-  ] as const
+  const apiChecks = [
+    ...(hasCheckout ? [{ name: 'api_checkout', label: 'API Checkout',   url: `${url}/api/checkout`,    statuses: [405] }] : []),
+    { name: 'api_webhook', label: 'API Webhook MP', url: `${url}/api/webhooks/mp`, statuses: [200] },
+  ]
 
-  const prefix = slug // para evitar colisión de nombres entre stores
+  const prefix = slug
   const [pages, seo, apis] = await Promise.all([
-    Promise.all(PAGE_CHECKS.map(c => httpCheck(`${prefix}:${c.name}`, c.label, 'page', c.url, [...c.statuses]))),
+    Promise.all(pageChecks.map(c => httpCheck(`${prefix}:${c.name}`, c.label, 'page', c.url, [...c.statuses]))),
     Promise.all(SEO_CHECKS.map(c => httpCheck(`${prefix}:${c.name}`, c.label, 'seo', c.url, [...c.statuses]))),
-    Promise.all(API_CHECKS.map(c => httpCheck(`${prefix}:${c.name}`, c.label, 'api', c.url, [...c.statuses]))),
+    Promise.all(apiChecks.map(c => httpCheck(`${prefix}:${c.name}`, c.label, 'api', c.url, [...c.statuses]))),
   ])
 
   return [...pages, ...seo, ...apis]
@@ -157,7 +164,7 @@ export async function runMultiStoreHealth(): Promise<MultiHealthData> {
   // Cargar todos los stores activos
   const { data: storeRows } = await service
     .from('store_config')
-    .select('id, name, slug, base_url, status')
+    .select('id, name, slug, base_url, status, site_type')
     .eq('status', 'active')
     .order('name', { ascending: true })
 
@@ -168,7 +175,7 @@ export async function runMultiStoreHealth(): Promise<MultiHealthData> {
     Promise.all([checkSupabase(), checkMercadoPago(), checkResend()]),
     ...stores.map(async (s) => {
       const url = storeBaseUrl(s.slug, s.base_url)
-      const checks = await runStoreChecks(s.slug, url)
+      const checks = await runStoreChecks(s.slug, url, s.site_type)
       const failing = checks.filter(c => !c.ok).length
       return {
         id: s.id,
@@ -203,10 +210,10 @@ export async function runMultiStoreHealth(): Promise<MultiHealthData> {
 
 // ─── Legacy single-store (mantener compatibilidad con /api/dev/health) ────────
 
-export async function runAllChecks(baseUrl: string): Promise<CheckResult[]> {
+export async function runAllChecks(baseUrl: string, siteType?: string): Promise<CheckResult[]> {
   const slug = 'default'
   const [checks, supabase, mp, resend] = await Promise.all([
-    runStoreChecks(slug, baseUrl),
+    runStoreChecks(slug, baseUrl, siteType),
     checkSupabase(),
     checkMercadoPago(),
     checkResend(),
