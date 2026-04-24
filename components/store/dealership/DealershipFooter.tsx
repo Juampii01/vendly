@@ -11,7 +11,7 @@ export function DealershipFooter({ store, categories }: Props) {
   const GOLD = store.color_accent
 
   return (
-    <footer style={{ backgroundColor: store.color_primary, color: 'rgba(255,255,255,0.85)' }}>
+    <footer style={{ backgroundColor: '#0f172a', color: 'rgba(255,255,255,0.85)' }}>
 
       {/* ── CTA band — Test Drive ──────────────────────────────────────────── */}
       {store.whatsapp_number && (
@@ -31,8 +31,8 @@ export function DealershipFooter({ store, categories }: Props) {
               href={`https://wa.me/${store.whatsapp_number.replace(/\D/g, '')}?text=Hola, quiero agendar un test drive`}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-8 py-4 text-[11px] font-black uppercase tracking-[0.2em] text-center transition-opacity hover:opacity-80"
-              style={{ backgroundColor: GOLD, color: store.color_primary }}
+              className="px-8 py-4 text-[11px] font-black uppercase tracking-[0.2em] text-center rounded-xl transition-all hover:brightness-110 text-white"
+              style={{ backgroundColor: GOLD }}
             >
               Agendar test drive
             </a>
@@ -40,8 +40,8 @@ export function DealershipFooter({ store, categories }: Props) {
               href={`https://wa.me/${store.whatsapp_number.replace(/\D/g, '')}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-8 py-4 text-[11px] font-black uppercase tracking-[0.2em] text-center border transition-opacity hover:opacity-60"
-              style={{ borderColor: `${store.color_background}30`, color: store.color_background }}
+              className="px-8 py-4 text-[11px] font-black uppercase tracking-[0.2em] text-center border rounded-xl transition-all hover:bg-white/10 text-white"
+              style={{ borderColor: 'rgba(255,255,255,0.2)' }}
             >
               Consultar por WhatsApp
             </a>
