@@ -124,14 +124,14 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
               backgroundSize: '20px 20px',
             }}
           />
-          {/* Logo grande */}
-          {store.logo_url ? (
+          {/* Logo grande — prefer hero_image_url (square/transparent) over horizontal logo */}
+          {(store.hero_image_url || store.logo_url) ? (
             <div className="relative z-10 flex flex-col items-center gap-8">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={store.logo_url}
+                src={store.hero_image_url ?? store.logo_url!}
                 alt={store.name}
-                className="w-full max-w-sm md:max-w-md object-contain drop-shadow-2xl"
+                className="w-full max-w-[280px] md:max-w-xs object-contain drop-shadow-2xl"
               />
               <div className="flex items-center gap-3">
                 <div className="w-10 h-px bg-white/40" />
