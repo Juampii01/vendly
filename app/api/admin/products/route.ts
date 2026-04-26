@@ -80,7 +80,6 @@ export async function POST(req: Request) {
 const PRODUCT_FIELDS = [
   'name', 'slug', 'description', 'price', 'compare_at_price',
   'images', 'is_active', 'is_featured', 'tags', 'category_id',
-  'meta_title', 'meta_description',
 ]
 
 function sanitizeProduct(data: Record<string, unknown>) {
