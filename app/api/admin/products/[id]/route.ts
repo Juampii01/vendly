@@ -41,7 +41,11 @@ export async function PATCH(req: Request, { params }: RouteContext) {
           { status: 409 },
         )
       }
-      throw productError
+      console.error('[PATCH product] DB error:', JSON.stringify(productError))
+      return NextResponse.json(
+        { error: `DB: ${productError.message} (${productError.code})` },
+        { status: 500 },
+      )
     }
 
     // Reemplazar variantes: delete old → insert new
@@ -66,8 +70,9 @@ export async function PATCH(req: Request, { params }: RouteContext) {
 
     return NextResponse.json({ data: updated })
   } catch (e) {
-    console.error(e)
-    return NextResponse.json({ error: 'Error al actualizar producto' }, { status: 500 })
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error('[PATCH product] Unexpected error:', e)
+    return NextResponse.json({ error: `Error: ${msg}` }, { status: 500 })
   }
 }
 
