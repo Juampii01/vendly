@@ -42,7 +42,7 @@ export function RealEstateHeader({
     : null
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-[#0d0d0d]/95 backdrop-blur-md">
+    <header className="sticky top-0 z-40 w-full border-b border-gray-100 bg-white/95 backdrop-blur-md shadow-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8">
 
         {/* Logo */}
@@ -69,7 +69,7 @@ export function RealEstateHeader({
             <Link
               key={href}
               href={href}
-              className="text-sm font-medium text-white/60 transition-colors hover:text-white"
+              className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"
             >
               {label}
             </Link>
@@ -81,10 +81,10 @@ export function RealEstateHeader({
           {/* Favoritos */}
           <button
             onClick={onFavoritesOpen}
-            className="relative flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/10"
+            className="relative flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-gray-100"
             aria-label="Mis favoritos"
           >
-            <HeartIcon color={count > 0 ? ACCENT : 'rgba(255,255,255,0.4)'} filled={count > 0} />
+            <HeartIcon color={count > 0 ? ACCENT : '#9ca3af'} filled={count > 0} />
             {count > 0 && (
               <span
                 className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black text-white"
@@ -100,7 +100,7 @@ export function RealEstateHeader({
             <div className="hidden md:flex items-center gap-1">
               <Link
                 href="/cuenta/login"
-                className="rounded-full px-3 py-2 text-xs font-semibold text-white/60 transition-colors hover:text-white hover:bg-white/10"
+                className="rounded-full px-3 py-2 text-xs font-semibold text-gray-600 transition-colors hover:text-gray-900 hover:bg-gray-100"
               >
                 Log in
               </Link>
@@ -115,7 +115,7 @@ export function RealEstateHeader({
           ) : (
             <Link
               href="/cuenta"
-              className="hidden md:flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold text-white/70 transition-colors hover:bg-white/10"
+              className="hidden md:flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-100"
             >
               <UserIcon />
               Mi cuenta
@@ -142,23 +142,23 @@ export function RealEstateHeader({
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Menú"
           >
-            <span className={`block w-5 h-0.5 bg-white transition-all ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-            <span className={`block w-5 h-0.5 bg-white transition-all ${menuOpen ? 'opacity-0' : ''}`} />
-            <span className={`block w-5 h-0.5 bg-white transition-all ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+            <span className={`block w-5 h-0.5 bg-gray-700 transition-all ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
+            <span className={`block w-5 h-0.5 bg-gray-700 transition-all ${menuOpen ? 'opacity-0' : ''}`} />
+            <span className={`block w-5 h-0.5 bg-gray-700 transition-all ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
           </button>
         </div>
       </div>
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="border-t border-white/10 bg-[#0d0d0d] px-4 pb-5 lg:hidden">
+        <div className="border-t border-gray-100 bg-white px-4 pb-5 lg:hidden">
           <nav className="flex flex-col gap-1 pt-3">
             {navLinks.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
                 onClick={() => setMenuOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 hover:bg-white/10 transition-colors"
+                className="rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 {label}
               </Link>
@@ -171,7 +171,7 @@ export function RealEstateHeader({
                 <Link
                   href="/cuenta/login"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 rounded-xl border border-white/20 py-3 text-sm font-semibold text-white"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-3 text-sm font-semibold text-gray-700"
                 >
                   Log in
                 </Link>
@@ -188,7 +188,7 @@ export function RealEstateHeader({
               <Link
                 href="/cuenta"
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center justify-center gap-2 rounded-xl border border-white/20 py-3 text-sm font-semibold text-white"
+                className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 py-3 text-sm font-semibold text-gray-700"
               >
                 <UserIcon />
                 Mi cuenta

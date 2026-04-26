@@ -65,7 +65,7 @@ export function RealEstatePropertyCard({ product, store, featured = false }: Pro
   return (
     <Link
       href={`/productos/${product.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#161616] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
     >
       {/* Image */}
       <div className="relative overflow-hidden" style={{ aspectRatio: featured ? '16/9' : '4/3' }}>
@@ -78,7 +78,7 @@ export function RealEstatePropertyCard({ product, store, featured = false }: Pro
             className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="w-full h-full bg-white/10 flex items-center justify-center">
+          <div className="w-full h-full bg-gray-100 flex items-center justify-center">
             <span className="text-5xl opacity-20">🏠</span>
           </div>
         )}
@@ -121,14 +121,14 @@ export function RealEstatePropertyCard({ product, store, featured = false }: Pro
           </p>
         )}
 
-        <h3 className="font-bold text-white leading-snug line-clamp-2 text-sm group-hover:text-white/80 transition-colors">
+        <h3 className="font-bold text-gray-900 leading-snug line-clamp-2 text-sm group-hover:text-gray-700 transition-colors">
           {product.name}
         </h3>
 
         {amenities.length > 0 && (
           <div className="flex flex-wrap gap-3 mt-1">
             {amenities.map(({ icon, label }) => (
-              <span key={label} className="flex items-center gap-1 text-[11px] text-white/50 font-medium">
+              <span key={label} className="flex items-center gap-1 text-[11px] text-gray-500 font-medium">
                 <span>{icon}</span> {label}
               </span>
             ))}
@@ -136,7 +136,7 @@ export function RealEstatePropertyCard({ product, store, featured = false }: Pro
         )}
 
         {product.description && (
-          <p className="text-xs text-white/35 line-clamp-2 leading-relaxed">
+          <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
             {product.description}
           </p>
         )}
