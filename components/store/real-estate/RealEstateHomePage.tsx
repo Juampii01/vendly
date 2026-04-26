@@ -127,13 +127,11 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
           {/* Logo grande */}
           {store.logo_url ? (
             <div className="relative z-10 flex flex-col items-center gap-8">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={store.logo_url}
                 alt={store.name}
-                width={420}
-                height={280}
                 className="w-full max-w-sm md:max-w-md object-contain drop-shadow-2xl"
-                priority
               />
               <div className="flex items-center gap-3">
                 <div className="w-10 h-px bg-white/40" />
