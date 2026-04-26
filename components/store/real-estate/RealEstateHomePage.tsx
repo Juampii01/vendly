@@ -47,7 +47,7 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
     : null
 
   return (
-    <div className="bg-white text-gray-900">
+    <div className="bg-[#0d0d0d] text-white">
 
       {/* ══ HEADER ══════════════════════════════════════════════════════════════ */}
       <RealEstateHeader
@@ -137,7 +137,7 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
       </section>
 
       {/* ══ TRUST BAR ═══════════════════════════════════════════════════════════ */}
-      <div className="border-y border-gray-100 bg-gray-50">
+      <div className="border-y border-white/10 bg-[#111]">
         <div className="mx-auto max-w-6xl px-6 py-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
             { icon: '🏠', title: 'Propiedades exclusivas', desc: 'Catálogo actualizado' },
@@ -147,19 +147,19 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
           ].map(({ icon, title, desc }) => (
             <div key={title} className="flex flex-col items-center gap-2">
               <span className="text-2xl">{icon}</span>
-              <p className="text-xs font-black uppercase tracking-wide text-gray-800">{title}</p>
-              <p className="text-[10px] text-gray-400">{desc}</p>
+              <p className="text-xs font-black uppercase tracking-wide text-white">{title}</p>
+              <p className="text-[10px] text-white/40">{desc}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* ══ BÚSQUEDA RÁPIDA ══════════════════════════════════════════════════════ */}
-      <section className="border-b border-gray-100 px-4 py-12 md:px-8">
+      <section className="border-b border-white/10 px-4 py-12 md:px-8">
         <div className="mx-auto max-w-7xl">
           <FadeUp className="mb-8">
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-2" style={{ color: ACCENT }}>Buscá tu inmueble</p>
-            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">¿Qué estás buscando?</h2>
+            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">¿Qué estás buscando?</h2>
           </FadeUp>
           <div className="flex flex-wrap gap-2">
             {[
@@ -174,7 +174,7 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
                 key={href}
                 href={href}
                 className="border px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.15em] transition-all"
-                style={{ borderColor: '#e5e7eb', color: '#4b5563' }}
+                style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)' }}
                 onMouseEnter={e => {
                   const el = e.currentTarget as HTMLElement
                   el.style.backgroundColor = ACCENT
@@ -184,8 +184,8 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
                 onMouseLeave={e => {
                   const el = e.currentTarget as HTMLElement
                   el.style.backgroundColor = ''
-                  el.style.borderColor = '#e5e7eb'
-                  el.style.color = '#4b5563'
+                  el.style.borderColor = 'rgba(255,255,255,0.2)'
+                  el.style.color = 'rgba(255,255,255,0.6)'
                 }}
               >
                 {label}
@@ -197,14 +197,14 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
 
       {/* ══ TIPOS DE INMUEBLE ════════════════════════════════════════════════════ */}
       {categories.length > 0 && (
-        <section className="px-4 py-16 md:px-8 bg-gray-50">
+        <section className="px-4 py-16 md:px-8 bg-[#111]">
           <div className="mx-auto max-w-7xl">
             <FadeUp className="mb-10 flex items-end justify-between">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-2" style={{ color: ACCENT }}>Explorá por tipo</p>
-                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">Tipos de inmueble</h2>
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">Tipos de inmueble</h2>
               </div>
-              <Link href="/productos" className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors">
+              <Link href="/productos" className="text-[10px] font-bold uppercase tracking-widest text-white/30 hover:text-white transition-colors">
                 Ver todos →
               </Link>
             </FadeUp>
@@ -213,11 +213,11 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
                 <StaggerItem key={cat.id}>
                   <Link
                     href={`/productos?categoria=${cat.slug}`}
-                    className="group relative flex flex-col justify-between overflow-hidden border border-gray-200 bg-white p-6 transition-all duration-300 hover:border-transparent hover:text-white"
+                    className="group relative flex flex-col justify-between overflow-hidden border border-white/10 bg-[#1a1a1a] p-6 transition-all duration-300 hover:border-transparent"
                     style={{ minHeight: 160 }}
                     onMouseEnter={e => {
                       const el = e.currentTarget as HTMLElement
-                      el.style.backgroundColor = '#111'
+                      el.style.backgroundColor = ACCENT
                       el.style.borderColor = 'transparent'
                     }}
                     onMouseLeave={e => {
@@ -229,18 +229,18 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
                     {/* Número */}
                     <span
                       className="text-4xl font-black leading-none transition-colors"
-                      style={{ color: ACCENT, opacity: 0.25 }}
+                      style={{ color: 'rgba(255,255,255,0.15)' }}
                     >
                       {String(i + 1).padStart(2, '0')}
                     </span>
 
                     {/* Nombre + flecha */}
                     <div>
-                      <div className="mb-3 w-6 h-px transition-all duration-300 group-hover:w-10" style={{ backgroundColor: ACCENT }} />
-                      <p className="text-sm font-black uppercase tracking-[0.15em] text-gray-900 group-hover:text-white transition-colors">
+                      <div className="mb-3 w-6 h-px transition-all duration-300 group-hover:w-10 bg-white/40" />
+                      <p className="text-sm font-black uppercase tracking-[0.15em] text-white transition-colors">
                         {cat.name}
                       </p>
-                      <p className="mt-2 text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-60 transition-opacity" style={{ color: '#fff' }}>
+                      <p className="mt-2 text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-80 transition-opacity text-white">
                         Explorar →
                       </p>
                     </div>
@@ -259,9 +259,9 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
             <FadeUp className="mb-10 flex items-end justify-between">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-2" style={{ color: ACCENT }}>Selección especial</p>
-                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">Inmuebles destacados</h2>
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">Inmuebles destacados</h2>
               </div>
-              <Link href="/productos" className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors">
+              <Link href="/productos" className="text-[10px] font-bold uppercase tracking-widest text-white/30 hover:text-white transition-colors">
                 Ver todos →
               </Link>
             </FadeUp>
@@ -282,18 +282,18 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
           <SlideLeft className="relative aspect-[4/3] md:aspect-auto overflow-hidden">
             <Image src={splitSrc} alt="Nosotros" fill sizes="50vw" className="object-cover object-center" />
           </SlideLeft>
-          <SlideRight className="flex flex-col justify-center px-10 py-16 md:px-16 bg-gray-50">
+          <SlideRight className="flex flex-col justify-center px-10 py-16 md:px-16 bg-[#111]">
             {store.home_editorial_label && (
               <p className="text-[9px] font-black uppercase tracking-[0.4em] mb-5" style={{ color: ACCENT }}>
                 {store.home_editorial_label}
               </p>
             )}
-            <h2 className="font-black leading-[0.9] tracking-tight text-gray-900 mb-6"
+            <h2 className="font-black leading-[0.9] tracking-tight text-white mb-6"
               style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
               {store.home_editorial_title}
             </h2>
             {store.home_editorial_body && (
-              <p className="text-sm leading-relaxed text-gray-500 mb-10 max-w-sm">{store.home_editorial_body}</p>
+              <p className="text-sm leading-relaxed text-white/50 mb-10 max-w-sm">{store.home_editorial_body}</p>
             )}
             <div className="flex flex-wrap gap-4">
               <Link href="/productos"
@@ -303,7 +303,7 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
               </Link>
               {whatsappHref && (
                 <a href={whatsappHref} target="_blank" rel="noopener noreferrer"
-                  className="px-7 py-3.5 text-[10px] font-black uppercase tracking-[0.2em] border border-gray-300 text-gray-700 transition-all hover:bg-gray-100">
+                  className="px-7 py-3.5 text-[10px] font-black uppercase tracking-[0.2em] border border-white/20 text-white/70 transition-all hover:bg-white/10">
                   Contactar
                 </a>
               )}
@@ -314,14 +314,14 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
 
       {/* ══ EN VENTA ═════════════════════════════════════════════════════════════ */}
       {enVenta.length > 0 && (
-        <section className="px-4 py-16 md:px-8 bg-gray-50">
+        <section className="px-4 py-16 md:px-8 bg-[#111]">
           <div className="mx-auto max-w-7xl">
             <FadeUp className="mb-10 flex items-end justify-between">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-2" style={{ color: ACCENT }}>Oportunidades</p>
-                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">En venta</h2>
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">En venta</h2>
               </div>
-              <Link href="/productos?tag=venta" className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors">
+              <Link href="/productos?tag=venta" className="text-[10px] font-bold uppercase tracking-widest text-white/30 hover:text-white transition-colors">
                 Ver todas →
               </Link>
             </FadeUp>
@@ -340,10 +340,10 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
           <div className="mx-auto max-w-7xl">
             <FadeUp className="mb-10 flex items-end justify-between">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-2" style={{ color: '#0EA5E9' }}>Disponible ahora</p>
-                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">En alquiler</h2>
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-2" style={{ color: ACCENT }}>Disponible ahora</p>
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">En alquiler</h2>
               </div>
-              <Link href="/productos?tag=alquiler" className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors">
+              <Link href="/productos?tag=alquiler" className="text-[10px] font-bold uppercase tracking-widest text-white/30 hover:text-white transition-colors">
                 Ver todas →
               </Link>
             </FadeUp>
@@ -431,10 +431,10 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
       </section>
 
       {/* ══ CONTACTO ════════════════════════════════════════════════════════════ */}
-      <section className="px-4 py-16 md:px-8">
+      <section className="px-4 py-16 md:px-8 bg-[#0d0d0d]">
         <div className="mx-auto max-w-7xl grid md:grid-cols-3 gap-6">
           {[
-            { icon: '📍', title: 'Visitanos', lines: ['Córdoba, Argentina', 'Lun–Vie 9:00–18:00', 'Sáb 9:00–13:00'] },
+            { icon: '📍', title: 'Visitanos', lines: ['Los Toldos, Buenos Aires', 'Lun–Vie 9:00–18:00', 'Sáb 9:00–13:00'] },
             {
               icon: '💬', title: 'WhatsApp',
               lines: [store.whatsapp_number ?? 'Consultá', 'Respondemos en minutos', 'Asesoramiento personalizado'],
@@ -446,12 +446,12 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
               link: store.email ? `mailto:${store.email}` : undefined,
             },
           ].map(({ icon, title, lines, link }) => (
-            <div key={title} className="rounded-2xl border border-gray-100 p-8 bg-white shadow-sm">
+            <div key={title} className="rounded-2xl border border-white/10 p-8 bg-[#161616]">
               <div className="text-3xl mb-4">{icon}</div>
-              <h3 className="font-black uppercase tracking-wider text-sm mb-4 text-gray-900">{title}</h3>
+              <h3 className="font-black uppercase tracking-wider text-sm mb-4 text-white">{title}</h3>
               <div className="space-y-1.5">
                 {lines.map((l, i) => (
-                  <p key={i} className={`text-sm ${i === 0 ? 'font-semibold text-gray-900' : 'text-gray-400'}`}>{l}</p>
+                  <p key={i} className={`text-sm ${i === 0 ? 'font-semibold text-white' : 'text-white/40'}`}>{l}</p>
                 ))}
               </div>
               {link && (
