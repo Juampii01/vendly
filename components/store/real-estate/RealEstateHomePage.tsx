@@ -62,9 +62,20 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
       {/* ══ HERO ════════════════════════════════════════════════════════════════ */}
       <section className="w-full grid md:grid-cols-2" style={{ minHeight: '88vh' }}>
 
-        {/* ── Lado izquierdo: texto ── */}
+        {/* ── Lado izquierdo: logo + texto + CTAs ── */}
         <div className="flex flex-col justify-center px-8 py-20 md:px-14 lg:px-20 bg-white">
-          <div className="flex items-center gap-3 mb-6">
+          {/* Logo */}
+          {(store.hero_image_url || store.logo_url) && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={store.hero_image_url ?? store.logo_url!}
+              alt={store.name}
+              className="mb-10 w-auto object-contain"
+              style={{ maxHeight: '120px', maxWidth: '280px' }}
+            />
+          )}
+
+          <div className="flex items-center gap-3 mb-5">
             <div className="w-8 h-px" style={{ backgroundColor: ACCENT }} />
             <p className="text-[10px] font-black uppercase tracking-[0.45em]" style={{ color: ACCENT }}>
               {store.hero_subtitle ?? 'Bienes Raíces'}
@@ -73,7 +84,7 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
 
           <h1
             className="font-black leading-[0.9] tracking-tight text-gray-900 mb-8"
-            style={{ fontSize: 'clamp(2.4rem, 5vw, 4.5rem)' }}
+            style={{ fontSize: 'clamp(2.2rem, 4.5vw, 4rem)' }}
           >
             {store.hero_title}
           </h1>
@@ -112,9 +123,9 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
           </div>
         </div>
 
-        {/* ── Lado derecho: logo sobre fondo rojo ── */}
+        {/* ── Lado derecho: panel rojo con nombre en grande ── */}
         <div
-          className="relative flex flex-col items-center justify-center px-10 py-16 min-h-[50vh] md:min-h-0"
+          className="relative flex flex-col items-center justify-center px-10 py-16 min-h-[50vh] md:min-h-0 overflow-hidden"
           style={{ backgroundColor: ACCENT }}
         >
           {/* Patrón geométrico sutil */}
@@ -124,28 +135,22 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
               backgroundSize: '20px 20px',
             }}
           />
-          {/* Logo grande — prefer hero_image_url (square/transparent) over horizontal logo */}
-          {(store.hero_image_url || store.logo_url) ? (
-            <div className="relative z-10 flex flex-col items-center gap-8">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={store.hero_image_url ?? store.logo_url!}
-                alt={store.name}
-                className="w-full max-w-[280px] md:max-w-xs object-contain drop-shadow-2xl"
-              />
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-px bg-white/40" />
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/70">
-                  Los Toldos · Buenos Aires
-                </p>
-                <div className="w-10 h-px bg-white/40" />
-              </div>
+          {/* Nombre del store en grande */}
+          <div className="relative z-10 text-center select-none">
+            <p
+              className="font-black uppercase text-white leading-none tracking-tight opacity-20"
+              style={{ fontSize: 'clamp(5rem, 12vw, 11rem)', letterSpacing: '-0.04em' }}
+            >
+              {store.name.split(' ')[0]}
+            </p>
+            <div className="mt-6 flex items-center justify-center gap-4">
+              <div className="w-12 h-px bg-white/40" />
+              <p className="text-[11px] font-black uppercase tracking-[0.4em] text-white/70">
+                Los Toldos · Buenos Aires
+              </p>
+              <div className="w-12 h-px bg-white/40" />
             </div>
-          ) : (
-            <div className="relative z-10 text-center">
-              <p className="text-6xl font-black text-white leading-none">{store.name}</p>
-            </div>
-          )}
+          </div>
         </div>
       </section>
 
