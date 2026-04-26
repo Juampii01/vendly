@@ -91,28 +91,28 @@ export function RealEstateProductsPage({
   }
 
   return (
-    <div className="bg-[#0d0d0d] text-white">
+    <div className="bg-white text-gray-900">
       <RealEstateHeader store={store} categories={categories} onFavoritesOpen={() => setFavOpen(true)} />
       <FavoritesSidebar store={store} open={favOpen} onClose={() => setFavOpen(false)} />
 
       {/* ── Breadcrumb + título de sección ──────────────────────────────────── */}
-      <section className="border-b border-white/10 bg-[#0d0d0d] px-4 pt-8 pb-10 md:px-8">
+      <section className="border-b border-gray-100 bg-white px-4 pt-8 pb-10 md:px-8">
         <div className="mx-auto max-w-7xl">
           {/* Breadcrumb */}
-          <nav className="mb-8 flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-white/30">
-            <Link href="/" className="hover:text-white transition-colors">Inicio</Link>
+          <nav className="mb-8 flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-gray-400">
+            <Link href="/" className="hover:text-gray-900 transition-colors">Inicio</Link>
             <span>/</span>
-            <Link href="/productos" className="hover:text-white transition-colors">Inmuebles</Link>
+            <Link href="/productos" className="hover:text-gray-900 transition-colors">Inmuebles</Link>
             {activeCategory && (
               <>
                 <span>/</span>
-                <span className="text-white/70 font-bold">{activeCategory.name}</span>
+                <span className="text-gray-700 font-bold">{activeCategory.name}</span>
               </>
             )}
             {params.tag && (
               <>
                 <span>/</span>
-                <span className="text-white/70 font-bold capitalize">{params.tag}</span>
+                <span className="text-gray-700 font-bold capitalize">{params.tag}</span>
               </>
             )}
           </nav>
@@ -123,10 +123,10 @@ export function RealEstateProductsPage({
               {sectionLabel}
             </p>
             <div className="flex items-end justify-between gap-4 flex-wrap">
-              <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight leading-[0.9] text-white">
+              <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight leading-[0.9]">
                 {sectionTitle}
               </h1>
-              <p className="text-sm text-white/30 pb-1">
+              <p className="text-sm text-gray-400 pb-1">
                 {total} inmueble{total !== 1 ? 's' : ''} encontrado{total !== 1 ? 's' : ''}
               </p>
             </div>
@@ -144,7 +144,7 @@ export function RealEstateProductsPage({
                     className="px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.15em] border transition-all"
                     style={active
                       ? { backgroundColor: ACCENT, borderColor: ACCENT, color: '#fff' }
-                      : { borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)' }
+                      : { borderColor: '#e5e7eb', color: '#4b5563' }
                     }
                   >
                     {f.label}
@@ -155,7 +155,7 @@ export function RealEstateProductsPage({
 
             {/* Buscador */}
             <div className="relative w-full sm:w-72">
-              <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-white/30">
+              <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-gray-400">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                   <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
@@ -165,7 +165,7 @@ export function RealEstateProductsPage({
                 defaultValue={params.busqueda}
                 onChange={e => handleSearch(e.target.value)}
                 placeholder="Buscar inmuebles..."
-                className="w-full border border-white/20 bg-white/5 text-white placeholder:text-white/30 py-2.5 pl-9 pr-4 text-sm outline-none transition-colors focus:border-white/40"
+                className="w-full border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm outline-none transition-colors focus:border-gray-400"
               />
             </div>
           </div>
@@ -173,15 +173,15 @@ export function RealEstateProductsPage({
       </section>
 
       {/* ── Contenido principal ───────────────────────────────────────────────── */}
-      <section className="bg-[#0d0d0d] px-4 py-12 md:px-8">
+      <section className="bg-gray-50 px-4 py-12 md:px-8">
         <div className="mx-auto max-w-7xl flex gap-8 flex-col lg:flex-row">
 
           {/* ── Sidebar ─────────────────────────────────────────────────────── */}
           <aside className="w-full lg:w-60 shrink-0 flex flex-col gap-5">
 
             {/* Operación */}
-            <div className="rounded-2xl border border-white/10 bg-[#161616] p-6">
-              <p className="mb-4 text-[10px] font-black uppercase tracking-[0.25em] text-white/30">
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+              <p className="mb-4 text-[10px] font-black uppercase tracking-[0.25em] text-gray-400">
                 Operación
               </p>
               <nav className="flex flex-col gap-0.5">
@@ -192,7 +192,7 @@ export function RealEstateProductsPage({
                       key={f.href}
                       href={f.href}
                       className={`flex items-center justify-between px-3 py-2.5 text-sm font-semibold transition-colors ${
-                        active ? 'text-white' : 'text-white/50 hover:bg-white/10 hover:text-white'
+                        active ? 'text-white' : 'text-gray-600 hover:bg-gray-50'
                       }`}
                       style={active ? { backgroundColor: ACCENT } : {}}
                     >
@@ -206,8 +206,8 @@ export function RealEstateProductsPage({
 
             {/* Tipo de inmueble */}
             {categories.length > 0 && (
-              <div className="rounded-2xl border border-white/10 bg-[#161616] p-6">
-                <p className="mb-4 text-[10px] font-black uppercase tracking-[0.25em] text-white/30">
+              <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                <p className="mb-4 text-[10px] font-black uppercase tracking-[0.25em] text-gray-400">
                   Tipo de inmueble
                 </p>
                 <nav className="flex flex-col gap-0.5">
@@ -218,7 +218,7 @@ export function RealEstateProductsPage({
                         key={cat.id}
                         href={`/productos?categoria=${cat.slug}`}
                         className={`flex items-center justify-between px-3 py-2.5 text-sm font-semibold transition-colors ${
-                          active ? 'text-white' : 'text-white/50 hover:bg-white/10 hover:text-white'
+                          active ? 'text-white' : 'text-gray-600 hover:bg-gray-50'
                         }`}
                         style={active ? { backgroundColor: ACCENT } : {}}
                       >
@@ -232,11 +232,11 @@ export function RealEstateProductsPage({
             )}
 
             {/* CTA Asesor */}
-            <div className="rounded-2xl border border-white/10 bg-[#161616] p-6">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/30 mb-3">
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 mb-3">
                 ¿Necesitás ayuda?
               </p>
-              <p className="text-sm text-white/50 leading-relaxed mb-5">
+              <p className="text-sm text-gray-600 leading-relaxed mb-5">
                 Nuestros asesores te acompañan en cada paso.
               </p>
               {store.whatsapp_number && (
@@ -279,7 +279,7 @@ export function RealEstateProductsPage({
                         ← Anterior
                       </Link>
                     )}
-                    <span className="text-sm text-white/30 font-medium">
+                    <span className="text-sm text-gray-400 font-medium">
                       {page} / {totalPages}
                     </span>
                     {page < totalPages && (
@@ -313,15 +313,15 @@ export function RealEstateProductsPage({
 
 function EmptyState({ accent }: { accent: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#161616] p-16 text-center">
+    <div className="rounded-2xl border border-gray-100 bg-white p-16 text-center shadow-sm">
       <p className="text-5xl mb-6 opacity-20">🏠</p>
       <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-3" style={{ color: accent }}>
         Sin resultados
       </p>
-      <h3 className="text-xl font-black uppercase tracking-tight text-white mb-2">
+      <h3 className="text-xl font-black uppercase tracking-tight text-gray-900 mb-2">
         No encontramos inmuebles
       </h3>
-      <p className="text-sm text-white/40 mb-8">
+      <p className="text-sm text-gray-400 mb-8">
         Probá con otro filtro o explorá el catálogo completo
       </p>
       <Link

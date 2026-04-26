@@ -47,7 +47,7 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
     : null
 
   return (
-    <div className="bg-[#0d0d0d] text-white">
+    <div className="bg-white text-gray-900">
 
       {/* ══ HEADER ══════════════════════════════════════════════════════════════ */}
       <RealEstateHeader
@@ -60,84 +60,99 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
       <FavoritesSidebar store={store} open={favOpen} onClose={() => setFavOpen(false)} />
 
       {/* ══ HERO ════════════════════════════════════════════════════════════════ */}
-      <section className="relative w-full overflow-hidden" style={{ minHeight: '88vh' }}>
-        <Image
-          src={heroSrc}
-          alt={store.hero_title}
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-center"
-        />
-        <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(to right, rgba(10,10,20,0.88) 0%, rgba(10,10,20,0.55) 55%, rgba(10,10,20,0.15) 100%)' }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(to top, rgba(10,10,20,0.7) 0%, transparent 45%)' }}
-        />
+      <section className="w-full grid md:grid-cols-2" style={{ minHeight: '88vh' }}>
 
-        <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-14 lg:px-20">
-          <div className="max-w-2xl">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-px" style={{ backgroundColor: ACCENT }} />
-              <p className="text-[10px] font-black uppercase tracking-[0.45em]" style={{ color: ACCENT }}>
-                {store.hero_subtitle ?? 'Bienes Raíces'}
-              </p>
-            </div>
+        {/* ── Lado izquierdo: texto ── */}
+        <div className="flex flex-col justify-center px-8 py-20 md:px-14 lg:px-20 bg-white">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-px" style={{ backgroundColor: ACCENT }} />
+            <p className="text-[10px] font-black uppercase tracking-[0.45em]" style={{ color: ACCENT }}>
+              {store.hero_subtitle ?? 'Bienes Raíces'}
+            </p>
+          </div>
 
-            <h1
-              className="font-black leading-[0.9] tracking-tight text-white mb-8"
-              style={{ fontSize: 'clamp(2.8rem, 6.5vw, 5.5rem)' }}
+          <h1
+            className="font-black leading-[0.9] tracking-tight text-gray-900 mb-8"
+            style={{ fontSize: 'clamp(2.4rem, 5vw, 4.5rem)' }}
+          >
+            {store.hero_title}
+          </h1>
+
+          <div className="flex flex-wrap gap-8 mb-10">
+            {[
+              { n: `${products.length}+`, l: 'Propiedades' },
+              { n: `${enVenta.length > 0 ? enVenta.length + '+' : categories.length}`, l: 'En venta' },
+              { n: '100%', l: 'Asesoramiento' },
+            ].map(({ n, l }) => (
+              <div key={l}>
+                <p className="text-2xl font-black" style={{ color: ACCENT }}>{n}</p>
+                <p className="text-[10px] uppercase tracking-wider text-gray-400">{l}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap gap-4">
+            <Link
+              href={store.hero_cta_url ?? '/productos'}
+              className="px-8 py-4 text-[11px] font-black uppercase tracking-[0.2em] text-white transition-all hover:brightness-110"
+              style={{ backgroundColor: ACCENT }}
             >
-              {store.hero_title}
-            </h1>
-
-            <div className="flex flex-wrap gap-8 mb-10">
-              {[
-                { n: `${products.length}+`, l: 'Propiedades' },
-                { n: `${enVenta.length > 0 ? enVenta.length + '+' : categories.length}`, l: 'En venta' },
-                { n: '100%', l: 'Asesoramiento' },
-              ].map(({ n, l }) => (
-                <div key={l}>
-                  <p className="text-2xl font-black" style={{ color: ACCENT }}>{n}</p>
-                  <p className="text-[10px] uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.45)' }}>{l}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href={store.hero_cta_url ?? '/productos'}
-                className="px-8 py-4 text-[11px] font-black uppercase tracking-[0.2em] text-white transition-all hover:brightness-110"
-                style={{ backgroundColor: ACCENT }}
+              {store.hero_cta_label ?? 'Ver propiedades'}
+            </Link>
+            {whatsappHref && (
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-8 py-4 text-[11px] font-black uppercase tracking-[0.2em] border border-gray-300 text-gray-700 transition-all hover:bg-gray-50"
               >
-                {store.hero_cta_label ?? 'Ver propiedades'}
-              </Link>
-              {whatsappHref && (
-                <a
-                  href={whatsappHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-8 py-4 text-[11px] font-black uppercase tracking-[0.2em] border transition-all hover:bg-white/10"
-                  style={{ borderColor: 'rgba(255,255,255,0.35)', color: 'rgba(255,255,255,0.9)' }}
-                >
-                  Consultar por WhatsApp
-                </a>
-              )}
-            </div>
+                Consultar por WhatsApp
+              </a>
+            )}
           </div>
         </div>
 
-        <div className="absolute bottom-8 right-10 hidden md:flex flex-col items-center gap-2">
-          <div className="w-px h-12 animate-pulse" style={{ backgroundColor: ACCENT, opacity: 0.4 }} />
-          <p className="text-[8px] uppercase tracking-[0.4em] rotate-90 origin-center" style={{ color: 'rgba(255,255,255,0.25)' }}>scroll</p>
+        {/* ── Lado derecho: logo sobre fondo rojo ── */}
+        <div
+          className="relative flex flex-col items-center justify-center px-10 py-16 min-h-[50vh] md:min-h-0"
+          style={{ backgroundColor: ACCENT }}
+        >
+          {/* Patrón geométrico sutil */}
+          <div className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage: 'repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 50%)',
+              backgroundSize: '20px 20px',
+            }}
+          />
+          {/* Logo grande */}
+          {store.logo_url ? (
+            <div className="relative z-10 flex flex-col items-center gap-8">
+              <Image
+                src={store.logo_url}
+                alt={store.name}
+                width={420}
+                height={280}
+                className="w-full max-w-sm md:max-w-md object-contain drop-shadow-2xl"
+                priority
+              />
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-px bg-white/40" />
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/70">
+                  Los Toldos · Buenos Aires
+                </p>
+                <div className="w-10 h-px bg-white/40" />
+              </div>
+            </div>
+          ) : (
+            <div className="relative z-10 text-center">
+              <p className="text-6xl font-black text-white leading-none">{store.name}</p>
+            </div>
+          )}
         </div>
       </section>
 
       {/* ══ TRUST BAR ═══════════════════════════════════════════════════════════ */}
-      <div className="border-y border-white/10 bg-[#111]">
+      <div className="border-y border-gray-100 bg-gray-50">
         <div className="mx-auto max-w-6xl px-6 py-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
             { icon: '🏠', title: 'Propiedades exclusivas', desc: 'Catálogo actualizado' },
@@ -147,19 +162,19 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
           ].map(({ icon, title, desc }) => (
             <div key={title} className="flex flex-col items-center gap-2">
               <span className="text-2xl">{icon}</span>
-              <p className="text-xs font-black uppercase tracking-wide text-white">{title}</p>
-              <p className="text-[10px] text-white/40">{desc}</p>
+              <p className="text-xs font-black uppercase tracking-wide text-gray-800">{title}</p>
+              <p className="text-[10px] text-gray-400">{desc}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* ══ BÚSQUEDA RÁPIDA ══════════════════════════════════════════════════════ */}
-      <section className="border-b border-white/10 px-4 py-12 md:px-8">
+      <section className="border-b border-gray-100 px-4 py-12 md:px-8">
         <div className="mx-auto max-w-7xl">
           <FadeUp className="mb-8">
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-2" style={{ color: ACCENT }}>Buscá tu inmueble</p>
-            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">¿Qué estás buscando?</h2>
+            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">¿Qué estás buscando?</h2>
           </FadeUp>
           <div className="flex flex-wrap gap-2">
             {[
@@ -174,7 +189,7 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
                 key={href}
                 href={href}
                 className="border px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.15em] transition-all"
-                style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)' }}
+                style={{ borderColor: '#e5e7eb', color: '#4b5563' }}
                 onMouseEnter={e => {
                   const el = e.currentTarget as HTMLElement
                   el.style.backgroundColor = ACCENT
@@ -184,8 +199,8 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
                 onMouseLeave={e => {
                   const el = e.currentTarget as HTMLElement
                   el.style.backgroundColor = ''
-                  el.style.borderColor = 'rgba(255,255,255,0.2)'
-                  el.style.color = 'rgba(255,255,255,0.6)'
+                  el.style.borderColor = '#e5e7eb'
+                  el.style.color = '#4b5563'
                 }}
               >
                 {label}
@@ -197,14 +212,14 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
 
       {/* ══ TIPOS DE INMUEBLE ════════════════════════════════════════════════════ */}
       {categories.length > 0 && (
-        <section className="px-4 py-16 md:px-8 bg-[#111]">
+        <section className="px-4 py-16 md:px-8 bg-gray-50">
           <div className="mx-auto max-w-7xl">
             <FadeUp className="mb-10 flex items-end justify-between">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-2" style={{ color: ACCENT }}>Explorá por tipo</p>
-                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">Tipos de inmueble</h2>
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">Tipos de inmueble</h2>
               </div>
-              <Link href="/productos" className="text-[10px] font-bold uppercase tracking-widest text-white/30 hover:text-white transition-colors">
+              <Link href="/productos" className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors">
                 Ver todos →
               </Link>
             </FadeUp>
@@ -213,11 +228,11 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
                 <StaggerItem key={cat.id}>
                   <Link
                     href={`/productos?categoria=${cat.slug}`}
-                    className="group relative flex flex-col justify-between overflow-hidden border border-white/10 bg-[#1a1a1a] p-6 transition-all duration-300 hover:border-transparent"
+                    className="group relative flex flex-col justify-between overflow-hidden border border-gray-200 bg-white p-6 transition-all duration-300 hover:border-transparent hover:text-white"
                     style={{ minHeight: 160 }}
                     onMouseEnter={e => {
                       const el = e.currentTarget as HTMLElement
-                      el.style.backgroundColor = ACCENT
+                      el.style.backgroundColor = '#111'
                       el.style.borderColor = 'transparent'
                     }}
                     onMouseLeave={e => {
@@ -226,21 +241,15 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
                       el.style.borderColor = ''
                     }}
                   >
-                    {/* Número */}
-                    <span
-                      className="text-4xl font-black leading-none transition-colors"
-                      style={{ color: 'rgba(255,255,255,0.15)' }}
-                    >
+                    <span className="text-4xl font-black leading-none" style={{ color: ACCENT, opacity: 0.25 }}>
                       {String(i + 1).padStart(2, '0')}
                     </span>
-
-                    {/* Nombre + flecha */}
                     <div>
-                      <div className="mb-3 w-6 h-px transition-all duration-300 group-hover:w-10 bg-white/40" />
-                      <p className="text-sm font-black uppercase tracking-[0.15em] text-white transition-colors">
+                      <div className="mb-3 w-6 h-px transition-all duration-300 group-hover:w-10" style={{ backgroundColor: ACCENT }} />
+                      <p className="text-sm font-black uppercase tracking-[0.15em] text-gray-900 group-hover:text-white transition-colors">
                         {cat.name}
                       </p>
-                      <p className="mt-2 text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-80 transition-opacity text-white">
+                      <p className="mt-2 text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-60 transition-opacity text-white">
                         Explorar →
                       </p>
                     </div>
@@ -259,9 +268,9 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
             <FadeUp className="mb-10 flex items-end justify-between">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-2" style={{ color: ACCENT }}>Selección especial</p>
-                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">Inmuebles destacados</h2>
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">Inmuebles destacados</h2>
               </div>
-              <Link href="/productos" className="text-[10px] font-bold uppercase tracking-widest text-white/30 hover:text-white transition-colors">
+              <Link href="/productos" className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors">
                 Ver todos →
               </Link>
             </FadeUp>
@@ -282,18 +291,18 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
           <SlideLeft className="relative aspect-[4/3] md:aspect-auto overflow-hidden">
             <Image src={splitSrc} alt="Nosotros" fill sizes="50vw" className="object-cover object-center" />
           </SlideLeft>
-          <SlideRight className="flex flex-col justify-center px-10 py-16 md:px-16 bg-[#111]">
+          <SlideRight className="flex flex-col justify-center px-10 py-16 md:px-16 bg-gray-50">
             {store.home_editorial_label && (
               <p className="text-[9px] font-black uppercase tracking-[0.4em] mb-5" style={{ color: ACCENT }}>
                 {store.home_editorial_label}
               </p>
             )}
-            <h2 className="font-black leading-[0.9] tracking-tight text-white mb-6"
+            <h2 className="font-black leading-[0.9] tracking-tight text-gray-900 mb-6"
               style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
               {store.home_editorial_title}
             </h2>
             {store.home_editorial_body && (
-              <p className="text-sm leading-relaxed text-white/50 mb-10 max-w-sm">{store.home_editorial_body}</p>
+              <p className="text-sm leading-relaxed text-gray-500 mb-10 max-w-sm">{store.home_editorial_body}</p>
             )}
             <div className="flex flex-wrap gap-4">
               <Link href="/productos"
@@ -303,7 +312,7 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
               </Link>
               {whatsappHref && (
                 <a href={whatsappHref} target="_blank" rel="noopener noreferrer"
-                  className="px-7 py-3.5 text-[10px] font-black uppercase tracking-[0.2em] border border-white/20 text-white/70 transition-all hover:bg-white/10">
+                  className="px-7 py-3.5 text-[10px] font-black uppercase tracking-[0.2em] border border-gray-300 text-gray-700 transition-all hover:bg-gray-100">
                   Contactar
                 </a>
               )}
@@ -314,14 +323,14 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
 
       {/* ══ EN VENTA ═════════════════════════════════════════════════════════════ */}
       {enVenta.length > 0 && (
-        <section className="px-4 py-16 md:px-8 bg-[#111]">
+        <section className="px-4 py-16 md:px-8 bg-gray-50">
           <div className="mx-auto max-w-7xl">
             <FadeUp className="mb-10 flex items-end justify-between">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-2" style={{ color: ACCENT }}>Oportunidades</p>
-                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">En venta</h2>
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">En venta</h2>
               </div>
-              <Link href="/productos?tag=venta" className="text-[10px] font-bold uppercase tracking-widest text-white/30 hover:text-white transition-colors">
+              <Link href="/productos?tag=venta" className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors">
                 Ver todas →
               </Link>
             </FadeUp>
@@ -341,9 +350,9 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
             <FadeUp className="mb-10 flex items-end justify-between">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-2" style={{ color: ACCENT }}>Disponible ahora</p>
-                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-white">En alquiler</h2>
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">En alquiler</h2>
               </div>
-              <Link href="/productos?tag=alquiler" className="text-[10px] font-bold uppercase tracking-widest text-white/30 hover:text-white transition-colors">
+              <Link href="/productos?tag=alquiler" className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors">
                 Ver todas →
               </Link>
             </FadeUp>
@@ -431,7 +440,7 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
       </section>
 
       {/* ══ CONTACTO ════════════════════════════════════════════════════════════ */}
-      <section className="px-4 py-16 md:px-8 bg-[#0d0d0d]">
+      <section className="px-4 py-16 md:px-8">
         <div className="mx-auto max-w-7xl grid md:grid-cols-3 gap-6">
           {[
             { icon: '📍', title: 'Visitanos', lines: ['Los Toldos, Buenos Aires', 'Lun–Vie 9:00–18:00', 'Sáb 9:00–13:00'] },
@@ -446,12 +455,12 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
               link: store.email ? `mailto:${store.email}` : undefined,
             },
           ].map(({ icon, title, lines, link }) => (
-            <div key={title} className="rounded-2xl border border-white/10 p-8 bg-[#161616]">
+            <div key={title} className="rounded-2xl border border-gray-100 p-8 bg-white shadow-sm">
               <div className="text-3xl mb-4">{icon}</div>
-              <h3 className="font-black uppercase tracking-wider text-sm mb-4 text-white">{title}</h3>
+              <h3 className="font-black uppercase tracking-wider text-sm mb-4 text-gray-900">{title}</h3>
               <div className="space-y-1.5">
                 {lines.map((l, i) => (
-                  <p key={i} className={`text-sm ${i === 0 ? 'font-semibold text-white' : 'text-white/40'}`}>{l}</p>
+                  <p key={i} className={`text-sm ${i === 0 ? 'font-semibold text-gray-900' : 'text-gray-400'}`}>{l}</p>
                 ))}
               </div>
               {link && (
