@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import type { StoreConfig } from '@/types'
 
 interface Props { store: StoreConfig }
@@ -225,9 +226,13 @@ export function StoreConfigForm({ store }: Props) {
             <Field label="Nombre de la tienda" required hint="Aparece en el header, footer y título de la pestaña">
               <Input value={form.name} onChange={(v) => set('name', v)} placeholder="Acosta Bienes Raíces" />
             </Field>
-            <Field label="URL del logo" hint="Pegá la URL de tu imagen. Dejá vacío para mostrar el nombre en texto.">
-              <Input value={form.logo_url} onChange={(v) => set('logo_url', v)} placeholder="https://..." />
-            </Field>
+            <ImageUploadField
+              label="Logo"
+              hint="Subí un archivo o pegá una URL. Dejá vacío para mostrar el nombre en texto."
+              value={form.logo_url}
+              onChange={(v) => set('logo_url', v)}
+              storeId={store.id}
+            />
 
             {/* Logo preview card */}
             <div className="rounded-2xl border border-slate-100 bg-slate-50 overflow-hidden">
@@ -382,9 +387,14 @@ export function StoreConfigForm({ store }: Props) {
                 <Field label="URL del botón" required>
                   <Input value={form.hero_cta_url} onChange={(v) => set('hero_cta_url', v)} placeholder="/productos" />
                 </Field>
-                <Field label="Imagen de fondo" hint="URL de imagen 1440×900px mínimo">
-                  <Input value={form.hero_image_url} onChange={(v) => set('hero_image_url', v)} placeholder="https://..." />
-                </Field>
+                <ImageUploadField
+                  label="Imagen de fondo"
+                  hint="1440×900px mínimo. Subí un archivo o pegá una URL."
+                  value={form.hero_image_url}
+                  onChange={(v) => set('hero_image_url', v)}
+                  storeId={store.id}
+                  aspect="16/9"
+                />
               </div>
 
               {/* Live hero preview */}
@@ -457,13 +467,14 @@ export function StoreConfigForm({ store }: Props) {
               </div>
             )}
 
-            <Field label="Imagen de la sección editorial" hint="URL de imagen. Aparece en la sección split de 'Quiénes somos'.">
-              <Input value={form.home_split_image_url} onChange={(v) => set('home_split_image_url', v)} placeholder="https://..." />
-            </Field>
-            {form.home_split_image_url && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={form.home_split_image_url} alt="Editorial" className="w-full aspect-video object-cover rounded-xl border border-slate-100" />
-            )}
+            <ImageUploadField
+              label="Imagen de la sección editorial"
+              hint="Aparece en la sección 'Quiénes somos'. Subí un archivo o pegá una URL."
+              value={form.home_split_image_url}
+              onChange={(v) => set('home_split_image_url', v)}
+              storeId={store.id}
+              aspect="16/9"
+            />
 
             <div className="grid gap-5 sm:grid-cols-3">
               <Field label="Etiqueta editorial" hint='Ej: "Colección 2025"'>
@@ -869,6 +880,92 @@ function InfoBox({ children, color = 'slate' }: { children: React.ReactNode; col
     blue:  'bg-blue-50 border-blue-100 text-blue-700',
   }[color]
   return <div className={`rounded-xl border p-4 text-xs leading-relaxed ${cls}`}>{children}</div>
+}
+
+function ImageUploadField({ label, hint, value, onChange, storeId, aspect }: {
+  label: string; hint?: string; value: string; onChange: (v: string) => void
+  storeId: string; aspect?: string
+}) {
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setUploadError(null)
+    try {
+      const supabase = createClient()
+      const ext = file.name.split('.').pop()
+      const path = `${storeId}/config/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const { error } = await supabase.storage.from('products').upload(path, file, { upsert: true })
+      if (error) throw error
+      const { data } = supabase.storage.from('products').getPublicUrl(path)
+      onChange(data.publicUrl)
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : 'Error al subir')
+    } finally {
+      setUploading(false)
+      if (fileRef.current) fileRef.current.value = ''
+    }
+  }
+
+  return (
+    <div>
+      <label className="mb-1.5 block text-xs font-semibold text-slate-600">{label}</label>
+      {hint && <p className="mb-2 text-xs text-slate-400">{hint}</p>}
+
+      {/* Preview */}
+      {value && (
+        <div className="mb-3 relative group inline-block">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={value}
+            alt={label}
+            className="rounded-xl border border-slate-200 object-contain bg-slate-50"
+            style={{ maxHeight: '120px', maxWidth: '100%', aspectRatio: aspect }}
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+          />
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-slate-500 text-white text-[10px] hover:bg-red-500 transition-colors"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Upload + URL row */}
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="https://... o subí un archivo →"
+          className="flex-1 min-w-0 rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-900 bg-white outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-200 placeholder:text-slate-300"
+        />
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={uploading}
+          className="shrink-0 flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:border-slate-400 hover:bg-slate-50 transition-colors disabled:opacity-50"
+        >
+          {uploading ? (
+            <span className="h-3 w-3 animate-spin rounded-full border-2 border-slate-400 border-t-transparent" />
+          ) : (
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          )}
+          {uploading ? 'Subiendo...' : 'Subir'}
+        </button>
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      </div>
+      {uploadError && <p className="mt-1 text-xs text-red-500">{uploadError}</p>}
+    </div>
+  )
 }
 
 function IntegField({ label, hint, configured, currentValue, value, onChange }: {
