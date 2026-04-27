@@ -71,7 +71,7 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
               src={store.hero_image_url ?? store.logo_url!}
               alt={store.name}
               className="mb-10 w-auto object-contain"
-              style={{ maxHeight: '120px', maxWidth: '280px' }}
+              style={{ maxHeight: '200px', maxWidth: '420px' }}
             />
           )}
 
