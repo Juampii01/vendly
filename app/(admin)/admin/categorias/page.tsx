@@ -16,5 +16,5 @@ export default async function CategoriasPage() {
     .order('position', { ascending: true })
     .order('created_at', { ascending: true })
 
-  return <CategoriasClient initialCategories={categories ?? []} />
+  return <CategoriasClient initialCategories={categories ?? []} storeId={storeId} />
 }

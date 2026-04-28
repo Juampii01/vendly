@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import type { Category } from '@/types'
 
 interface CategoryWithCount extends Category {
@@ -9,9 +10,10 @@ interface CategoryWithCount extends Category {
 
 interface Props {
   initialCategories: CategoryWithCount[]
+  storeId: string
 }
 
-export function CategoriasClient({ initialCategories }: Props) {
+export function CategoriasClient({ initialCategories, storeId }: Props) {
   const [categories, setCategories] = useState(initialCategories)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -22,6 +24,9 @@ export function CategoriasClient({ initialCategories }: Props) {
   const [imageUrl, setImageUrl] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   function productCount(cat: CategoryWithCount) {
     return cat.products?.[0]?.count ?? 0
@@ -82,6 +87,27 @@ export function CategoriasClient({ initialCategories }: Props) {
       setError(e instanceof Error ? e.message : 'Error al guardar')
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setUploadError(null)
+    try {
+      const supabase = createClient()
+      const ext = file.name.split('.').pop()
+      const path = `${storeId}/categories/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const { error: upErr } = await supabase.storage.from('products').upload(path, file, { upsert: true })
+      if (upErr) throw upErr
+      const { data } = supabase.storage.from('products').getPublicUrl(path)
+      setImageUrl(data.publicUrl)
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : 'Error al subir')
+    } finally {
+      setUploading(false)
+      if (fileRef.current) fileRef.current.value = ''
     }
   }
 
@@ -199,19 +225,46 @@ export function CategoriasClient({ initialCategories }: Props) {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                  Imagen <span className="text-slate-400 font-normal normal-case">(URL, opcional)</span>
+                  Imagen <span className="text-slate-400 font-normal normal-case">(opcional)</span>
                 </label>
-                <input
-                  type="url"
-                  value={imageUrl}
-                  onChange={e => setImageUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400"
-                />
+
+                {/* Preview */}
                 {imageUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={imageUrl} alt="" className="mt-2 h-16 w-24 rounded-lg object-cover border border-slate-200" />
+                  <div className="relative inline-block mb-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={imageUrl} alt="" className="h-24 w-32 rounded-xl object-cover border border-slate-200 bg-slate-50" />
+                    <button
+                      type="button"
+                      onClick={() => setImageUrl('')}
+                      className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-slate-500 text-white text-[10px] hover:bg-red-500 transition-colors"
+                    >✕</button>
+                  </div>
                 )}
+
+                {/* Upload + URL row */}
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={imageUrl}
+                    onChange={e => { setImageUrl(e.target.value); setUploadError(null) }}
+                    placeholder="https://... o subí un archivo →"
+                    className="flex-1 min-w-0 rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 placeholder:text-slate-300"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    disabled={uploading}
+                    className="shrink-0 flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:border-slate-400 hover:bg-slate-50 transition-colors disabled:opacity-50"
+                  >
+                    {uploading
+                      ? <span className="h-3 w-3 animate-spin rounded-full border-2 border-slate-400 border-t-transparent" />
+                      : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    }
+                    {uploading ? 'Subiendo...' : 'Subir'}
+                  </button>
+                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                </div>
+                {uploadError && <p className="mt-1 text-xs text-red-500">{uploadError}</p>}
               </div>
 
               {error && <p className="text-xs text-red-500 font-medium">{error}</p>}
