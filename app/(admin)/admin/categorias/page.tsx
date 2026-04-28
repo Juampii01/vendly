@@ -11,7 +11,7 @@ export default async function CategoriasPage() {
 
   const { data: categories } = await service
     .from('categories')
-    .select('*, products(count)')
+    .select('*, products(images)')
     .eq('store_id', storeId)
     .order('position', { ascending: true })
     .order('created_at', { ascending: true })

@@ -147,14 +147,16 @@ export function ModoHomePage({ store, products, categories, featured }: Props) {
           {/* Cards grandes — 2 primeras categorías con imagen */}
           {categories.length >= 2 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {categories.slice(0, 2).map((cat) => (
+              {categories.slice(0, 2).map((cat) => {
+                const catSrc = cat.image_url || cat.products?.find(p => p.images?.[0])?.images?.[0] || null
+                return (
                 <Link key={cat.id}
                   href={`/productos?categoria=${cat.slug}`}
                   className="group relative h-80 md:h-[480px] overflow-hidden block"
                   style={{ backgroundColor: '#e8e2da' }}>
-                  {cat.image_url && (
+                  {catSrc && (
                     <Image
-                      src={cat.image_url}
+                      src={catSrc}
                       alt={cat.name}
                       fill
                       sizes="(max-width: 768px) 100vw, 50vw"
@@ -171,20 +173,23 @@ export function ModoHomePage({ store, products, categories, featured }: Props) {
                     </span>
                   </div>
                 </Link>
-              ))}
+                )
+              })}
             </div>
           )}
 
           {/* Categorías adicionales — fila horizontal */}
           {categories.length > 2 && (
             <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-              {categories.slice(2, 6).map((cat) => (
+              {categories.slice(2, 6).map((cat) => {
+                const catSrc = cat.image_url || cat.products?.find(p => p.images?.[0])?.images?.[0] || null
+                return (
                 <Link key={cat.id}
                   href={`/productos?categoria=${cat.slug}`}
                   className="group relative h-40 overflow-hidden block"
                   style={{ backgroundColor: '#e8e2da' }}>
-                  {cat.image_url && (
-                    <Image src={cat.image_url} alt={cat.name} fill
+                  {catSrc && (
+                    <Image src={catSrc} alt={cat.name} fill
                       sizes="25vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                   )}
                   <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
@@ -192,7 +197,8 @@ export function ModoHomePage({ store, products, categories, featured }: Props) {
                     <p className="text-sm font-black uppercase text-white tracking-tight">{cat.name}</p>
                   </div>
                 </Link>
-              ))}
+                )
+              })}
             </div>
           )}
         </section>

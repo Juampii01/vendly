@@ -96,6 +96,8 @@ export interface Category {
   position: number
   is_active: boolean
   created_at: string
+  // Populated when fetching with product images fallback
+  products?: { images: string[] | null }[]
 }
 
 // ─── Product ─────────────────────────────────────────────────────────────────

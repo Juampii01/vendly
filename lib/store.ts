@@ -39,7 +39,7 @@ const _fetchCategories = unstable_cache(
     const supabase = createServiceClient()
     const { data } = await supabase
       .from('categories')
-      .select('*')
+      .select('*, products(images)')
       .eq('store_id', storeId)
       .eq('is_active', true)
       .order('position', { ascending: true })

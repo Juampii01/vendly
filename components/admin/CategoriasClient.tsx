@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { Category } from '@/types'
 
 interface CategoryWithCount extends Category {
-  products: { count: number }[]
+  products: { images: string[] | null }[]
 }
 
 interface Props {
@@ -29,7 +29,15 @@ export function CategoriasClient({ initialCategories, storeId }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
 
   function productCount(cat: CategoryWithCount) {
-    return cat.products?.[0]?.count ?? 0
+    return cat.products?.length ?? 0
+  }
+
+  function productFallbackImage(cat: CategoryWithCount): string | null {
+    // Pick the first image from any product in this category
+    for (const p of cat.products ?? []) {
+      if (p.images?.[0]) return p.images[0]
+    }
+    return null
   }
 
   function openNew() {
@@ -332,15 +340,20 @@ export function CategoriasClient({ initialCategories, storeId }: Props) {
                 </div>
 
                 {/* Imagen */}
-                <div className="h-10 w-10 shrink-0 rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
-                  {cat.image_url
-                    // eslint-disable-next-line @next/next/no-img-element
-                    ? <img src={cat.image_url} alt={cat.name} className="h-full w-full object-cover" />
-                    : <div className="h-full w-full flex items-center justify-center text-slate-300 text-xs font-bold">
-                        {cat.name.charAt(0).toUpperCase()}
-                      </div>
-                  }
-                </div>
+                {(() => {
+                  const src = cat.image_url || productFallbackImage(cat)
+                  return (
+                    <div className="h-10 w-10 shrink-0 rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
+                      {src
+                        // eslint-disable-next-line @next/next/no-img-element
+                        ? <img src={src} alt={cat.name} className="h-full w-full object-cover" />
+                        : <div className="h-full w-full flex items-center justify-center text-slate-300 text-xs font-bold">
+                            {cat.name.charAt(0).toUpperCase()}
+                          </div>
+                      }
+                    </div>
+                  )
+                })()}
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
