@@ -44,9 +44,9 @@ const FEATURES_BY_SITE_TYPE: Record<StoreConfig['site_type'], SiteFeatures> = {
     hasProductCatalog: true,
     hasUserAccount: true,
   },
-  // ── Concesionaria — consultas por WhatsApp, sin cuenta ni checkout real ──
+  // ── Concesionaria — todo va por WhatsApp, sin carrito ni cuenta ───────────
   dealership: {
-    hasCart: true,
+    hasCart: false,
     hasCheckout: false,
     hasWhatsappCTA: true,
     hasProductCatalog: true,

@@ -88,7 +88,6 @@ export default async function ProductosPage({ searchParams }: PageProps) {
         page={page}
         totalPages={totalPages}
         params={params}
-        features={features}
       />
     )
   }
@@ -170,7 +169,7 @@ export default async function ProductosPage({ searchParams }: PageProps) {
                       : store.site_type === 'athletic'
                       ? <AthleticProductCard product={product} store={store} />
                       : store.site_type === 'dealership'
-                      ? <DealershipProductCard product={product} store={store} features={features} />
+                      ? <DealershipProductCard product={product} store={store} />
                       : store.site_type === 'libreria'
                       ? <LibreriaProductCard product={product} store={store} />
                       : <ProductCard product={product} store={store} />
