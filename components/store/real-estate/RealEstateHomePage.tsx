@@ -123,33 +123,31 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
           </div>
         </div>
 
-        {/* ── Lado derecho: panel rojo con nombre en grande ── */}
-        <div
-          className="relative flex flex-col items-center justify-center px-10 py-16 min-h-[50vh] md:min-h-0 overflow-hidden"
-          style={{ backgroundColor: ACCENT }}
-        >
-          {/* Patrón geométrico sutil */}
-          <div className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage: 'repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 50%)',
-              backgroundSize: '20px 20px',
-            }}
+        {/* ── Lado derecho: foto del local ── */}
+        <div className="relative min-h-[50vh] md:min-h-0 overflow-hidden">
+          {/* Foto del local */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://qcfhxhokryjvaejgbjpw.supabase.co/storage/v1/object/public/products/acosta/frente-local.jpeg"
+            alt="Oficina Acosta Bienes Raíces"
+            className="absolute inset-0 w-full h-full object-cover object-center"
           />
-          {/* Nombre del store en grande */}
-          <div className="relative z-10 text-center select-none">
-            <p
-              className="font-black uppercase text-white leading-none tracking-tight opacity-20"
-              style={{ fontSize: 'clamp(5rem, 12vw, 11rem)', letterSpacing: '-0.04em' }}
-            >
-              {store.name.split(' ')[0]}
-            </p>
-            <div className="mt-6 flex items-center justify-center gap-4">
-              <div className="w-12 h-px bg-white/40" />
-              <p className="text-[11px] font-black uppercase tracking-[0.4em] text-white/70">
-                Los Toldos · Buenos Aires
+          {/* Overlay degradado de color para mantener la marca */}
+          <div
+            className="absolute inset-0"
+            style={{ background: `linear-gradient(135deg, ${ACCENT}cc 0%, ${ACCENT}55 60%, transparent 100%)` }}
+          />
+          {/* Texto inferior */}
+          <div className="absolute bottom-8 left-8 right-8 z-10">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-px bg-white/60" />
+              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/80">
+                Lamadrid 182 · Los Toldos
               </p>
-              <div className="w-12 h-px bg-white/40" />
             </div>
+            <p className="text-white font-black text-2xl md:text-3xl uppercase tracking-tight leading-tight drop-shadow-lg">
+              Nuestra oficina
+            </p>
           </div>
         </div>
       </section>
