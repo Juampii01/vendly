@@ -132,20 +132,14 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
             alt="Oficina Acosta Bienes Raíces"
             className="absolute inset-0 w-full h-full object-cover object-center"
           />
-          {/* Overlay degradado de color para mantener la marca */}
-          <div
-            className="absolute inset-0"
-            style={{ background: `linear-gradient(135deg, ${ACCENT}cc 0%, ${ACCENT}55 60%, transparent 100%)` }}
-          />
+          {/* Overlay sutil — solo oscurece el fondo para legibilidad */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
           {/* Texto inferior */}
-          <div className="absolute bottom-8 left-8 right-8 z-10">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-px bg-white/60" />
-              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/80">
-                Lamadrid 182 · Los Toldos
-              </p>
-            </div>
-            <p className="text-white font-black text-2xl md:text-3xl uppercase tracking-tight leading-tight drop-shadow-lg">
+          <div className="absolute bottom-8 left-8 z-10">
+            <p className="text-[9px] font-semibold uppercase tracking-[0.35em] text-white/50 mb-1">
+              Lamadrid 182 · Los Toldos
+            </p>
+            <p className="text-white font-light text-lg tracking-widest uppercase">
               Nuestra oficina
             </p>
           </div>
