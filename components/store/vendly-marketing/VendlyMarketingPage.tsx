@@ -205,56 +205,195 @@ export function VendlyMarketingPage() {
           </button>
         </div>
 
-        {/* Dashboard mockup */}
-        <div className="relative w-full max-w-5xl mx-auto">
-          <div className="absolute inset-0 rounded-2xl blur-3xl opacity-30"
-            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }} />
-          <div className="relative rounded-2xl overflow-hidden border"
-            style={{ borderColor: 'rgba(255,255,255,0.1)', backgroundColor: '#0d0d14' }}>
-            {/* Browser chrome */}
-            <div className="flex items-center gap-2 px-4 h-10 border-b"
-              style={{ borderColor: 'rgba(255,255,255,0.06)', backgroundColor: '#0a0a10' }}>
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-red-500/60" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
-                <div className="w-3 h-3 rounded-full bg-green-500/60" />
-              </div>
-              <div className="flex-1 mx-4">
-                <div className="max-w-xs mx-auto h-5 rounded-md flex items-center px-3 text-[10px]"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' }}>
-                  minegocio.com
-                </div>
-              </div>
-            </div>
-            {/* Store preview */}
-            <div className="aspect-video relative overflow-hidden" style={{ backgroundColor: '#0d0d14' }}>
-              <Image
-                src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80"
-                alt="Store preview"
-                fill
-                className="object-cover object-top opacity-60"
-              />
-              <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, #0d0d14 100%)' }} />
-              {/* Overlay UI elements */}
-              <div className="absolute top-4 left-0 right-0 flex justify-center">
-                <div className="px-6 h-12 rounded-full flex items-center gap-8"
-                  style={{ backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <span className="font-black text-sm tracking-[0.2em]">MODO</span>
-                  <div className="flex gap-4 text-xs text-white/60">
-                    <span>Remeras</span><span>Pantalones</span><span>Vestidos</span>
-                  </div>
-                  <div className="w-5 h-5 relative">
-                    <span className="text-white/80 text-sm">🛒</span>
-                  </div>
-                </div>
-              </div>
-              <div className="absolute bottom-8 left-8">
-                <div className="text-4xl font-black uppercase text-white mb-2">VESTITE CON<br/>INTENCIÓN</div>
-                <div className="px-4 py-2 text-xs font-bold uppercase rounded inline-block"
-                  style={{ backgroundColor: '#6366f1' }}>Explorar →</div>
+        {/* ── Hero mockup ──────────────────────────────────────────────── */}
+        <div className="relative w-full max-w-5xl mx-auto mt-4">
+
+          {/* Glow aura */}
+          <div className="absolute -inset-8 rounded-3xl blur-3xl opacity-25 pointer-events-none"
+            style={{ background: 'radial-gradient(ellipse at center, #6366f1 0%, #8b5cf6 40%, transparent 70%)' }} />
+
+          {/* Floating stat — left */}
+          <div className="absolute -left-4 top-1/4 z-10 hidden lg:block">
+            <div className="px-4 py-3 rounded-xl shadow-2xl border"
+              style={{ backgroundColor: '#0d0d18', borderColor: 'rgba(255,255,255,0.09)', minWidth: '148px' }}>
+              <p className="text-[9px] uppercase tracking-wider mb-1" style={{ color: 'rgba(255,255,255,0.38)' }}>Visitas hoy</p>
+              <p className="text-2xl font-black text-white leading-none">1.247</p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="text-[10px] font-bold" style={{ color: '#22c55e' }}>↑ 23%</span>
+                <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.3)' }}>vs ayer</span>
               </div>
             </div>
           </div>
+
+          {/* Floating stat — right */}
+          <div className="absolute -right-4 top-1/3 z-10 hidden lg:block">
+            <div className="px-4 py-3 rounded-xl shadow-2xl border"
+              style={{ backgroundColor: '#0d0d18', borderColor: 'rgba(255,255,255,0.09)', minWidth: '148px' }}>
+              <p className="text-[9px] uppercase tracking-wider mb-1" style={{ color: 'rgba(255,255,255,0.38)' }}>Consultas / mes</p>
+              <p className="text-2xl font-black text-white leading-none">84</p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="text-[10px] font-bold" style={{ color: '#6366f1' }}>WhatsApp</span>
+                <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.3)' }}>+ Email</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Floating notification — bottom left */}
+          <div className="absolute -left-2 bottom-10 z-10 hidden lg:flex items-center gap-3 px-4 py-2.5 rounded-xl border shadow-2xl"
+            style={{ backgroundColor: '#0d0d18', borderColor: 'rgba(34,197,94,0.25)' }}>
+            <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+              style={{ backgroundColor: 'rgba(34,197,94,0.15)' }}>
+              <svg width="13" height="13" fill="none" stroke="#22c55e" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.8 19.8 0 01-8.63-3.07A19.5 19.5 0 014.69 11.9 19.8 19.8 0 011.62 3.3 2 2 0 013.61 1.1h3a2 2 0 012 1.72 12.8 12.8 0 00.7 2.81 2 2 0 01-.45 2.11L7.91 8.73a16 16 0 006.29 6.29l.89-.97a2 2 0 012.11-.45 12.8 12.8 0 002.81.7A2 2 0 0122 16.92z"/>
+              </svg>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-white">Nueva consulta vía WhatsApp</p>
+              <p className="text-[9px]" style={{ color: 'rgba(255,255,255,0.4)' }}>hace 2 minutos</p>
+            </div>
+          </div>
+
+          {/* Browser frame */}
+          <div className="relative rounded-2xl overflow-hidden border shadow-2xl"
+            style={{ borderColor: 'rgba(255,255,255,0.08)', backgroundColor: '#07070e' }}>
+
+            {/* Chrome bar */}
+            <div className="flex items-center gap-3 px-4 h-10 border-b"
+              style={{ borderColor: 'rgba(255,255,255,0.05)', backgroundColor: '#040408' }}>
+              <div className="flex gap-1.5 shrink-0">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ff5f57' }} />
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#febc2e' }} />
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#28c840' }} />
+              </div>
+              {/* Tabs */}
+              <div className="flex items-center gap-1 ml-2 shrink-0">
+                <div className="flex items-center gap-1.5 h-7 px-3 rounded-t text-[9px] font-medium"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)' }}>
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#D4A847', opacity: 0.8 }} />
+                  peugeot — Concesionaria
+                </div>
+              </div>
+              {/* URL */}
+              <div className="flex-1 flex justify-center">
+                <div className="flex items-center gap-2 h-6 px-3 rounded text-[9px] w-56"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.3)' }}>
+                  <svg width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                  </svg>
+                  ona-store.vendly-mod.space
+                </div>
+              </div>
+            </div>
+
+            {/* Store content — simulated Peugeot page */}
+            <div className="relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
+
+              {/* BG photo */}
+              <Image
+                src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1400&q=80"
+                alt="Peugeot store preview" fill priority
+                className="object-cover object-center"
+                style={{ opacity: 0.4 }}
+              />
+              {/* Cinematic overlay */}
+              <div className="absolute inset-0"
+                style={{ background: 'linear-gradient(115deg, rgba(3,3,8,0.97) 0%, rgba(3,3,8,0.65) 45%, rgba(3,3,8,0.15) 100%)' }} />
+              <div className="absolute inset-0"
+                style={{ background: 'linear-gradient(to top, rgba(3,3,8,0.9) 0%, transparent 50%)' }} />
+
+              {/* Accent left column */}
+              <div className="absolute left-0 top-0 bottom-0 w-[2px]"
+                style={{ background: 'linear-gradient(to bottom, transparent, #D4A847 30%, #D4A847 70%, transparent)' }} />
+
+              {/* Simulated navbar */}
+              <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-6 h-12 border-b"
+                style={{ borderColor: 'rgba(255,255,255,0.07)', backgroundColor: 'rgba(255,255,255,0.97)' }}>
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <div className="w-0.5 h-6 rounded-full" style={{ backgroundColor: '#D4A847' }} />
+                    <span className="font-black text-slate-900 text-[10px] tracking-[0.08em] uppercase">PEUGEOT</span>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">
+                    <span>Modelos</span>
+                    <span>0 km</span>
+                    <span>Usados</span>
+                  </div>
+                </div>
+                <div className="px-4 py-1.5 text-[8px] font-black uppercase tracking-wider text-white"
+                  style={{ backgroundColor: '#D4A847' }}>
+                  Test Drive
+                </div>
+              </div>
+
+              {/* Hero content */}
+              <div className="absolute inset-0 flex flex-col justify-end px-6 pb-5 pt-14">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-px" style={{ backgroundColor: '#D4A847' }} />
+                  <span className="text-[7px] font-black uppercase tracking-[0.4em]" style={{ color: '#D4A847' }}>
+                    Concesionaria Oficial
+                  </span>
+                </div>
+                <h2 className="font-black uppercase text-white leading-[0.88] mb-4"
+                  style={{ fontSize: 'clamp(1.2rem, 3.5vw, 2.8rem)', letterSpacing: '-0.04em' }}>
+                  MANEJÁ EL<br/>FUTURO HOY
+                </h2>
+
+                {/* Vehicle cards row */}
+                <div className="flex gap-2">
+                  {[
+                    { name: 'Peugeot 208', tag: '0 KM', price: '$28.500.000' },
+                    { name: 'Peugeot 3008', tag: 'SUV', price: '$45.200.000' },
+                    { name: 'Peugeot 408', tag: '0 KM', price: '$52.800.000' },
+                  ].map(card => (
+                    <div key={card.name} className="flex-1 min-w-0 overflow-hidden border"
+                      style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.07)' }}>
+                      <div className="relative overflow-hidden" style={{ aspectRatio: '16/9', backgroundColor: 'rgba(255,255,255,0.03)' }}>
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ backgroundColor: '#D4A847' }} />
+                      </div>
+                      <div className="p-1.5">
+                        <p className="text-[7px] font-black text-white leading-none">{card.name}</p>
+                        <p className="text-[6px] font-black uppercase tracking-wider mt-0.5" style={{ color: '#D4A847' }}>{card.tag}</p>
+                        <p className="text-[7px] font-bold text-white mt-1">{card.price}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile mockup — overlapping corner */}
+          <div className="absolute -bottom-5 -right-3 md:-right-8 z-10 hidden sm:block w-16 md:w-24 rounded-2xl overflow-hidden border shadow-2xl"
+            style={{ borderColor: 'rgba(255,255,255,0.1)', backgroundColor: '#07070e' }}>
+            {/* Notch */}
+            <div className="h-3 flex items-center justify-center" style={{ backgroundColor: '#040408' }}>
+              <div className="w-8 h-1 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }} />
+            </div>
+            <div className="relative" style={{ aspectRatio: '9/18' }}>
+              <Image
+                src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&q=70"
+                alt="Mobile preview" fill
+                className="object-cover"
+                style={{ opacity: 0.35 }}
+              />
+              <div className="absolute inset-0"
+                style={{ background: 'linear-gradient(to bottom, rgba(3,3,8,0.85), rgba(3,3,8,0.4) 40%, rgba(3,3,8,0.92))' }} />
+              <div className="absolute inset-0 flex flex-col justify-center items-center gap-1">
+                <div className="w-6 h-px" style={{ backgroundColor: '#D4A847' }} />
+                <p className="text-white font-black uppercase text-[6px] tracking-wider">PEUGEOT</p>
+              </div>
+              <div className="absolute bottom-2 left-0 right-0 flex flex-col gap-1 px-1.5">
+                {['208', '3008', '408'].map(m => (
+                  <div key={m} className="h-3 rounded-sm flex items-center px-1 gap-1"
+                    style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div className="w-1 h-1 rounded-full" style={{ backgroundColor: '#D4A847' }} />
+                    <span className="text-[5px] text-white/60 font-bold">Peugeot {m}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
 
