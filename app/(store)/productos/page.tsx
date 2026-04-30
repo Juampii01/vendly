@@ -6,6 +6,7 @@ import { AthleticProductCard } from '@/components/store/athletic/AthleticProduct
 import { DealershipProductCard } from '@/components/store/dealership/DealershipProductCard'
 import { LibreriaProductCard } from '@/components/store/libreria/LibreriaProductCard'
 import { RealEstateProductsPage } from '@/components/store/real-estate/RealEstateProductsPage'
+import { ModoProductsPage } from '@/components/store/modo/ModoProductsPage'
 import { FilterSidebar } from '@/components/store/FilterSidebar'
 import { SearchInput } from '@/components/store/SearchInput'
 import { FadeUp, StaggerGrid, StaggerItem } from '@/components/store/motion'
@@ -45,10 +46,24 @@ export default async function ProductosPage({ searchParams }: PageProps) {
   const features = getSiteFeatures(store.site_type)
   const totalPages = Math.ceil(total / PER_PAGE)
 
-  // Real-estate has its own full-page layout with header/footer
+  // Templates with their own full-page layout (header + footer included)
   if (store.site_type === 'real-estate') {
     return (
       <RealEstateProductsPage
+        store={store}
+        categories={categories}
+        products={products}
+        total={total}
+        page={page}
+        totalPages={totalPages}
+        params={params}
+      />
+    )
+  }
+
+  if (store.site_type === 'modo') {
+    return (
+      <ModoProductsPage
         store={store}
         categories={categories}
         products={products}
