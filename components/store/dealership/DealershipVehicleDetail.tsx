@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/format'
+import { DealershipProductCard } from './DealershipProductCard'
 import type { StoreConfig, Product } from '@/types'
 
 interface Props {
@@ -339,5 +340,3 @@ export function DealershipVehicleDetail({ store, product, related }: Props) {
   )
 }
 
-// Import inside module to avoid circular dependency
-import { DealershipProductCard } from './DealershipProductCard'
