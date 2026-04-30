@@ -104,23 +104,37 @@ export function ModoHomePage({ store, products, categories, featured }: Props) {
       {/* ══════════════════════════════════════════════════════════
           CARRUSEL DE IMÁGENES — scroll horizontal
       ══════════════════════════════════════════════════════════ */}
-      <section className="py-10 overflow-hidden" style={{ backgroundColor: '#f5f0ea' }}>
+      <section className="py-10 overflow-hidden" style={{ backgroundColor: '#f0ebe3' }}>
         <style>{`
           @keyframes modo-slide {
             0%   { transform: translateX(0); }
             100% { transform: translateX(-50%); }
           }
-          .modo-carousel { display:flex; width:max-content; animation: modo-slide 30s linear infinite; }
+          .modo-carousel { display:flex; width:max-content; animation: modo-slide 36s linear infinite; gap: 10px; }
           .modo-carousel:hover { animation-play-state: paused; }
         `}</style>
-        <div className="modo-carousel gap-3">
+        <div className="modo-carousel">
           {[...CAROUSEL_IMGS, ...CAROUSEL_IMGS].map((src, i) => (
-            <div key={i} className="relative shrink-0 h-64 w-48 overflow-hidden">
-              <Image src={src} alt="" fill sizes="192px" className="object-cover" />
+            <div key={i} className="relative shrink-0 h-72 w-52 overflow-hidden">
+              <Image src={src} alt="" fill sizes="208px" className="object-cover" />
             </div>
           ))}
         </div>
       </section>
+
+      {/* ── Marquee texto editorial ── */}
+      <div className="overflow-hidden border-y py-3.5" style={{ borderColor: 'rgba(10,10,10,0.07)' }}>
+        <style>{`
+          @keyframes modo-text-slide { 0% { transform:translateX(0); } 100% { transform:translateX(-50%); } }
+          .modo-text-ticker { display:inline-block; white-space:nowrap; animation: modo-text-slide 22s linear infinite; }
+        `}</style>
+        <div className="modo-text-ticker text-[10px] font-bold uppercase tracking-[0.35em] select-none"
+          style={{ color: 'rgba(10,10,10,0.22)' }}>
+          {Array(8).fill(null).map((_, i) => (
+            <span key={i}>Nueva colección &nbsp;·&nbsp; Edición limitada &nbsp;·&nbsp; Hecho para vos &nbsp;·&nbsp; </span>
+          ))}
+        </div>
+      </div>
 
       {/* ══════════════════════════════════════════════════════════
           CATEGORÍAS — chips horizontales + cards grandes
@@ -236,32 +250,58 @@ export function ModoHomePage({ store, products, categories, featured }: Props) {
       )}
 
       {/* ══════════════════════════════════════════════════════════
-          PRODUCTOS DESTACADOS — 3 columnas, tarjetas limpias
+          PRODUCTOS DESTACADOS — layout editorial asimétrico
       ══════════════════════════════════════════════════════════ */}
       {featured.length > 0 && (
-        <section className="px-6 py-16 md:px-12 md:py-20">
-          <div className="mb-10 flex items-end justify-between">
+        <section className="px-6 py-16 md:px-12 md:py-24">
+          {/* Header de sección */}
+          <div className="mb-12 flex items-end justify-between border-b pb-6" style={{ borderColor: 'rgba(10,10,10,0.08)' }}>
             <div>
-              <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.35em] opacity-40"
+              <p className="mb-2 text-[9px] font-black uppercase tracking-[0.5em] opacity-25"
                 style={{ color: store.color_text }}>
-                Selección
+                Selección editorial
               </p>
-              <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight"
+              <h2 className="text-[clamp(2rem,5vw,3.5rem)] font-black uppercase leading-[0.92] tracking-tight"
                 style={{ color: store.color_text }}>
                 Destacados
               </h2>
             </div>
-            <Link href="/productos"
-              className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40 hover:opacity-100 transition-opacity"
+            <Link href="/productos?featured=true"
+              className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] opacity-35 hover:opacity-100 transition-opacity group"
               style={{ color: store.color_text }}>
-              Ver todo →
+              <span>Ver todo</span>
+              <span className="transition-transform group-hover:translate-x-0.5">→</span>
             </Link>
           </div>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {featured.slice(0, 8).map((p) => (
-              <ModoProductCard key={p.id} product={p} store={store} />
-            ))}
-          </div>
+
+          {/* Grid: primer producto grande, resto normales */}
+          {featured.length >= 3 ? (
+            <div className="grid grid-cols-2 md:grid-cols-12 gap-5">
+              {/* Card grande */}
+              <div className="col-span-2 md:col-span-5">
+                <ModoProductCard product={featured[0]} store={store} variant="portrait" />
+              </div>
+              {/* 2 cards medianas apiladas */}
+              <div className="col-span-1 md:col-span-3 flex flex-col gap-5">
+                <ModoProductCard product={featured[1]} store={store} />
+                {featured[2] && <ModoProductCard product={featured[2]} store={store} />}
+              </div>
+              {/* Resto en columna */}
+              {featured.slice(3, 7).length > 0 && (
+                <div className="col-span-2 md:col-span-4 grid grid-cols-2 gap-5 content-start">
+                  {featured.slice(3, 7).map(p => (
+                    <ModoProductCard key={p.id} product={p} store={store} />
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
+              {featured.slice(0, 8).map((p) => (
+                <ModoProductCard key={p.id} product={p} store={store} />
+              ))}
+            </div>
+          )}
         </section>
       )}
 
@@ -299,41 +339,66 @@ export function ModoHomePage({ store, products, categories, featured }: Props) {
       )}
 
       {/* ══════════════════════════════════════════════════════════
-          NEWSLETTER — minimal, centrado
+          NEWSLETTER — full bleed editorial
       ══════════════════════════════════════════════════════════ */}
-      <section className="px-6 py-24 md:px-12 text-center"
-        style={{ backgroundColor: store.color_text }}>
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.4em] opacity-30"
-          style={{ color: store.color_background }}>
-          Comunidad
-        </p>
-        <h2 className="mb-4 text-3xl md:text-4xl font-black uppercase tracking-tight"
-          style={{ color: store.color_background }}>
-          Suscribite
-        </h2>
-        <p className="mb-8 text-sm opacity-40 max-w-xs mx-auto" style={{ color: store.color_background }}>
-          Novedades y lanzamientos antes que nadie. Sin spam.
-        </p>
-        <div className="max-w-sm mx-auto">
-          <NewsletterForm store={store} dark />
+      <section
+        className="relative overflow-hidden px-6 py-28 md:px-12 text-center"
+        style={{ backgroundColor: store.color_text }}
+      >
+        {/* Decorative large letter */}
+        <span
+          className="pointer-events-none absolute inset-0 flex items-center justify-center text-[30vw] font-black uppercase leading-none select-none opacity-[0.03]"
+          style={{ color: store.color_background }}
+          aria-hidden
+        >
+          M
+        </span>
+        <div className="relative z-10">
+          <p className="mb-3 text-[9px] font-black uppercase tracking-[0.6em] opacity-30"
+            style={{ color: store.color_background }}>
+            Comunidad
+          </p>
+          <h2
+            className="mb-4 font-black uppercase leading-[0.9] tracking-tight"
+            style={{ color: store.color_background, fontSize: 'clamp(2.5rem, 6vw, 5rem)' }}
+          >
+            Stay<br />in the loop
+          </h2>
+          <p className="mb-10 text-xs opacity-35 max-w-xs mx-auto leading-relaxed" style={{ color: store.color_background }}>
+            Lanzamientos, lookbooks y ofertas antes que nadie. Cero spam.
+          </p>
+          <div className="max-w-sm mx-auto">
+            <NewsletterForm store={store} dark />
+          </div>
         </div>
       </section>
 
       {/* ══════════════════════════════════════════════════════════
-          TRUST — 3 íconos horizontales
+          TRUST — barra horizontal clean
       ══════════════════════════════════════════════════════════ */}
-      <section className="px-6 py-12 md:px-12 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center max-w-3xl mx-auto">
-        {[
-          { icon: '⚡', title: 'Envío express', desc: 'Recibís en 24–48 hs' },
-          { icon: '↺', title: 'Cambios gratis', desc: '30 días sin costo' },
-          { icon: '🔒', title: 'Pago 100% seguro', desc: 'Por MercadoPago' },
-        ].map((item) => (
-          <div key={item.title} className="flex flex-col items-center gap-2">
-            <span className="text-3xl">{item.icon}</span>
-            <p className="text-xs font-black uppercase tracking-wide" style={{ color: store.color_text }}>{item.title}</p>
-            <p className="text-xs opacity-40" style={{ color: store.color_text }}>{item.desc}</p>
-          </div>
-        ))}
+      <section className="border-t" style={{ borderColor: 'rgba(10,10,10,0.07)' }}>
+        <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x"
+          style={{ divideColor: 'rgba(10,10,10,0.07)' } as React.CSSProperties}>
+          {[
+            { num: '01', title: 'Envío express', desc: 'Recibís en 24–48 hs a todo el país' },
+            { num: '02', title: 'Cambios gratis', desc: '30 días para cambiar sin preguntas' },
+            { num: '03', title: 'Pago seguro', desc: 'Tarjeta, transferencia o MercadoPago' },
+          ].map((item) => (
+            <div key={item.num} className="flex items-start gap-4 px-8 py-8">
+              <span className="text-[10px] font-black opacity-20 mt-0.5 shrink-0" style={{ color: store.color_text }}>
+                {item.num}
+              </span>
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.12em] mb-1" style={{ color: store.color_text }}>
+                  {item.title}
+                </p>
+                <p className="text-xs opacity-40 leading-relaxed" style={{ color: store.color_text }}>
+                  {item.desc}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
     </div>
