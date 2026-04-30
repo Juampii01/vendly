@@ -11,6 +11,7 @@ import { LibreriaHomePage } from '@/components/store/libreria/LibreriaHomePage'
 import { VendlyMarketingPage } from '@/components/store/vendly-marketing/VendlyMarketingPage'
 import { RealEstateHomePage } from '@/components/store/real-estate/RealEstateHomePage'
 import { RestaurantHomePage } from '@/components/store/restaurant/RestaurantHomePage'
+import { GymHomePage } from '@/components/store/gym/GymHomePage'
 import { FadeUp, SlideLeft, SlideRight, StaggerGrid, StaggerItem } from '@/components/store/motion'
 import { formatPrice } from '@/lib/format'
 import { DEFAULT_SECTIONS } from '@/types'
@@ -55,6 +56,11 @@ export default async function HomePage() {
   // ── Template Modo ──────────────────────────────────────────────────────────
   if (store.site_type === 'modo') {
     return <ModoHomePage store={store} products={all} categories={categories} featured={featured} />
+  }
+
+  // ── Template Gym (athletic + label marker) ────────────────────────────────
+  if (store.site_type === 'athletic' && store.home_editorial_label === 'gym') {
+    return <GymHomePage store={store} products={all} categories={categories} featured={featured} />
   }
 
   // ── Template Athletic (Adidas-style) ──────────────────────────────────────

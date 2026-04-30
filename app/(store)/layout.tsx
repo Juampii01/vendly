@@ -13,6 +13,8 @@ import { LibreriaHeader } from '@/components/store/libreria/LibreriaHeader'
 import { LibreriaFooter } from '@/components/store/libreria/LibreriaFooter'
 import { RestaurantHeader } from '@/components/store/restaurant/RestaurantHeader'
 import { RestaurantFooter } from '@/components/store/restaurant/RestaurantFooter'
+import { GymHeader } from '@/components/store/gym/GymHeader'
+import { GymFooter } from '@/components/store/gym/GymFooter'
 import { PageEnter } from '@/components/store/motion'
 import { getSiteFeatures } from '@/lib/site-features'
 import type { Metadata } from 'next'
@@ -34,7 +36,9 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   ])
   const userLoggedIn = Boolean(h.get('x-user-id'))
   const isModo = store.site_type === 'modo'
-  const isAthletic = store.site_type === 'athletic'
+  // gym uses athletic site_type + home_editorial_label === 'gym' as marker (until DB migration runs)
+  const isGym = store.site_type === 'athletic' && store.home_editorial_label === 'gym'
+  const isAthletic = store.site_type === 'athletic' && !isGym
   const isDealership = store.site_type === 'dealership'
   const isLibreria = store.site_type === 'libreria'
   const isRestaurant = store.site_type === 'restaurant'
@@ -76,6 +80,8 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         ? <LibreriaHeader store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
         : isRestaurant
         ? <RestaurantHeader store={store} categories={categories} features={features} />
+        : isGym
+        ? <GymHeader store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
         : <Header store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
       }
       <main className="flex-1">
@@ -91,6 +97,8 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         ? <LibreriaFooter store={store} categories={categories} />
         : isRestaurant
         ? <RestaurantFooter store={store} categories={categories} />
+        : isGym
+        ? <GymFooter store={store} categories={categories} />
         : <Footer store={store} categories={categories} features={features} />
       }
     </div>

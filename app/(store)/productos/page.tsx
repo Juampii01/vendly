@@ -8,6 +8,7 @@ import { LibreriaProductCard } from '@/components/store/libreria/LibreriaProduct
 import { RealEstateProductsPage } from '@/components/store/real-estate/RealEstateProductsPage'
 import { ModoProductsPage } from '@/components/store/modo/ModoProductsPage'
 import { RestaurantMenuPage } from '@/components/store/restaurant/RestaurantMenuPage'
+import { GymCatalogPage } from '@/components/store/gym/GymCatalogPage'
 import { FilterSidebar } from '@/components/store/FilterSidebar'
 import { SearchInput } from '@/components/store/SearchInput'
 import { FadeUp, StaggerGrid, StaggerItem } from '@/components/store/motion'
@@ -65,6 +66,20 @@ export default async function ProductosPage({ searchParams }: PageProps) {
   if (store.site_type === 'restaurant') {
     return (
       <RestaurantMenuPage
+        store={store}
+        categories={categories}
+        products={products}
+        total={total}
+        page={page}
+        totalPages={totalPages}
+        params={params}
+      />
+    )
+  }
+
+  if (store.site_type === 'athletic' && store.home_editorial_label === 'gym') {
+    return (
+      <GymCatalogPage
         store={store}
         categories={categories}
         products={products}
