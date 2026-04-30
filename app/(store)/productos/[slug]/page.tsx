@@ -5,6 +5,7 @@ import { ProductGallery } from '@/components/store/ProductGallery'
 import { AddToCartSection } from '@/components/store/AddToCartSection'
 import { ProductCard } from '@/components/store/ProductCard'
 import { RealEstatePropertyDetail } from '@/components/store/real-estate/RealEstatePropertyDetail'
+import { DealershipVehicleDetail } from '@/components/store/dealership/DealershipVehicleDetail'
 import { FadeUp, SlideLeft, SlideRight, StaggerGrid, StaggerItem } from '@/components/store/motion'
 import { getSiteFeatures } from '@/lib/site-features'
 import type { Metadata } from 'next'
@@ -37,6 +38,11 @@ export default async function ProductoPage({ params }: PageProps) {
   // Real-estate uses its own full-page detail with header/footer
   if (store.site_type === 'real-estate') {
     return <RealEstatePropertyDetail product={product} store={store} related={related} />
+  }
+
+  // Dealership uses its own premium vehicle detail
+  if (store.site_type === 'dealership') {
+    return <DealershipVehicleDetail product={product} store={store} related={related} />
   }
 
   const features = getSiteFeatures(store.site_type)

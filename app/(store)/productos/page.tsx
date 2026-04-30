@@ -4,6 +4,7 @@ import { ProductCard } from '@/components/store/ProductCard'
 import { ModoProductCard } from '@/components/store/modo/ModoProductCard'
 import { AthleticProductCard } from '@/components/store/athletic/AthleticProductCard'
 import { DealershipProductCard } from '@/components/store/dealership/DealershipProductCard'
+import { DealershipCatalogPage } from '@/components/store/dealership/DealershipCatalogPage'
 import { LibreriaProductCard } from '@/components/store/libreria/LibreriaProductCard'
 import { RealEstateProductsPage } from '@/components/store/real-estate/RealEstateProductsPage'
 import { ModoProductsPage } from '@/components/store/modo/ModoProductsPage'
@@ -73,6 +74,21 @@ export default async function ProductosPage({ searchParams }: PageProps) {
         page={page}
         totalPages={totalPages}
         params={params}
+      />
+    )
+  }
+
+  if (store.site_type === 'dealership') {
+    return (
+      <DealershipCatalogPage
+        store={store}
+        categories={categories}
+        products={products}
+        total={total}
+        page={page}
+        totalPages={totalPages}
+        params={params}
+        features={features}
       />
     )
   }
