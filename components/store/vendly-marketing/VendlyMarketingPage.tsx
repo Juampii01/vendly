@@ -280,7 +280,7 @@ export function VendlyMarketingPage() {
                   <svg width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
                   </svg>
-                  ona-store.vendly-mod.space
+                  peugeot.vendly-mod.space
                 </div>
               </div>
             </div>
@@ -551,7 +551,7 @@ export function VendlyMarketingPage() {
           </div>
 
           {/* Featured — Peugeot */}
-          <a href="https://ona-store.vendly-mod.space" target="_blank" rel="noopener noreferrer"
+          <a href="https://peugeot.vendly-mod.space" target="_blank" rel="noopener noreferrer"
             className="group block relative rounded-2xl overflow-hidden border mb-4 hover:scale-[1.005] transition-transform cursor-pointer"
             style={{ borderColor: 'rgba(212,168,71,0.25)' }}>
             <div className="relative overflow-hidden" style={{ aspectRatio: '21/9' }}>

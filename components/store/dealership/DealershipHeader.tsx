@@ -16,6 +16,7 @@ export function DealershipHeader({ store, categories }: Props) {
   const [mobileOpen, setMobileOpen]   = useState(false)
   const [scrolled, setScrolled]       = useState(false)
   const [modelsOpen, setModelsOpen]   = useState(false)
+  const [logoError, setLogoError]     = useState(false)
   const modelsRef = useRef<HTMLDivElement>(null)
   const ACCENT = store.color_accent
   const waNum = store.whatsapp_number?.replace(/\D/g, '') ?? ''
@@ -84,9 +85,14 @@ export function DealershipHeader({ store, categories }: Props) {
 
           {/* Logo */}
           <Link href="/" className="flex-shrink-0 flex flex-col leading-tight mr-6">
-            {store.logo_url
-              ? <Image src={store.logo_url} alt={store.name} width={140} height={44}
-                  className="h-11 w-auto object-contain" />
+            {store.logo_url && !logoError
+              ? <Image
+                  src={store.logo_url}
+                  alt={store.name}
+                  width={140} height={44}
+                  className="h-11 w-auto object-contain"
+                  onError={() => setLogoError(true)}
+                />
               : <div>
                   <p className="font-black text-xl tracking-[0.05em] uppercase text-slate-900 leading-none">
                     {store.name}
