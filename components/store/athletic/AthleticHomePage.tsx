@@ -83,11 +83,11 @@ export function AthleticHomePage({ store, products, featured, categories }: Prop
         </div>
       </div>
 
-      {/* ══ CATEGORÍAS — full bleed ══════════════════════════════════════════ */}
+      {/* ══ CATEGORÍAS ══════════════════════════════════════════════════════ */}
       {categories.length > 0 && (
-        <section>
+        <section className="max-w-[1440px] mx-auto px-4 md:px-8 pt-16 pb-4">
           {/* Header */}
-          <div className="flex items-end justify-between px-8 md:px-16 pt-16 pb-6">
+          <div className="flex items-end justify-between mb-6">
             <h2 className="text-xl font-black uppercase tracking-[0.04em]"
               style={{ color: store.color_text }}>Colecciones</h2>
             <Link href="/productos"
@@ -101,7 +101,7 @@ export function AthleticHomePage({ store, products, featured, categories }: Prop
           )}
 
           {categories.length === 2 && (
-            <div className="grid grid-cols-2">
+            <div className="grid grid-cols-2 gap-3">
               {categories.map(cat => (
                 <CategoryCard key={cat.id} cat={cat} store={store} ratio="3/4" size="50vw" titleSize="text-2xl md:text-4xl" />
               ))}
@@ -109,9 +109,9 @@ export function AthleticHomePage({ store, products, featured, categories }: Prop
           )}
 
           {categories.length >= 3 && (
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-3">
               {/* Primera fila: primer elemento grande (2/3) + segundo (1/3) */}
-              <div className="grid grid-cols-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div className="col-span-2">
                   <CategoryCard cat={categories[0]} store={store} ratio="4/3" size="66vw" titleSize="text-3xl md:text-5xl" />
                 </div>
@@ -121,7 +121,7 @@ export function AthleticHomePage({ store, products, featured, categories }: Prop
               </div>
               {/* Segunda fila: resto de categorías equitativas */}
               {categories.length > 2 && (
-                <div className={`grid`}
+                <div className="grid gap-3"
                   style={{ gridTemplateColumns: `repeat(${Math.min(categories.length - 2, 4)}, 1fr)` }}>
                   {categories.slice(2, 6).map(cat => (
                     <CategoryCard key={cat.id} cat={cat} store={store} ratio="4/3" size="25vw" titleSize="text-lg md:text-2xl" />
@@ -135,7 +135,7 @@ export function AthleticHomePage({ store, products, featured, categories }: Prop
 
       {/* ══ DESTACADOS ═══════════════════════════════════════════════════════ */}
       {featured.length > 0 && (
-        <section className="px-8 md:px-16 py-20">
+        <section className="max-w-[1440px] mx-auto px-4 md:px-8 py-20">
           <div className="flex items-end justify-between mb-10">
             <div>
               <p className="text-[8px] font-bold uppercase tracking-[0.4em] mb-2 opacity-30">Selección</p>
@@ -187,10 +187,10 @@ export function AthleticHomePage({ store, products, featured, categories }: Prop
         </section>
       )}
 
-      {/* ══ NUEVA TEMPORADA — full bleed grid ════════════════════════════════ */}
+      {/* ══ NUEVA TEMPORADA ══════════════════════════════════════════════════ */}
       {products.length > 0 && (
-        <section className="py-20">
-          <div className="flex items-end justify-between mb-10 px-8 md:px-16">
+        <section className="max-w-[1440px] mx-auto px-4 md:px-8 py-20">
+          <div className="flex items-end justify-between mb-10">
             <h2 className="text-xl font-black uppercase tracking-[0.04em]">Nueva temporada</h2>
             <Link href="/productos"
               className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-40 hover:opacity-100 transition-opacity"
@@ -198,7 +198,7 @@ export function AthleticHomePage({ store, products, featured, categories }: Prop
           </div>
 
           {/* Mobile: scroll horizontal */}
-          <div className="flex gap-4 overflow-x-auto px-8 pb-3 md:hidden"
+          <div className="flex gap-4 overflow-x-auto pb-3 md:hidden"
             style={{ scrollSnapType: 'x mandatory' }}>
             {products.slice(0, 10).map(p => (
               <div key={p.id} className="w-[62vw] shrink-0" style={{ scrollSnapAlign: 'start' }}>
@@ -208,7 +208,7 @@ export function AthleticHomePage({ store, products, featured, categories }: Prop
           </div>
 
           {/* Desktop: 3 col */}
-          <div className="hidden md:grid grid-cols-3 gap-x-4 gap-y-14 px-8 md:px-16">
+          <div className="hidden md:grid grid-cols-3 gap-x-4 gap-y-14">
             {products.slice(0, 6).map((p, i) => (
               <AthleticProductCard key={p.id} product={p} store={store} priority={i < 3} />
             ))}
@@ -218,7 +218,7 @@ export function AthleticHomePage({ store, products, featured, categories }: Prop
 
       {/* ══ TRUST ════════════════════════════════════════════════════════════ */}
       <div className="border-t border-b" style={{ borderColor: `${store.color_text}08` }}>
-        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0"
+        <div className="max-w-[1440px] mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0"
           style={{ '--tw-divide-opacity': '0.06' } as React.CSSProperties}>
           {[
             { icon: <TruckIcon />,  title: 'Envío express',  desc: '24hs CABA y GBA' },
@@ -245,7 +245,7 @@ export function AthleticHomePage({ store, products, featured, categories }: Prop
       </div>
 
       {/* ══ NEWSLETTER ═══════════════════════════════════════════════════════ */}
-      <section className="px-8 py-28 md:px-16" style={{ backgroundColor: store.color_primary }}>
+      <section className="px-4 py-28 md:px-8" style={{ backgroundColor: store.color_primary }}>
         <div className="max-w-lg mx-auto text-center">
           <p className="text-[8px] font-bold uppercase tracking-[0.5em] mb-5"
             style={{ color: store.color_accent ?? `${store.color_background}45` }}>
