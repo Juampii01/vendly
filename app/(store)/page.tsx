@@ -10,6 +10,7 @@ import { DealershipHomePage } from '@/components/store/dealership/DealershipHome
 import { LibreriaHomePage } from '@/components/store/libreria/LibreriaHomePage'
 import { VendlyMarketingPage } from '@/components/store/vendly-marketing/VendlyMarketingPage'
 import { RealEstateHomePage } from '@/components/store/real-estate/RealEstateHomePage'
+import { RestaurantHomePage } from '@/components/store/restaurant/RestaurantHomePage'
 import { FadeUp, SlideLeft, SlideRight, StaggerGrid, StaggerItem } from '@/components/store/motion'
 import { formatPrice } from '@/lib/format'
 import { DEFAULT_SECTIONS } from '@/types'
@@ -79,6 +80,11 @@ export default async function HomePage() {
   // ── Template Inmobiliaria ─────────────────────────────────────────────────
   if (store.site_type === 'real-estate') {
     return <RealEstateHomePage store={store} products={all} categories={categories} featured={featured} />
+  }
+
+  // ── Template Restaurante ──────────────────────────────────────────────────
+  if (store.site_type === 'restaurant') {
+    return <RestaurantHomePage store={store} products={all} categories={categories} featured={featured} />
   }
 
   const heroSrc = store.hero_image_url ?? HERO_FALLBACK

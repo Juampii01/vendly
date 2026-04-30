@@ -11,6 +11,8 @@ import { DealershipHeader } from '@/components/store/dealership/DealershipHeader
 import { DealershipFooter } from '@/components/store/dealership/DealershipFooter'
 import { LibreriaHeader } from '@/components/store/libreria/LibreriaHeader'
 import { LibreriaFooter } from '@/components/store/libreria/LibreriaFooter'
+import { RestaurantHeader } from '@/components/store/restaurant/RestaurantHeader'
+import { RestaurantFooter } from '@/components/store/restaurant/RestaurantFooter'
 import { PageEnter } from '@/components/store/motion'
 import { getSiteFeatures } from '@/lib/site-features'
 import type { Metadata } from 'next'
@@ -35,6 +37,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   const isAthletic = store.site_type === 'athletic'
   const isDealership = store.site_type === 'dealership'
   const isLibreria = store.site_type === 'libreria'
+  const isRestaurant = store.site_type === 'restaurant'
   const isVendlyMarketing = store.site_type === 'vendly-marketing'
   // real-estate maneja su propio header, footer y sidebar de favoritos internamente
   const isRealEstate = store.site_type === 'real-estate'
@@ -71,6 +74,8 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         ? <DealershipHeader store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
         : isLibreria
         ? <LibreriaHeader store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
+        : isRestaurant
+        ? <RestaurantHeader store={store} categories={categories} features={features} />
         : <Header store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
       }
       <main className="flex-1">
@@ -84,6 +89,8 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         ? <DealershipFooter store={store} categories={categories} />
         : isLibreria
         ? <LibreriaFooter store={store} categories={categories} />
+        : isRestaurant
+        ? <RestaurantFooter store={store} categories={categories} />
         : <Footer store={store} categories={categories} features={features} />
       }
     </div>
