@@ -393,130 +393,174 @@ export function VendlyMarketingPage() {
         </div>
       </section>
 
-      {/* ══ TEMPLATES SHOWCASE ═══════════════════════════════════════════════ */}
+      {/* ══ PORTFOLIO ════════════════════════════════════════════════════════ */}
       <section id="proyectos" className="py-28 px-6 overflow-hidden">
         <div className="mx-auto max-w-6xl">
+
+          {/* Header */}
           <div className="text-center mb-16">
-            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#06b6d4' }}>Estructuras probadas</p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">Estructuras probadas. Resultados garantizados.</h2>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#06b6d4' }}>
+              Portfolio
+            </p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
+              Proyectos reales, resultados reales.
+            </h2>
             <p className="max-w-xl mx-auto text-base" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              Trabajamos sobre estructuras diseñadas y probadas para acelerar los resultados. Nosotros adaptamos cada una a tu negocio.
+              Cada web es única, construida para el rubro y la marca de cada cliente.
+              Hacé click en cualquier proyecto para verlo en vivo.
             </p>
           </div>
-          {/* Proyecto destacado — El Rincón del Libro */}
-          {(() => {
-            // Librería template: #2C1A0E · #B5632A · #FAF6EF
-            const featured = {
-              name: 'El Rincón del Libro',
-              subtitle: 'Librería',
-              tagline: 'Paleta crema y ámbar. Diseño editorial con tipografía serif, filtros por género y carrito completo.',
-              accent: '#B5632A',
-              img: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1400&q=80',
-              demo: 'el-rincon-del-libro.vendly-mod.space',
-            }
-            return (
-              <a href={`https://${featured.demo}`} target="_blank" rel="noopener noreferrer"
-                className="group block relative rounded-2xl overflow-hidden border mb-6 hover:scale-[1.005] transition-transform cursor-pointer"
-                style={{ borderColor: `${featured.accent}30` }}>
-                <div className="relative overflow-hidden" style={{ aspectRatio: '21/9' }}>
-                  <Image src={featured.img} alt={featured.name} fill className="object-cover object-center brightness-60 group-hover:brightness-75 transition-all group-hover:scale-105 duration-700" />
-                  {/* Warm gradient matching the librería bg palette */}
-                  <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, transparent 25%, ${featured.accent}18 60%, rgba(5,5,8,0.97) 100%)` }} />
-                  {/* Accent bar at top */}
-                  <div className="absolute top-0 left-0 right-0 h-0.5" style={{ backgroundColor: featured.accent }} />
-                  <div className="absolute top-4 left-4 flex items-center gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
-                      style={{ backgroundColor: `${featured.accent}25`, color: featured.accent, border: `1px solid ${featured.accent}50` }}>
-                      {featured.subtitle}
-                    </span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
-                      style={{ backgroundColor: 'rgba(99,102,241,0.15)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.3)' }}>
-                      Proyecto real
-                    </span>
-                  </div>
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-                  <h3 className="text-2xl font-black mb-2">{featured.name}</h3>
-                  <p className="text-sm mb-5 max-w-xl" style={{ color: 'rgba(255,255,255,0.55)' }}>{featured.tagline}</p>
-                  <span className="inline-flex items-center gap-2 text-sm font-semibold group-hover:gap-3 transition-all"
-                    style={{ color: featured.accent }}>
-                    Ver en vivo →
-                  </span>
-                </div>
-              </a>
-            )
-          })()}
 
-          {/* Resto de proyectos */}
-          <div className="grid sm:grid-cols-2 gap-6">
-            {[
+          {/* Featured — Peugeot */}
+          <a href="https://ona-store.vendly-mod.space" target="_blank" rel="noopener noreferrer"
+            className="group block relative rounded-2xl overflow-hidden border mb-4 hover:scale-[1.005] transition-transform cursor-pointer"
+            style={{ borderColor: 'rgba(212,168,71,0.25)' }}>
+            <div className="relative overflow-hidden" style={{ aspectRatio: '21/9' }}>
+              <Image
+                src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1600&q=80"
+                alt="Peugeot" fill
+                className="object-cover object-center brightness-50 group-hover:brightness-65 transition-all group-hover:scale-105 duration-700"
+              />
+              <div className="absolute inset-0"
+                style={{ background: 'linear-gradient(to bottom, transparent 20%, rgba(5,5,8,0.4) 60%, rgba(5,5,8,0.97) 100%)' }} />
+              <div className="absolute top-0 left-0 right-0 h-0.5" style={{ backgroundColor: '#D4A847' }} />
+              <div className="absolute top-5 left-5 flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
+                  style={{ backgroundColor: 'rgba(212,168,71,0.2)', color: '#D4A847', border: '1px solid rgba(212,168,71,0.4)' }}>
+                  Automotriz · Concesionaria
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
+                  style={{ backgroundColor: 'rgba(99,102,241,0.15)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.3)' }}>
+                  Proyecto real
+                </span>
+              </div>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 p-7 md:p-10">
+              <h3 className="text-3xl font-black mb-2">Peugeot</h3>
+              <p className="text-sm mb-5 max-w-lg" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                Concesionaria oficial. Hero fullscreen oscuro, catálogo de vehículos con ficha técnica, filtros por condición y CTA directo a WhatsApp. Sin carrito — todo va a consulta directa.
+              </p>
+              <span className="inline-flex items-center gap-2 text-sm font-bold group-hover:gap-4 transition-all"
+                style={{ color: '#D4A847' }}>
+                Ver en vivo →
+              </span>
+            </div>
+          </a>
+
+          {/* Grid — 9 proyectos */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {([
               {
-                name: 'Spriovani',
-                desc: 'Indumentaria. Fondo negro, tipografía blanca en mayúsculas, acento dorado. Variantes de talle y color, carrito deslizable.',
-                tag: 'Indumentaria',
-                // default ecommerce template: dark · gold
-                color: '#C9A96E',
-                img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=75',
+                name: 'El Rincón del Libro',
+                tag: 'Librería',
+                color: '#B5632A',
+                img: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=800&q=75',
                 objPos: 'object-center',
-                demo: 'spriovani-indumentaria.vendly-mod.space',
+                demo: 'el-rincon-del-libro.vendly-mod.space',
+                desc: 'Diseño editorial crema y ámbar. Filtros por género, carrito y checkout completo.',
+              },
+              {
+                name: 'Moda Space',
+                tag: 'Moda editorial',
+                color: '#b48ecf',
+                img: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=75',
+                objPos: 'object-top',
+                demo: 'moda-space.vendly-mod.space',
+                desc: 'Boutique premium. Hero editorial con modelo, colección lookbook y carrito deslizable.',
               },
               {
                 name: 'Modo',
-                desc: 'Moda editorial. Paleta crema (#FAF7F2) y rojo fuego (#E63329). Hero de modelo a pantalla completa, carrusel de colección.',
-                tag: 'Moda Editorial',
-                // modo-setup.sql: color_accent = #E63329
+                tag: 'Indumentaria',
                 color: '#E63329',
                 img: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=75',
                 objPos: 'object-top',
                 demo: 'pagina-prueba.vendly-mod.space',
+                desc: 'Paleta crema y rojo fuego. Hero fullscreen, carrusel de colección y editorial split.',
               },
               {
                 name: 'Adidas',
-                desc: 'Streetwear. Blanco total, tipografía negra de impacto, acento rojo fuego (#FF3A20). Marquee animado y sección editorial split.',
                 tag: 'Deportivo',
-                // athletic-setup.sql: color_accent = #FF3A20
                 color: '#FF3A20',
                 img: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=800&q=75',
                 objPos: 'object-center',
                 demo: 'adidas.vendly-mod.space',
+                desc: 'Blanco total, tipografía de impacto, acento rojo. Marquee animado y sección editorial.',
               },
               {
-                name: 'Peugeot',
-                desc: 'Concesionaria. Fondo casi negro (#0d0d18), acento dorado, cards por vehículo con ficha técnica y CTA directo a WhatsApp.',
-                tag: 'Automotriz',
-                // dealership template: dark navy · gold
-                color: '#D4A847',
-                img: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=800&q=75',
+                name: 'Sinergia',
+                tag: 'Gym · Athletic',
+                color: '#22c55e',
+                img: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=75',
                 objPos: 'object-center',
-                demo: 'ona-store.vendly-mod.space',
+                demo: 'sinergia.vendly-mod.space',
+                desc: 'Gimnasio premium. Dark mode con verde eléctrico, clases, membresías y equipo.',
               },
-            ].map(({ name, desc, tag, color, img, objPos, demo }) => (
+              {
+                name: 'Mosto',
+                tag: 'Restaurante',
+                color: '#f97316',
+                img: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=75',
+                objPos: 'object-center',
+                demo: 'mosto.vendly-mod.space',
+                desc: 'Menú digital categorizado. Hero con platos, secciones por rubro y pedido por WhatsApp.',
+              },
+              {
+                name: 'Acosta Bienes Raíces',
+                tag: 'Inmobiliaria',
+                color: '#38bdf8',
+                img: 'https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=800&q=75',
+                objPos: 'object-center',
+                demo: 'acosta-inmobiliaria.vendly-mod.space',
+                desc: 'Propiedades en venta y alquiler. Filtros por tipo, zona y precio. Ficha con galería.',
+              },
+              {
+                name: 'Spriovanni',
+                tag: 'Indumentaria premium',
+                color: '#C9A96E',
+                img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=75',
+                objPos: 'object-center',
+                demo: 'spriovani-indumentaria.vendly-mod.space',
+                desc: 'Fondo negro, acento dorado. Variantes de talle y color, carrito deslizable.',
+              },
+              {
+                name: 'vendly-mod',
+                tag: 'Ecommerce',
+                color: '#6366f1',
+                img: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=75',
+                objPos: 'object-center',
+                demo: 'vendly-mod.space',
+                desc: 'Tienda ecommerce completa. Búsqueda, filtros, variantes, carrito y checkout integrado.',
+              },
+            ] as const).map(({ name, tag, color, img, objPos, demo, desc }) => (
               <a key={name} href={`https://${demo}`} target="_blank" rel="noopener noreferrer"
-                className="group relative rounded-2xl overflow-hidden border hover:scale-[1.01] transition-transform block cursor-pointer"
-                style={{ borderColor: `${color}25` }}>
-                {/* Accent bar */}
+                className="group relative rounded-xl overflow-hidden border hover:scale-[1.02] transition-all duration-300 block cursor-pointer"
+                style={{ borderColor: `${color}20` }}>
                 <div className="absolute top-0 left-0 right-0 h-0.5 z-10" style={{ backgroundColor: color }} />
                 <div className="relative aspect-video overflow-hidden">
-                  <Image src={img} alt={name} fill className={`object-cover ${objPos} brightness-75 group-hover:brightness-90 transition-all group-hover:scale-105 duration-700`} />
-                  <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, transparent 35%, ${color}12 65%, rgba(5,5,8,0.96) 100%)` }} />
-                  <div className="absolute top-4 left-4">
-                    <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
-                      style={{ backgroundColor: `${color}25`, color: color, border: `1px solid ${color}50` }}>
+                  <Image src={img} alt={name} fill
+                    className={`object-cover ${objPos} brightness-60 group-hover:brightness-75 transition-all group-hover:scale-105 duration-700`}
+                  />
+                  <div className="absolute inset-0"
+                    style={{ background: `linear-gradient(to bottom, transparent 30%, rgba(5,5,8,0.95) 100%)` }} />
+                  <div className="absolute top-3 left-3">
+                    <span className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full"
+                      style={{ backgroundColor: `${color}20`, color, border: `1px solid ${color}40` }}>
                       {tag}
                     </span>
                   </div>
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <h3 className="text-lg font-black mb-1">{name}</h3>
-                  <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.55)' }}>{desc}</p>
-                  <span className="inline-flex items-center gap-2 text-xs font-semibold group-hover:gap-3 transition-all"
-                    style={{ color: color }}>
+                <div className="absolute bottom-0 left-0 right-0 p-5">
+                  <h3 className="text-base font-black mb-1">{name}</h3>
+                  <p className="text-[11px] leading-relaxed mb-3" style={{ color: 'rgba(255,255,255,0.5)' }}>{desc}</p>
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold group-hover:gap-2.5 transition-all"
+                    style={{ color }}>
                     Ver en vivo →
                   </span>
                 </div>
               </a>
             ))}
           </div>
+
         </div>
       </section>
 

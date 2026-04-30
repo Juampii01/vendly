@@ -223,21 +223,48 @@ export function DealershipHomePage({ store, products, featured, categories }: Pr
                 Ver todo →
               </Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-              {categories.map((cat, i) => (
-                <Link key={cat.id} href={`/productos?categoria=${cat.slug}`}
-                  className="group relative overflow-hidden bg-slate-100"
-                  style={{ aspectRatio: i === 0 ? '2/1.2' : '3/4' }}>
+
+            {/* Bento: first card is large (col-span-2 lg:col-span-1 row-span-2), rest fill right grid */}
+            <div className="grid grid-cols-2 lg:grid-cols-[2fr_1fr_1fr] gap-3">
+
+              {/* Hero segment card */}
+              {categories[0] && (
+                <Link href={`/productos?categoria=${categories[0].slug}`}
+                  className="group relative overflow-hidden bg-slate-100 col-span-2 lg:col-span-1 lg:row-span-2 aspect-[4/3] lg:aspect-auto">
                   <div className="absolute inset-0">
-                    {cat.image_url
-                      ? <Image src={cat.image_url} alt={cat.name} fill sizes="20vw"
+                    {categories[0].image_url
+                      ? <Image src={categories[0].image_url} alt={categories[0].name} fill sizes="(max-width:1024px) 100vw, 40vw"
                           className="object-cover object-center transition-transform duration-700 group-hover:scale-105" />
                       : <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200" />
                     }
                   </div>
-                  <div className="absolute inset-0 transition-opacity"
+                  <div className="absolute inset-0"
+                    style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.05) 55%)' }} />
+                  <div className="absolute bottom-0 left-0 h-[3px] w-0 group-hover:w-full transition-all duration-500"
+                    style={{ backgroundColor: ACCENT }} />
+                  <div className="absolute bottom-0 left-0 w-full p-6 lg:p-8">
+                    <div className="w-5 h-0.5 mb-3 transition-all duration-300 group-hover:w-10"
+                      style={{ backgroundColor: ACCENT }} />
+                    <p className="text-sm font-black uppercase tracking-[0.2em] text-white">{categories[0].name}</p>
+                    <p className="text-[10px] font-medium uppercase tracking-wider mt-1"
+                      style={{ color: 'rgba(255,255,255,0.42)' }}>Ver modelos →</p>
+                  </div>
+                </Link>
+              )}
+
+              {/* Remaining segment cards — right 2×2 grid */}
+              {categories.slice(1).map(cat => (
+                <Link key={cat.id} href={`/productos?categoria=${cat.slug}`}
+                  className="group relative overflow-hidden bg-slate-100 aspect-[4/3]">
+                  <div className="absolute inset-0">
+                    {cat.image_url
+                      ? <Image src={cat.image_url} alt={cat.name} fill sizes="(max-width:1024px) 50vw, 22vw"
+                          className="object-cover object-center transition-transform duration-700 group-hover:scale-105" />
+                      : <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200" />
+                    }
+                  </div>
+                  <div className="absolute inset-0"
                     style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.05) 55%)' }} />
-                  {/* Hover accent line */}
                   <div className="absolute bottom-0 left-0 h-[3px] w-0 group-hover:w-full transition-all duration-500"
                     style={{ backgroundColor: ACCENT }} />
                   <div className="absolute bottom-0 left-0 w-full p-4">
