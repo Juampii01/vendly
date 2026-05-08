@@ -7,6 +7,20 @@
       "runtimeArgs": ["run", "dev"],
       "port": 3000,
       "autoPort": false
+    },
+    {
+      "name": "Vendly — Next.js (webpack, no turbopack)",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "dev", "-p", "3001"],
+      "port": 3001,
+      "autoPort": false
+    },
+    {
+      "name": "Vendly — Next.js (production)",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "start", "-p", "3003"],
+      "port": 3003,
+      "autoPort": false
     }
   ]
 }
