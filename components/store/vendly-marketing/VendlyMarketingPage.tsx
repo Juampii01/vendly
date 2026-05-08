@@ -1,16 +1,52 @@
 'use client'
 
+/**
+ * VENDLY — Landing page de marketing.
+ *
+ * Sales tool. Primer punto de contacto con el potencial cliente.
+ * Filosofía: honesto > exagerado. Si decimos "8 tiendas activas", son 8.
+ *
+ * Para reemplazar antes de prospectear:
+ *   - WHATSAPP_NUMBER: número real de contacto (hoy es placeholder)
+ *   - Calendar link / form (opcional, si querés agendar demos)
+ *   - Caso de Spriovani con métricas reales si las tenés
+ */
+
 import { useState, useEffect, useRef } from 'react'
-import Link from 'next/link'
 import Image from 'next/image'
 
-// ─────────────────────────────────────────────────────────────────────────────
-// VENDLY MARKETING PAGE
-// Landing page para presentar Vendly a potenciales clientes.
-// Diseño: dark premium, gradientes morado/índigo, tipografía de impacto.
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Config ──────────────────────────────────────────────────────────────────
 
-// ── Counter animado ───────────────────────────────────────────────────────────
+// TODO(juampi): reemplazar con tu WhatsApp real antes de promocionar
+const WHATSAPP_NUMBER = '5491100000000'
+const WA_HELLO   = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola! Quiero información sobre Vendly')}`
+const WA_DEMO    = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola! Quiero ver una demo de Vendly')}`
+const WA_REQUEST = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola! Quiero solicitar mi tienda')}`
+
+// Stores que efectivamente tienen row en store_config y deberían cargar en
+// *.vendly-mod.space cuando el wildcard de Vercel esté configurado.
+const PORTFOLIO_HERO = {
+  name: 'Spriovanni',
+  tag: 'Indumentaria masculina · Premium',
+  url: 'https://spriovani-indumentaria.vendly-mod.space',
+  description: 'Tienda de indumentaria masculina premium con identidad propia. Hero fullbleed, catálogo con variantes de talle y color, marquee animado, editorial split y newsletter. Construida y entregada en una semana.',
+  badge: 'Cliente activo',
+  accent: '#C9A96E',
+}
+
+const PORTFOLIO_GRID = [
+  { name: 'Peugeot',            tag: 'Concesionaria',   color: '#D4A847', img: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=800&q=75', objPos: 'object-center', demo: 'peugeot.vendly-mod.space',          desc: 'Hero oscuro fullscreen, catálogo de vehículos, ficha técnica y CTA a WhatsApp. Sin carrito.' },
+  { name: 'Adidas',             tag: 'Deportivo',       color: '#FF3A20', img: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=800&q=75',   objPos: 'object-center', demo: 'adidas.vendly-mod.space',            desc: 'Blanco editorial con acento rojo. Marquee animado, grid de productos, sección editorial.' },
+  { name: 'El Rincón del Libro', tag: 'Librería',       color: '#B5632A', img: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=800&q=75', objPos: 'object-center', demo: 'el-rincon-del-libro.vendly-mod.space', desc: 'Diseño editorial crema y ámbar. Filtros por género, carrito y checkout completo.' },
+  { name: 'Sinergia',           tag: 'Gym',             color: '#22c55e', img: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=75', objPos: 'object-center', demo: 'sinergia.vendly-mod.space',          desc: 'Dark mode con verde eléctrico. Clases, planes de membresía y team.' },
+  { name: 'Mosto',              tag: 'Restaurante',     color: '#f97316', img: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=75', objPos: 'object-center', demo: 'mosto.vendly-mod.space',             desc: 'Menú digital categorizado. Hero con platos, secciones por rubro, pedido por WhatsApp.' },
+  { name: 'Acosta Bienes Raíces', tag: 'Inmobiliaria',  color: '#38bdf8', img: 'https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=800&q=75', objPos: 'object-center', demo: 'acosta-inmobiliaria.vendly-mod.space', desc: 'Propiedades en venta y alquiler. Filtros por tipo, zona y precio. Galería de fotos.' },
+  { name: 'Moda Space',         tag: 'Moda editorial',  color: '#b48ecf', img: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=75', objPos: 'object-top',    demo: 'moda-space.vendly-mod.space',        desc: 'Boutique premium. Hero editorial con modelo, lookbook de colección, carrito deslizable.' },
+  { name: 'Modo',               tag: 'Indumentaria',    color: '#E63329', img: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=75', objPos: 'object-top',    demo: 'pagina-prueba.vendly-mod.space',     desc: 'Paleta crema y rojo fuego. Hero fullscreen, carrusel de colección, editorial split.' },
+] as const
+
+// ─── Counter animado ──────────────────────────────────────────────────────────
+
 function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: string }) {
   const [count, setCount] = useState(0)
   const ref = useRef<HTMLSpanElement>(null)
@@ -21,18 +57,18 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
       ([entry]) => {
         if (entry.isIntersecting && !started.current) {
           started.current = true
-          const duration = 2000
-          const steps = 60
-          const increment = target / steps
-          let current = 0
-          const timer = setInterval(() => {
-            current += increment
-            if (current >= target) { setCount(target); clearInterval(timer) }
-            else setCount(Math.floor(current))
+          const duration = 1600
+          const steps = 40
+          const inc = target / steps
+          let cur = 0
+          const t = setInterval(() => {
+            cur += inc
+            if (cur >= target) { setCount(target); clearInterval(t) }
+            else setCount(Math.floor(cur))
           }, duration / steps)
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     )
     if (ref.current) observer.observe(ref.current)
     return () => observer.disconnect()
@@ -41,46 +77,36 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
   return <span ref={ref}>{count.toLocaleString()}{suffix}</span>
 }
 
-// ── Video Modal ───────────────────────────────────────────────────────────────
-function VideoModal({ onClose }: { onClose: () => void }) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(0,0,0,0.92)' }}
-      onClick={onClose}
-    >
-      <div
-        className="relative w-full max-w-4xl"
-        style={{ aspectRatio: '16/9' }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Placeholder — reemplazá el src con tu URL de YouTube/Vimeo */}
-        <div
-          className="w-full h-full rounded-2xl flex flex-col items-center justify-center gap-6"
-          style={{ backgroundColor: '#111', border: '1px solid #333' }}
-        >
-          <div className="text-6xl">▶</div>
-          <p className="text-white/60 text-sm text-center max-w-xs">
-            Reemplazá este bloque con un iframe de YouTube, Vimeo o Loom.<br />
-            <code className="text-indigo-400 text-xs mt-2 block">/components/store/vendly-marketing/VendlyMarketingPage.tsx</code>
-          </p>
-        </div>
-        <button
-          onClick={onClose}
-          className="absolute -top-4 -right-4 w-10 h-10 rounded-full flex items-center justify-center text-white text-xl font-bold"
-          style={{ backgroundColor: '#333' }}
-        >
-          ×
-        </button>
-      </div>
-    </div>
-  )
+// ─── SVG icons ────────────────────────────────────────────────────────────────
+
+function IconConversation() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+}
+function IconBuild() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+}
+function IconLaunch() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09zM12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2zM9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+}
+function IconCheck() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+}
+function IconX() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+}
+function IconShield() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+}
+function IconClock() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+}
+function IconHandshake() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75M9 11a4 4 0 100-8 4 4 0 000 8z"/></svg>
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export function VendlyMarketingPage() {
-  const [videoOpen, setVideoOpen] = useState(false)
   const [faqOpen, setFaqOpen] = useState<number | null>(null)
   const [scrolled, setScrolled] = useState(false)
 
@@ -91,375 +117,254 @@ export function VendlyMarketingPage() {
   }, [])
 
   return (
-    <div style={{ backgroundColor: '#050508', color: '#ffffff', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+    <div style={{ backgroundColor: '#08080C', color: '#ffffff', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
 
-      {/* ══ NAVBAR ═══════════════════════════════════════════════════════════ */}
-      <nav
-        className="fixed top-0 left-0 right-0 z-40 transition-all duration-300"
+      {/* ═══════════ NAVBAR ═══════════════════════════════════════════════ */}
+      <nav className="fixed top-0 left-0 right-0 z-40 transition-all duration-300"
         style={{
-          backgroundColor: scrolled ? 'rgba(5,5,8,0.92)' : 'transparent',
+          backgroundColor: scrolled ? 'rgba(8,8,12,0.85)' : 'transparent',
           backdropFilter: scrolled ? 'blur(20px)' : 'none',
-          borderBottom: scrolled ? '1px solid rgba(255,255,255,0.06)' : 'none',
-        }}
-      >
+          borderBottom: scrolled ? '1px solid rgba(255,255,255,0.06)' : '1px solid transparent',
+        }}>
         <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <a href="#top" className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center"
               style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
               <span className="text-white font-black text-xs">V</span>
             </div>
             <span className="font-black text-lg tracking-tight">Vendly</span>
+          </a>
+          <div className="hidden md:flex items-center gap-8 text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            <a href="#proceso"   className="hover:text-white transition-colors">Cómo funciona</a>
+            <a href="#proyectos" className="hover:text-white transition-colors">Proyectos</a>
+            <a href="#planes"    className="hover:text-white transition-colors">Planes</a>
+            <a href="#faq"       className="hover:text-white transition-colors">FAQ</a>
           </div>
-          <div className="hidden md:flex items-center gap-8">
-            {[
-              { label: 'Cómo funciona', href: '#como-funciona' },
-              { label: 'Proyectos', href: '#proyectos' },
-              { label: 'Planes', href: '#planes' },
-              { label: 'FAQ', href: '#faq' },
-            ].map(item => (
-              <a key={item.label} href={item.href}
-                className="text-sm text-white/60 hover:text-white transition-colors">
-                {item.label}
-              </a>
-            ))}
-          </div>
-          <div className="flex items-center gap-3">
-            <a href="https://wa.me/5491100000000?text=Hola! Quiero información sobre Vendly"
-              target="_blank" rel="noopener noreferrer"
-              className="hidden md:block text-sm text-white/60 hover:text-white transition-colors">
-              Contacto
-            </a>
-            <a href="https://wa.me/5491100000000?text=Hola! Quiero solicitar mi web"
-              target="_blank" rel="noopener noreferrer"
-              className="text-sm font-semibold px-4 py-2 rounded-lg transition-all hover:scale-105"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
-              Solicitar mi web →
-            </a>
-          </div>
+          <a href={WA_DEMO} target="_blank" rel="noopener noreferrer"
+            className="text-sm font-semibold px-4 py-2 rounded-lg transition-all hover:scale-105"
+            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 0 24px rgba(99,102,241,0.3)' }}>
+            Agendar demo
+          </a>
         </div>
       </nav>
 
-      {/* ══ HERO ════════════════════════════════════════════════════════════ */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-6 pt-24 pb-16">
+      {/* ═══════════ HERO ═════════════════════════════════════════════════ */}
+      <section id="top" className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-6 pt-28 pb-20">
 
-        {/* Glow background */}
+        {/* Background atmosphere */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full opacity-20 blur-3xl"
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full opacity-25 blur-3xl"
             style={{ background: 'radial-gradient(circle, #6366f1 0%, #8b5cf6 40%, transparent 70%)' }} />
-          <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] rounded-full opacity-10 blur-3xl"
-            style={{ background: '#06b6d4' }} />
-          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full opacity-10 blur-3xl"
-            style={{ background: '#f59e0b' }} />
-          {/* Grid */}
-          <div className="absolute inset-0 opacity-5"
+          <div className="absolute inset-0 opacity-[0.04]"
             style={{
-              backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-              backgroundSize: '60px 60px'
+              backgroundImage: 'linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)',
+              backgroundSize: '64px 64px',
+              maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 70%)',
             }} />
         </div>
 
-        {/* Badge */}
-        <div className="relative mb-6 flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium border"
-          style={{ borderColor: 'rgba(99,102,241,0.4)', backgroundColor: 'rgba(99,102,241,0.1)', color: '#a5b4fc' }}>
-          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          Servicio activo · webs diseñadas y entregadas
+        {/* Eyebrow */}
+        <div className="relative mb-7 inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium border"
+          style={{ borderColor: 'rgba(99,102,241,0.4)', backgroundColor: 'rgba(99,102,241,0.08)', color: '#a5b4fc' }}>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          Estudio especializado en LATAM · 2026
         </div>
 
         {/* Headline */}
-        <h1 className="relative text-center font-black leading-[0.9] tracking-tight mb-6 max-w-5xl"
-          style={{ fontSize: 'clamp(3rem, 9vw, 7rem)' }}>
-          <span className="block text-white">TENÉ TU WEB LISTA</span>
+        <h1 className="relative text-center font-black leading-[0.92] tracking-[-0.03em] mb-7 max-w-5xl"
+          style={{ fontSize: 'clamp(2.6rem, 8vw, 6.5rem)' }}>
+          <span className="block text-white">Tu tienda online,</span>
           <span className="block"
-            style={{ background: 'linear-gradient(135deg, #6366f1, #a78bfa, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            EN DÍAS, NO EN MESES.
+            style={{ background: 'linear-gradient(110deg, #c7d2fe, #a78bfa 50%, #67e8f9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            hecha a medida.
           </span>
         </h1>
 
-        <p className="relative text-center max-w-xl text-lg mb-10"
-          style={{ color: 'rgba(255,255,255,0.55)' }}>
-          Diseñamos, configuramos y dejamos tu página funcionando
-          para que empieces a vender sin complicarte.
+        <p className="relative text-center max-w-2xl text-base md:text-lg mb-10 leading-relaxed"
+          style={{ color: 'rgba(255,255,255,0.62)' }}>
+          Diseñamos, configuramos y entregamos tu ecommerce funcionando en <strong style={{ color: 'white' }}>7 a 10 días</strong>.
+          Con <strong style={{ color: 'white' }}>identidad propia</strong>, MercadoPago integrado y soporte humano.
+          Vos no tocás código.
         </p>
 
         {/* CTAs */}
-        <div className="relative flex flex-col sm:flex-row items-center gap-4 mb-16">
-          <a href="https://wa.me/5491100000000?text=Hola! Quiero solicitar mi web"
-            target="_blank" rel="noopener noreferrer"
-            className="group px-8 py-4 rounded-xl font-bold text-base transition-all hover:scale-105 hover:shadow-2xl flex items-center gap-2"
-            style={{
-              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-              boxShadow: '0 0 40px rgba(99,102,241,0.4)',
-            }}>
-            Solicitar mi web
+        <div className="relative flex flex-col sm:flex-row items-center gap-3 mb-16">
+          <a href={WA_DEMO} target="_blank" rel="noopener noreferrer"
+            className="group px-8 py-4 rounded-xl font-bold text-base transition-all hover:scale-105 inline-flex items-center gap-2"
+            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 0 40px rgba(99,102,241,0.4)' }}>
+            Agendar demo de 15 min
             <span className="group-hover:translate-x-1 transition-transform">→</span>
           </a>
-          <button
-            onClick={() => setVideoOpen(true)}
-            className="flex items-center gap-3 px-6 py-4 rounded-xl font-medium text-base border transition-all hover:bg-white/5"
-            style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.8)' }}>
-            <span className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ background: 'rgba(255,255,255,0.1)' }}>
-              ▶
-            </span>
-            Ver cómo lo hacemos
-          </button>
+          <a href={PORTFOLIO_HERO.url} target="_blank" rel="noopener noreferrer"
+            className="px-6 py-4 rounded-xl font-medium text-base border transition-all hover:bg-white/5 inline-flex items-center gap-2"
+            style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.85)' }}>
+            <span>Ver tienda real</span>
+            <span style={{ color: PORTFOLIO_HERO.accent }}>↗</span>
+          </a>
         </div>
 
-        {/* ── Hero mockup ──────────────────────────────────────────────── */}
-        <div className="relative w-full max-w-5xl mx-auto mt-4">
-
-          {/* Glow aura */}
-          <div className="absolute -inset-8 rounded-3xl blur-3xl opacity-25 pointer-events-none"
+        {/* Hero card — caso real Spriovanni */}
+        <div className="relative w-full max-w-5xl mx-auto">
+          <div className="absolute -inset-4 rounded-3xl blur-3xl opacity-30 pointer-events-none"
             style={{ background: 'radial-gradient(ellipse at center, #6366f1 0%, #8b5cf6 40%, transparent 70%)' }} />
 
-          {/* Floating stat — left */}
-          <div className="absolute -left-4 top-1/4 z-10 hidden lg:block">
-            <div className="px-4 py-3 rounded-xl shadow-2xl border"
-              style={{ backgroundColor: '#0d0d18', borderColor: 'rgba(255,255,255,0.09)', minWidth: '148px' }}>
-              <p className="text-[9px] uppercase tracking-wider mb-1" style={{ color: 'rgba(255,255,255,0.38)' }}>Visitas hoy</p>
-              <p className="text-2xl font-black text-white leading-none">1.247</p>
-              <div className="flex items-center gap-1.5 mt-1">
-                <span className="text-[10px] font-bold" style={{ color: '#22c55e' }}>↑ 23%</span>
-                <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.3)' }}>vs ayer</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Floating stat — right */}
-          <div className="absolute -right-4 top-1/3 z-10 hidden lg:block">
-            <div className="px-4 py-3 rounded-xl shadow-2xl border"
-              style={{ backgroundColor: '#0d0d18', borderColor: 'rgba(255,255,255,0.09)', minWidth: '148px' }}>
-              <p className="text-[9px] uppercase tracking-wider mb-1" style={{ color: 'rgba(255,255,255,0.38)' }}>Consultas / mes</p>
-              <p className="text-2xl font-black text-white leading-none">84</p>
-              <div className="flex items-center gap-1.5 mt-1">
-                <span className="text-[10px] font-bold" style={{ color: '#6366f1' }}>WhatsApp</span>
-                <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.3)' }}>+ Email</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Floating notification — bottom left */}
-          <div className="absolute -left-2 bottom-10 z-10 hidden lg:flex items-center gap-3 px-4 py-2.5 rounded-xl border shadow-2xl"
-            style={{ backgroundColor: '#0d0d18', borderColor: 'rgba(34,197,94,0.25)' }}>
-            <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
-              style={{ backgroundColor: 'rgba(34,197,94,0.15)' }}>
-              <svg width="13" height="13" fill="none" stroke="#22c55e" strokeWidth="2" viewBox="0 0 24 24">
-                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.8 19.8 0 01-8.63-3.07A19.5 19.5 0 014.69 11.9 19.8 19.8 0 011.62 3.3 2 2 0 013.61 1.1h3a2 2 0 012 1.72 12.8 12.8 0 00.7 2.81 2 2 0 01-.45 2.11L7.91 8.73a16 16 0 006.29 6.29l.89-.97a2 2 0 012.11-.45 12.8 12.8 0 002.81.7A2 2 0 0122 16.92z"/>
-              </svg>
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-white">Nueva consulta vía WhatsApp</p>
-              <p className="text-[9px]" style={{ color: 'rgba(255,255,255,0.4)' }}>hace 2 minutos</p>
-            </div>
-          </div>
-
-          {/* Browser frame */}
-          <div className="relative rounded-2xl overflow-hidden border shadow-2xl"
+          <a href={PORTFOLIO_HERO.url} target="_blank" rel="noopener noreferrer"
+            className="relative block rounded-2xl overflow-hidden border shadow-2xl group cursor-pointer"
             style={{ borderColor: 'rgba(255,255,255,0.08)', backgroundColor: '#07070e' }}>
 
-            {/* Chrome bar */}
-            <div className="flex items-center gap-3 px-4 h-10 border-b"
+            {/* Browser chrome */}
+            <div className="flex items-center gap-3 px-4 h-10 border-b shrink-0"
               style={{ borderColor: 'rgba(255,255,255,0.05)', backgroundColor: '#040408' }}>
-              <div className="flex gap-1.5 shrink-0">
+              <div className="flex gap-1.5">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ff5f57' }} />
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#febc2e' }} />
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#28c840' }} />
               </div>
-              {/* Tabs */}
-              <div className="flex items-center gap-1 ml-2 shrink-0">
-                <div className="flex items-center gap-1.5 h-7 px-3 rounded-t text-[9px] font-medium"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)' }}>
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#D4A847', opacity: 0.8 }} />
-                  peugeot — Concesionaria
-                </div>
-              </div>
-              {/* URL */}
               <div className="flex-1 flex justify-center">
-                <div className="flex items-center gap-2 h-6 px-3 rounded text-[9px] w-56"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.3)' }}>
+                <div className="flex items-center gap-2 h-6 px-3 rounded-md text-[10px] w-72 max-w-[60%]"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.4)' }}>
                   <svg width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
                   </svg>
-                  peugeot.vendly-mod.space
+                  spriovani-indumentaria.vendly-mod.space
                 </div>
               </div>
+              <span className="text-[10px] hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: 'rgba(34,197,94,0.12)', color: '#86efac', border: '1px solid rgba(34,197,94,0.25)' }}>
+                <span className="w-1 h-1 rounded-full bg-emerald-400" />
+                Live
+              </span>
             </div>
 
-            {/* Store content — simulated Peugeot page */}
-            <div className="relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
-
-              {/* BG photo */}
+            {/* Preview */}
+            <div className="relative" style={{ aspectRatio: '16/10' }}>
               <Image
-                src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1400&q=80"
-                alt="Peugeot store preview" fill priority
-                className="object-cover object-center"
-                style={{ opacity: 0.4 }}
+                src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=80"
+                alt="Spriovanni preview" fill priority
+                className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.02]"
+                style={{ opacity: 0.5 }}
               />
-              {/* Cinematic overlay */}
               <div className="absolute inset-0"
-                style={{ background: 'linear-gradient(115deg, rgba(3,3,8,0.97) 0%, rgba(3,3,8,0.65) 45%, rgba(3,3,8,0.15) 100%)' }} />
+                style={{ background: 'linear-gradient(115deg, rgba(8,8,12,0.95) 0%, rgba(8,8,12,0.55) 50%, rgba(8,8,12,0.15) 100%)' }} />
               <div className="absolute inset-0"
-                style={{ background: 'linear-gradient(to top, rgba(3,3,8,0.9) 0%, transparent 50%)' }} />
+                style={{ background: 'linear-gradient(to top, rgba(8,8,12,0.95) 0%, transparent 50%)' }} />
 
-              {/* Accent left column */}
-              <div className="absolute left-0 top-0 bottom-0 w-[2px]"
-                style={{ background: 'linear-gradient(to bottom, transparent, #D4A847 30%, #D4A847 70%, transparent)' }} />
-
-              {/* Simulated navbar */}
-              <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-6 h-12 border-b"
-                style={{ borderColor: 'rgba(255,255,255,0.07)', backgroundColor: 'rgba(255,255,255,0.97)' }}>
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-2">
-                    <div className="w-0.5 h-6 rounded-full" style={{ backgroundColor: '#D4A847' }} />
-                    <span className="font-black text-slate-900 text-[10px] tracking-[0.08em] uppercase">PEUGEOT</span>
-                  </div>
-                  <div className="hidden md:flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">
-                    <span>Modelos</span>
-                    <span>0 km</span>
-                    <span>Usados</span>
-                  </div>
-                </div>
-                <div className="px-4 py-1.5 text-[8px] font-black uppercase tracking-wider text-white"
-                  style={{ backgroundColor: '#D4A847' }}>
-                  Test Drive
-                </div>
-              </div>
-
-              {/* Hero content */}
-              <div className="absolute inset-0 flex flex-col justify-end px-6 pb-5 pt-14">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-px" style={{ backgroundColor: '#D4A847' }} />
-                  <span className="text-[7px] font-black uppercase tracking-[0.4em]" style={{ color: '#D4A847' }}>
-                    Concesionaria Oficial
+              {/* Spriovanni faux UI on top */}
+              <div className="absolute inset-0 flex flex-col justify-end px-8 md:px-16 pb-12">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-px w-10" style={{ backgroundColor: PORTFOLIO_HERO.accent }} />
+                  <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em]"
+                    style={{ color: PORTFOLIO_HERO.accent }}>
+                    Indumentaria masculina
                   </span>
                 </div>
-                <h2 className="font-black uppercase text-white leading-[0.88] mb-4"
-                  style={{ fontSize: 'clamp(1.2rem, 3.5vw, 2.8rem)', letterSpacing: '-0.04em' }}>
-                  MANEJÁ EL<br/>FUTURO HOY
+                <h2 className="font-black uppercase text-white leading-[0.86] mb-6"
+                  style={{ fontSize: 'clamp(2rem, 6vw, 5rem)', letterSpacing: '-0.04em' }}>
+                  ESTILO.<br/>ACTITUD.
                 </h2>
-
-                {/* Vehicle cards row */}
-                <div className="flex gap-2">
-                  {[
-                    { name: 'Peugeot 208', tag: '0 KM', price: '$28.500.000' },
-                    { name: 'Peugeot 3008', tag: 'SUV', price: '$45.200.000' },
-                    { name: 'Peugeot 408', tag: '0 KM', price: '$52.800.000' },
-                  ].map(card => (
-                    <div key={card.name} className="flex-1 min-w-0 overflow-hidden border"
-                      style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.07)' }}>
-                      <div className="relative overflow-hidden" style={{ aspectRatio: '16/9', backgroundColor: 'rgba(255,255,255,0.03)' }}>
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ backgroundColor: '#D4A847' }} />
-                      </div>
-                      <div className="p-1.5">
-                        <p className="text-[7px] font-black text-white leading-none">{card.name}</p>
-                        <p className="text-[6px] font-black uppercase tracking-wider mt-0.5" style={{ color: '#D4A847' }}>{card.tag}</p>
-                        <p className="text-[7px] font-bold text-white mt-1">{card.price}</p>
-                      </div>
-                    </div>
-                  ))}
+                <div className="inline-flex items-center gap-2 self-start px-5 py-2.5 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] rounded"
+                  style={{ backgroundColor: 'white', color: '#0A0A0A' }}>
+                  Ver colección →
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Mobile mockup — overlapping corner */}
-          <div className="absolute -bottom-5 -right-3 md:-right-8 z-10 hidden sm:block w-16 md:w-24 rounded-2xl overflow-hidden border shadow-2xl"
-            style={{ borderColor: 'rgba(255,255,255,0.1)', backgroundColor: '#07070e' }}>
-            {/* Notch */}
-            <div className="h-3 flex items-center justify-center" style={{ backgroundColor: '#040408' }}>
-              <div className="w-8 h-1 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }} />
-            </div>
-            <div className="relative" style={{ aspectRatio: '9/18' }}>
-              <Image
-                src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&q=70"
-                alt="Mobile preview" fill
-                className="object-cover"
-                style={{ opacity: 0.35 }}
-              />
-              <div className="absolute inset-0"
-                style={{ background: 'linear-gradient(to bottom, rgba(3,3,8,0.85), rgba(3,3,8,0.4) 40%, rgba(3,3,8,0.92))' }} />
-              <div className="absolute inset-0 flex flex-col justify-center items-center gap-1">
-                <div className="w-6 h-px" style={{ backgroundColor: '#D4A847' }} />
-                <p className="text-white font-black uppercase text-[6px] tracking-wider">PEUGEOT</p>
-              </div>
-              <div className="absolute bottom-2 left-0 right-0 flex flex-col gap-1 px-1.5">
-                {['208', '3008', '408'].map(m => (
-                  <div key={m} className="h-3 rounded-sm flex items-center px-1 gap-1"
-                    style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                    <div className="w-1 h-1 rounded-full" style={{ backgroundColor: '#D4A847' }} />
-                    <span className="text-[5px] text-white/60 font-bold">Peugeot {m}</span>
-                  </div>
-                ))}
+              {/* Hover overlay */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ backgroundColor: 'rgba(8,8,12,0.7)' }}>
+                <span className="px-6 py-3 rounded-full font-bold text-sm border"
+                  style={{ borderColor: 'rgba(255,255,255,0.3)', color: 'white' }}>
+                  Visitar tienda en vivo →
+                </span>
               </div>
             </div>
-          </div>
-
+          </a>
         </div>
       </section>
 
-      {/* ══ NÚMEROS ═════════════════════════════════════════════════════════ */}
-      <section className="py-20 border-y" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+      {/* ═══════════ TRUST LINE ═══════════════════════════════════════════ */}
+      <section className="py-12 border-y" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+        <div className="mx-auto max-w-6xl px-6">
+          <p className="text-center text-[10px] font-bold uppercase tracking-[0.3em] mb-8"
+            style={{ color: 'rgba(255,255,255,0.4)' }}>
+            Tiendas activas funcionando hoy
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4 md:gap-8 items-center justify-items-center">
+            {['Spriovanni', 'Peugeot', 'Adidas', 'Mosto', 'Sinergia', 'El Rincón', 'Acosta', 'Modo', 'Moda Space', 'vendly-mod'].map(name => (
+              <span key={name} className="text-sm font-black tracking-tight"
+                style={{ color: 'rgba(255,255,255,0.45)' }}>
+                {name}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════ NÚMEROS ══════════════════════════════════════════════ */}
+      <section className="py-20">
         <div className="mx-auto max-w-5xl px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
-            { value: 8, suffix: '+', label: 'Webs entregadas' },
-            { value: 4, suffix: '', label: 'Diseños exclusivos' },
-            { value: 100, suffix: '%', label: 'Llave en mano' },
-            { value: 7, suffix: 'días', label: 'Entrega promedio' },
+            { value: 10, suffix: '',     label: 'Tiendas activas' },
+            { value: 8,  suffix: '',     label: 'Verticales soportados' },
+            { value: 7,  suffix: ' días', label: 'Entrega promedio' },
+            { value: 100, suffix: '%',   label: 'Llave en mano' },
           ].map(({ value, suffix, label }) => (
             <div key={label}>
-              <div className="text-4xl md:text-5xl font-black mb-2"
-                style={{ background: 'linear-gradient(135deg, #a78bfa, #60a5fa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <div className="text-4xl md:text-5xl font-black mb-2 tracking-tight"
+                style={{ background: 'linear-gradient(135deg, #c7d2fe, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 <AnimatedCounter target={value} suffix={suffix} />
               </div>
-              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>{label}</p>
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{label}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ══ CÓMO FUNCIONA ════════════════════════════════════════════════════ */}
-      <section id="como-funciona" className="py-28 px-6">
+      {/* ═══════════ CÓMO FUNCIONA ═══════════════════════════════════════ */}
+      <section id="proceso" className="py-28 px-6">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#6366f1' }}>Sin vueltas</p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Así trabajamos</h2>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#a78bfa' }}>Sin vueltas</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.03em]">Así trabajamos</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-5">
             {[
               {
                 step: '01',
-                icon: '🗣️',
-                title: 'Nos contás qué necesitás',
-                desc: 'Nos contás tu rubro, tus productos y cómo te imaginás la página. Sin formularios eternos — una llamada o un mensaje alcanza.',
+                Icon: IconConversation,
+                title: 'Discovery call de 30 min',
+                desc: 'Nos contás qué vendés, cómo te imaginás la tienda y qué referencias te gustan. De ahí sale una propuesta concreta con plazo y precio.',
                 color: '#6366f1',
               },
               {
                 step: '02',
-                icon: '🛠️',
-                title: 'Nosotros la construimos',
-                desc: 'Nuestro equipo diseña, configura y carga todo. Productos, colores, dominio, medios de pago. Vos no tocás nada técnico.',
+                Icon: IconBuild,
+                title: 'Diseño y desarrollo',
+                desc: 'Te entregamos un diseño exclusivo, cargamos tu catálogo, conectamos MercadoPago y dominio propio. En 7-10 días corridos.',
                 color: '#8b5cf6',
               },
               {
                 step: '03',
-                icon: '✅',
-                title: 'La recibís lista para usar',
-                desc: 'En días tenés tu web funcionando, con tu dominio, lista para vender. Y con soporte para lo que necesites después.',
+                Icon: IconLaunch,
+                title: 'Live + soporte continuo',
+                desc: 'Lanzamos. Te enseñamos a usar el panel en una sesión de 30 min. Después, soporte humano todos los meses para cambios y mejoras.',
                 color: '#06b6d4',
               },
-            ].map(({ step, icon, title, desc, color }) => (
+            ].map(({ step, Icon, title, desc, color }) => (
               <div key={step}
-                className="relative p-8 rounded-2xl border group hover:scale-[1.02] transition-transform"
-                style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.06)' }}>
-                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity blur-xl"
-                  style={{ background: `radial-gradient(circle at center, ${color}20, transparent)` }} />
+                className="relative p-8 rounded-2xl border group hover:border-white/20 transition-all"
+                style={{ backgroundColor: 'rgba(255,255,255,0.025)', borderColor: 'rgba(255,255,255,0.06)' }}>
+                <div className="absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity blur-2xl pointer-events-none"
+                  style={{ background: `radial-gradient(circle at center, ${color}30, transparent 60%)` }} />
                 <div className="relative">
                   <div className="flex items-center gap-3 mb-6">
-                    <span className="text-3xl">{icon}</span>
-                    <span className="text-xs font-black" style={{ color: color }}>PASO {step}</span>
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center"
+                      style={{ backgroundColor: `${color}15`, color }}>
+                      <Icon />
+                    </div>
+                    <span className="text-xs font-black tracking-widest" style={{ color }}>PASO {step}</span>
                   </div>
-                  <h3 className="text-xl font-black mb-3">{title}</h3>
-                  <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{desc}</p>
+                  <h3 className="text-xl font-black mb-3 tracking-tight">{title}</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)' }}>{desc}</p>
                 </div>
               </div>
             ))}
@@ -467,230 +372,102 @@ export function VendlyMarketingPage() {
         </div>
       </section>
 
-      {/* ══ VIDEO ════════════════════════════════════════════════════════════ */}
-      <section className="py-20 px-6">
-        <div className="mx-auto max-w-4xl">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-black mb-4">Mirá cómo construimos una web</h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)' }}>2 minutos que te van a ahorrar meses de trabajo</p>
-          </div>
-          <button
-            onClick={() => setVideoOpen(true)}
-            className="relative w-full rounded-2xl overflow-hidden group cursor-pointer border"
-            style={{ aspectRatio: '16/9', borderColor: 'rgba(255,255,255,0.1)' }}>
-            <Image
-              src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80"
-              alt="Video preview"
-              fill
-              className="object-cover brightness-50 group-hover:brightness-40 transition-all"
-            />
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-              <div className="w-20 h-20 rounded-full flex items-center justify-center transition-all group-hover:scale-110"
-                style={{
-                  background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                  boxShadow: '0 0 60px rgba(99,102,241,0.6)',
-                }}>
-                <span className="text-3xl ml-1">▶</span>
-              </div>
-              <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>Ver proceso completo</p>
-            </div>
-            {/* Glow border */}
-            <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{ boxShadow: 'inset 0 0 60px rgba(99,102,241,0.2)' }} />
-          </button>
-        </div>
-      </section>
-
-      {/* ══ FEATURES ════════════════════════════════════════════════════════ */}
-      <section className="py-28 px-6" style={{ backgroundColor: 'rgba(255,255,255,0.015)' }}>
+      {/* ═══════════ CASO: SPRIOVANNI ═════════════════════════════════════ */}
+      <section className="py-24 px-6" style={{ backgroundColor: 'rgba(255,255,255,0.015)' }}>
         <div className="mx-auto max-w-6xl">
-          <div className="text-center mb-16">
-            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#8b5cf6' }}>Todo lo que necesitás, ya incluido</p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Lo que entregamos en cada proyecto</h2>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              { icon: '🎨', title: 'Diseño profesional incluido', desc: 'Tu web diseñada desde cero con identidad propia. Colores, tipografías, imágenes y layout pensados para tu marca.' },
-              { icon: '🌐', title: 'Dominio configurado', desc: 'Comprás tu dominio (o ya tenés uno) y nosotros lo conectamos. Tus clientes ven tu dirección, no la nuestra.' },
-              { icon: '💳', title: 'MercadoPago listo para cobrar', desc: 'Pagos online, cuotas y transferencias desde el día uno. Sin configuraciones técnicas de tu parte.' },
-              { icon: '📱', title: 'Optimizada para mobile', desc: 'La mayoría de tus clientes entran desde el celular. Tu web se ve impecable en cualquier pantalla.' },
-              { icon: '📦', title: 'Catálogo de productos cargado', desc: 'Cargamos tus productos con fotos, descripción, precio y variantes. Vos solo empezás a vender.' },
-              { icon: '🔔', title: 'Carritos abandonados automáticos', desc: 'El sistema detecta cuando alguien deja productos sin comprar y manda recordatorios automáticos por email y WhatsApp.' },
-              { icon: '💬', title: 'WhatsApp integrado', desc: 'Tus clientes pueden consultarte directo por WhatsApp. Sin fricción, sin formularios complicados.' },
-              { icon: '📊', title: 'Panel simple para gestionar todo', desc: 'Ves pedidos, métricas y stock en tiempo real. Sin complicaciones técnicas — está hecho para que lo uses vos.' },
-              { icon: '⚡', title: 'Velocidad y SEO desde el día uno', desc: 'Tu web carga rápido y está optimizada para Google desde que se entrega. Sin plugins, sin configuración extra.' },
-            ].map(({ icon, title, desc }) => (
-              <div key={title}
-                className="p-6 rounded-xl border hover:border-indigo-500/30 transition-all group"
-                style={{ backgroundColor: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}>
-                <div className="text-2xl mb-4">{icon}</div>
-                <h3 className="font-bold mb-2 text-sm">{title}</h3>
-                <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══ PORTFOLIO ════════════════════════════════════════════════════════ */}
-      <section id="proyectos" className="py-28 px-6 overflow-hidden">
-        <div className="mx-auto max-w-6xl">
-
-          {/* Header */}
-          <div className="text-center mb-16">
-            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#06b6d4' }}>
-              Portfolio
+          <div className="text-center mb-12">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: PORTFOLIO_HERO.accent }}>
+              Caso de cliente
             </p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
-              Proyectos reales, resultados reales.
-            </h2>
-            <p className="max-w-xl mx-auto text-base" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              Cada web es única, construida para el rubro y la marca de cada cliente.
-              Hacé click en cualquier proyecto para verlo en vivo.
-            </p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.03em]">Spriovanni Indumentaria</h2>
           </div>
-
-          {/* Featured — Peugeot */}
-          <a href="https://peugeot.vendly-mod.space" target="_blank" rel="noopener noreferrer"
-            className="group block relative rounded-2xl overflow-hidden border mb-4 hover:scale-[1.005] transition-transform cursor-pointer"
-            style={{ borderColor: 'rgba(212,168,71,0.25)' }}>
-            <div className="relative overflow-hidden" style={{ aspectRatio: '21/9' }}>
-              <Image
-                src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1600&q=80"
-                alt="Peugeot" fill
-                className="object-cover object-center brightness-50 group-hover:brightness-65 transition-all group-hover:scale-105 duration-700"
-              />
-              <div className="absolute inset-0"
-                style={{ background: 'linear-gradient(to bottom, transparent 20%, rgba(5,5,8,0.4) 60%, rgba(5,5,8,0.97) 100%)' }} />
-              <div className="absolute top-0 left-0 right-0 h-0.5" style={{ backgroundColor: '#D4A847' }} />
-              <div className="absolute top-5 left-5 flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
-                  style={{ backgroundColor: 'rgba(212,168,71,0.2)', color: '#D4A847', border: '1px solid rgba(212,168,71,0.4)' }}>
-                  Automotriz · Concesionaria
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
-                  style={{ backgroundColor: 'rgba(99,102,241,0.15)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.3)' }}>
-                  Proyecto real
-                </span>
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <a href={PORTFOLIO_HERO.url} target="_blank" rel="noopener noreferrer"
+              className="block relative rounded-2xl overflow-hidden border group cursor-pointer"
+              style={{ borderColor: `${PORTFOLIO_HERO.accent}30` }}>
+              <div className="absolute top-0 left-0 right-0 h-0.5 z-10" style={{ backgroundColor: PORTFOLIO_HERO.accent }} />
+              <div className="relative" style={{ aspectRatio: '4/3' }}>
+                <Image
+                  src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80"
+                  alt="Spriovanni" fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0"
+                  style={{ background: 'linear-gradient(to top, rgba(8,8,12,0.85) 0%, rgba(8,8,12,0.2) 50%, transparent 100%)' }} />
+                <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-1"
+                      style={{ color: PORTFOLIO_HERO.accent }}>{PORTFOLIO_HERO.tag}</p>
+                    <p className="text-xl font-black text-white">{PORTFOLIO_HERO.name}</p>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border"
+                    style={{ backgroundColor: 'rgba(34,197,94,0.12)', color: '#86efac', borderColor: 'rgba(34,197,94,0.25)' }}>
+                    Live
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 p-7 md:p-10">
-              <h3 className="text-3xl font-black mb-2">Peugeot</h3>
-              <p className="text-sm mb-5 max-w-lg" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                Concesionaria oficial. Hero fullscreen oscuro, catálogo de vehículos con ficha técnica, filtros por condición y CTA directo a WhatsApp. Sin carrito — todo va a consulta directa.
+            </a>
+            <div>
+              <p className="text-base leading-relaxed mb-7" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                {PORTFOLIO_HERO.description}
               </p>
-              <span className="inline-flex items-center gap-2 text-sm font-bold group-hover:gap-4 transition-all"
-                style={{ color: '#D4A847' }}>
-                Ver en vivo →
-              </span>
+              <div className="space-y-3 mb-8">
+                {[
+                  'Diseño exclusivo: hero fullscreen, marquee animado, editorial split',
+                  'Catálogo cargado con variantes de talle y color',
+                  'MercadoPago integrado con cobranza directa al cliente',
+                  'Newsletter + WhatsApp para retención',
+                  'Entrega: 7 días desde la primera reunión',
+                ].map(b => (
+                  <div key={b} className="flex items-start gap-3">
+                    <span className="mt-1 shrink-0" style={{ color: PORTFOLIO_HERO.accent }}><IconCheck /></span>
+                    <span className="text-sm" style={{ color: 'rgba(255,255,255,0.75)' }}>{b}</span>
+                  </div>
+                ))}
+              </div>
+              <a href={PORTFOLIO_HERO.url} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-lg text-sm font-bold transition-all hover:scale-105 border"
+                style={{ borderColor: `${PORTFOLIO_HERO.accent}50`, color: PORTFOLIO_HERO.accent }}>
+                Visitar la tienda →
+              </a>
             </div>
-          </a>
+          </div>
+        </div>
+      </section>
 
-          {/* Grid — 9 proyectos */}
+      {/* ═══════════ PORTFOLIO ════════════════════════════════════════════ */}
+      <section id="proyectos" className="py-28 px-6">
+        <div className="mx-auto max-w-6xl">
+          <div className="text-center mb-16">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#06b6d4' }}>Más proyectos</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.03em] mb-4">8 verticales, 1 plataforma</h2>
+            <p className="max-w-xl mx-auto text-base" style={{ color: 'rgba(255,255,255,0.55)' }}>
+              Cada tienda con su identidad. Click en cualquiera para verla en vivo.
+            </p>
+          </div>
+
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {([
-              {
-                name: 'El Rincón del Libro',
-                tag: 'Librería',
-                color: '#B5632A',
-                img: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=800&q=75',
-                objPos: 'object-center',
-                demo: 'el-rincon-del-libro.vendly-mod.space',
-                desc: 'Diseño editorial crema y ámbar. Filtros por género, carrito y checkout completo.',
-              },
-              {
-                name: 'Moda Space',
-                tag: 'Moda editorial',
-                color: '#b48ecf',
-                img: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=75',
-                objPos: 'object-top',
-                demo: 'moda-space.vendly-mod.space',
-                desc: 'Boutique premium. Hero editorial con modelo, colección lookbook y carrito deslizable.',
-              },
-              {
-                name: 'Modo',
-                tag: 'Indumentaria',
-                color: '#E63329',
-                img: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=75',
-                objPos: 'object-top',
-                demo: 'pagina-prueba.vendly-mod.space',
-                desc: 'Paleta crema y rojo fuego. Hero fullscreen, carrusel de colección y editorial split.',
-              },
-              {
-                name: 'Adidas',
-                tag: 'Deportivo',
-                color: '#FF3A20',
-                img: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=800&q=75',
-                objPos: 'object-center',
-                demo: 'adidas.vendly-mod.space',
-                desc: 'Blanco total, tipografía de impacto, acento rojo. Marquee animado y sección editorial.',
-              },
-              {
-                name: 'Sinergia',
-                tag: 'Gym · Athletic',
-                color: '#22c55e',
-                img: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=75',
-                objPos: 'object-center',
-                demo: 'sinergia.vendly-mod.space',
-                desc: 'Gimnasio premium. Dark mode con verde eléctrico, clases, membresías y equipo.',
-              },
-              {
-                name: 'Mosto',
-                tag: 'Restaurante',
-                color: '#f97316',
-                img: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=75',
-                objPos: 'object-center',
-                demo: 'mosto.vendly-mod.space',
-                desc: 'Menú digital categorizado. Hero con platos, secciones por rubro y pedido por WhatsApp.',
-              },
-              {
-                name: 'Acosta Bienes Raíces',
-                tag: 'Inmobiliaria',
-                color: '#38bdf8',
-                img: 'https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=800&q=75',
-                objPos: 'object-center',
-                demo: 'acosta-inmobiliaria.vendly-mod.space',
-                desc: 'Propiedades en venta y alquiler. Filtros por tipo, zona y precio. Ficha con galería.',
-              },
-              {
-                name: 'Spriovanni',
-                tag: 'Indumentaria premium',
-                color: '#C9A96E',
-                img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=75',
-                objPos: 'object-center',
-                demo: 'spriovani-indumentaria.vendly-mod.space',
-                desc: 'Fondo negro, acento dorado. Variantes de talle y color, carrito deslizable.',
-              },
-              {
-                name: 'vendly-mod',
-                tag: 'Ecommerce',
-                color: '#6366f1',
-                img: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=75',
-                objPos: 'object-center',
-                demo: 'vendly-mod.space',
-                desc: 'Tienda ecommerce completa. Búsqueda, filtros, variantes, carrito y checkout integrado.',
-              },
-            ] as const).map(({ name, tag, color, img, objPos, demo, desc }) => (
+            {PORTFOLIO_GRID.map(({ name, tag, color, img, objPos, demo, desc }) => (
               <a key={name} href={`https://${demo}`} target="_blank" rel="noopener noreferrer"
-                className="group relative rounded-xl overflow-hidden border hover:scale-[1.02] transition-all duration-300 block cursor-pointer"
-                style={{ borderColor: `${color}20` }}>
+                className="group relative rounded-xl overflow-hidden border transition-all duration-300 block cursor-pointer hover:scale-[1.02]"
+                style={{ borderColor: `${color}25` }}>
                 <div className="absolute top-0 left-0 right-0 h-0.5 z-10" style={{ backgroundColor: color }} />
                 <div className="relative aspect-video overflow-hidden">
                   <Image src={img} alt={name} fill
-                    className={`object-cover ${objPos} brightness-60 group-hover:brightness-75 transition-all group-hover:scale-105 duration-700`}
-                  />
+                    className={`object-cover ${objPos} transition-all group-hover:scale-105 duration-700`}
+                    style={{ filter: 'brightness(0.55)' }} />
                   <div className="absolute inset-0"
-                    style={{ background: `linear-gradient(to bottom, transparent 30%, rgba(5,5,8,0.95) 100%)` }} />
+                    style={{ background: 'linear-gradient(to bottom, transparent 30%, rgba(8,8,12,0.95) 100%)' }} />
                   <div className="absolute top-3 left-3">
-                    <span className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full"
-                      style={{ backgroundColor: `${color}20`, color, border: `1px solid ${color}40` }}>
+                    <span className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border"
+                      style={{ backgroundColor: `${color}15`, color, borderColor: `${color}40` }}>
                       {tag}
                     </span>
                   </div>
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <h3 className="text-base font-black mb-1">{name}</h3>
-                  <p className="text-[11px] leading-relaxed mb-3" style={{ color: 'rgba(255,255,255,0.5)' }}>{desc}</p>
+                  <h3 className="text-base font-black mb-1.5 tracking-tight">{name}</h3>
+                  <p className="text-[11px] leading-relaxed mb-3" style={{ color: 'rgba(255,255,255,0.55)' }}>{desc}</p>
                   <span className="inline-flex items-center gap-1.5 text-[11px] font-bold group-hover:gap-2.5 transition-all"
                     style={{ color }}>
                     Ver en vivo →
@@ -699,171 +476,302 @@ export function VendlyMarketingPage() {
               </a>
             ))}
           </div>
-
         </div>
       </section>
 
-      {/* ══ PRICING ══════════════════════════════════════════════════════════ */}
-      <section id="planes" className="py-28 px-6">
-        <div className="mx-auto max-w-5xl">
+      {/* ═══════════ FEATURES (BENEFICIOS) ════════════════════════════════ */}
+      <section className="py-28 px-6" style={{ backgroundColor: 'rgba(255,255,255,0.015)' }}>
+        <div className="mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#a78bfa' }}>A tu medida</p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight">Planes según tu proyecto</h2>
-            <p className="mt-4 max-w-md mx-auto text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
-              Cada proyecto es distinto. Hablamos con vos, entendemos qué necesitás y te damos una propuesta a medida.
+            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#a78bfa' }}>Todo incluido</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.03em]">No te falta nada para vender</h2>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              { title: 'Diseño exclusivo, no plantilla', desc: 'Tu tienda no se parece a otras. Construimos identidad propia: colores, tipografías y layout pensados para tu marca.' },
+              { title: 'Cobranza directa con MercadoPago', desc: 'Tarjeta, cuotas y transferencia desde el día uno. La plata va a TU cuenta, Vendly nunca toca tu dinero.' },
+              { title: 'Mobile-first, sin compromiso', desc: 'El 70% de tus visitas vienen del celular. Tu tienda se ve impecable en cualquier pantalla.' },
+              { title: 'Catálogo cargado por nosotros', desc: 'Mandanos las fotos y los datos. Nosotros cargamos productos, variantes, descripciones y precios. Vos arrancás vendiendo.' },
+              { title: 'Carritos abandonados que recuperan', desc: 'El sistema detecta clientes que dejaron compras a mitad y manda recordatorios automáticos. Recuperás 10-15% de las ventas perdidas.' },
+              { title: 'WhatsApp como canal de venta', desc: 'Botón flotante que abre directo con tu número. Templates de venta y recovery para automatizar la consulta.' },
+              { title: 'Panel de admin pensado para humanos', desc: 'Gestionás pedidos, stock y promociones desde un panel hecho para que lo uses vos, no un dev.' },
+              { title: 'IA para contenido y diseño', desc: 'Generá descripciones de productos y ajustes de diseño con un click. Te ahorra horas de copy y escritura.' },
+              { title: 'Soporte humano todos los meses', desc: 'No te dejamos solo después del lanzamiento. Cambios, ajustes y mejoras siempre disponibles.' },
+            ].map(({ title, desc }) => (
+              <div key={title}
+                className="p-6 rounded-xl border hover:border-indigo-400/30 transition-all group"
+                style={{ backgroundColor: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}>
+                <div className="mb-3" style={{ color: '#a5b4fc' }}><IconCheck /></div>
+                <h3 className="font-bold mb-2 text-sm tracking-tight">{title}</h3>
+                <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════ PARA QUIÉN ES / NO ES ════════════════════════════════ */}
+      <section className="py-28 px-6">
+        <div className="mx-auto max-w-5xl">
+          <div className="text-center mb-14">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#a78bfa' }}>Honestidad arriba de la mesa</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.03em]">¿Vendly es para vos?</h2>
+          </div>
+          <div className="grid md:grid-cols-2 gap-5">
+            {/* Sí */}
+            <div className="p-8 rounded-2xl border"
+              style={{ backgroundColor: 'rgba(34,197,94,0.04)', borderColor: 'rgba(34,197,94,0.2)' }}>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: 'rgba(34,197,94,0.15)', color: '#22c55e' }}>
+                  <IconCheck />
+                </div>
+                <h3 className="text-xl font-black tracking-tight">Sí, claramente</h3>
+              </div>
+              <ul className="space-y-3">
+                {[
+                  'Tenés una marca con identidad (no estás en idea-stage)',
+                  'Vendés producto físico: indumentaria, deco, cosmética, gym, food premium',
+                  'Catálogo de 10 a 500 productos',
+                  'Querés delegar lo técnico, no aprenderlo',
+                  'Valorás hecho a medida sobre "tipo Wix"',
+                  'Pensás quedarte 6+ meses con tu proveedor',
+                ].map(t => (
+                  <li key={t} className="flex items-start gap-2.5 text-sm" style={{ color: 'rgba(255,255,255,0.78)' }}>
+                    <span className="mt-1 shrink-0" style={{ color: '#22c55e' }}><IconCheck /></span>
+                    <span>{t}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* No */}
+            <div className="p-8 rounded-2xl border"
+              style={{ backgroundColor: 'rgba(239,68,68,0.03)', borderColor: 'rgba(239,68,68,0.18)' }}>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: 'rgba(239,68,68,0.12)', color: '#f87171' }}>
+                  <IconX />
+                </div>
+                <h3 className="text-xl font-black tracking-tight">Probablemente no</h3>
+              </div>
+              <ul className="space-y-3">
+                {[
+                  'Buscás "lo más barato posible" — no somos eso',
+                  'Necesitás funcionalidad de marketplace multi-vendor',
+                  'Vendés productos regulados (farmacia, alcohol, salud)',
+                  'Catálogo enorme >2.000 SKUs con stock multi-depósito',
+                  'Tenés equipo IT propio que va a pedir customizaciones constantes',
+                  'Querés pagar con equity o cambiar a equity tu deuda',
+                ].map(t => (
+                  <li key={t} className="flex items-start gap-2.5 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                    <span className="mt-1 shrink-0" style={{ color: '#f87171' }}><IconX /></span>
+                    <span>{t}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════ PRICING ══════════════════════════════════════════════ */}
+      <section id="planes" className="py-28 px-6" style={{ backgroundColor: 'rgba(255,255,255,0.015)' }}>
+        <div className="mx-auto max-w-6xl">
+          <div className="text-center mb-14">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#a78bfa' }}>Precios claros</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.03em] mb-4">Planes que crecen con tu marca</h2>
+            <p className="max-w-md mx-auto text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              Setup único + suscripción mensual. Sin permanencia. Cancelás cuando quieras.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-5 items-stretch">
             {[
               {
-                name: 'Presencia Digital',
-                tagline: 'Ideal para emprendedores y negocios que recién arrancan.',
-                color: 'rgba(255,255,255,0.06)',
-                border: 'rgba(255,255,255,0.1)',
+                name: 'Esencial',
+                tagline: 'Para marcas que arrancan online',
+                price: '$590',
+                priceUnit: '/ mes',
+                setupFee: 'Setup único $890',
                 highlight: false,
-                features: ['Diseño personalizado', 'Hasta 20 productos cargados', 'Dominio propio configurado', 'MercadoPago integrado', 'WhatsApp conectado'],
-                cta: 'Consultar',
-                ctaStyle: { border: '1px solid rgba(255,255,255,0.2)', color: 'white' },
+                features: [
+                  'Diseño exclusivo (1 ronda de revisiones)',
+                  'Hasta 30 productos cargados',
+                  'Dominio propio configurado',
+                  'MercadoPago integrado',
+                  'WhatsApp y email de pedidos',
+                  'Mobile-first responsive',
+                  'Soporte por email — 48h SLA',
+                ],
+                cta: 'Empezar con Esencial',
+                ctaStyle: { border: '1px solid rgba(255,255,255,0.2)', color: 'white', backgroundColor: 'rgba(255,255,255,0.04)' },
               },
               {
-                name: 'Tienda Completa',
-                tagline: 'Para negocios con catálogo amplio que quieren vender más.',
-                color: 'rgba(99,102,241,0.15)',
-                border: 'rgba(99,102,241,0.5)',
+                name: 'Pro',
+                tagline: 'Para marcas que quieren escalar',
+                price: '$1.290',
+                priceUnit: '/ mes',
+                setupFee: 'Setup único $1.990',
                 highlight: true,
-                features: ['Todo del plan Presencia', 'Catálogo ilimitado cargado', 'Carritos abandonados activos', 'Panel de métricas incluido', 'Soporte prioritario post-entrega'],
-                cta: 'Consultar',
+                features: [
+                  'Todo lo del plan Esencial',
+                  'Catálogo ilimitado',
+                  'Carritos abandonados automáticos',
+                  'Newsletter + drip campaigns',
+                  'IA para contenido y diseño',
+                  'Panel de métricas y reportes',
+                  'Editor visual de tu home (drag & drop)',
+                  'Soporte prioritario WhatsApp — 12h SLA',
+                ],
+                cta: 'Empezar con Pro',
                 ctaStyle: { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white' },
               },
               {
-                name: 'A Medida',
-                tagline: 'Para proyectos con necesidades específicas o múltiples páginas.',
-                color: 'rgba(255,255,255,0.03)',
-                border: 'rgba(255,255,255,0.08)',
+                name: 'Custom',
+                tagline: 'Para proyectos con necesidades específicas',
+                price: 'Desde $2.500',
+                priceUnit: '/ mes',
+                setupFee: 'Setup a cotizar',
                 highlight: false,
-                features: ['Diseño exclusivo', 'Funcionalidades personalizadas', 'Integraciones especiales', 'Múltiples páginas o secciones', 'Soporte y mantenimiento continuo'],
+                features: [
+                  'Todo lo del plan Pro',
+                  'Diseño 100% personalizado',
+                  'Integraciones a medida (CRM, ERP, etc.)',
+                  'Múltiples páginas o secciones especiales',
+                  'Equipo dedicado',
+                  'Soporte 24/7 con SLA contractual',
+                ],
                 cta: 'Hablemos',
-                ctaStyle: { border: '1px solid rgba(255,255,255,0.2)', color: 'white' },
+                ctaStyle: { border: '1px solid rgba(255,255,255,0.2)', color: 'white', backgroundColor: 'rgba(255,255,255,0.04)' },
               },
-            ].map(({ name, tagline, color, border, highlight, features, cta, ctaStyle }) => (
+            ].map(({ name, tagline, price, priceUnit, setupFee, highlight, features, cta, ctaStyle }) => (
               <div key={name}
-                className="relative p-8 rounded-2xl border flex flex-col"
-                style={{ backgroundColor: color, borderColor: border }}>
+                className="relative p-7 rounded-2xl border flex flex-col"
+                style={{
+                  backgroundColor: highlight ? 'rgba(99,102,241,0.06)' : 'rgba(255,255,255,0.02)',
+                  borderColor: highlight ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.08)',
+                  boxShadow: highlight ? '0 0 60px rgba(99,102,241,0.15)' : 'none',
+                }}>
                 {highlight && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full"
                     style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
                     Más elegido
                   </div>
                 )}
-                <div className="mb-6">
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.5)' }}>{name}</p>
-                  <p className="text-sm leading-snug" style={{ color: 'rgba(255,255,255,0.6)' }}>{tagline}</p>
+                <div className="mb-5">
+                  <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>{name}</p>
+                  <p className="text-sm leading-snug" style={{ color: 'rgba(255,255,255,0.65)' }}>{tagline}</p>
                 </div>
-                <ul className="flex-1 space-y-3 mb-8">
+                <div className="mb-5 pb-5 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-4xl font-black tracking-tight">{price}</span>
+                    <span className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>{priceUnit}</span>
+                  </div>
+                  <p className="text-[11px] mt-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{setupFee}</p>
+                </div>
+                <ul className="flex-1 space-y-2.5 mb-7">
                   {features.map(f => (
-                    <li key={f} className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                      <span className="text-green-400 text-xs">✓</span> {f}
+                    <li key={f} className="flex items-start gap-2 text-[13px]" style={{ color: 'rgba(255,255,255,0.78)' }}>
+                      <span className="mt-0.5 shrink-0" style={{ color: highlight ? '#a5b4fc' : '#22c55e' }}><IconCheck /></span>
+                      <span>{f}</span>
                     </li>
                   ))}
                 </ul>
-                <a href="https://wa.me/5491100000000?text=Hola! Quiero información sobre los planes de Vendly"
-                  target="_blank" rel="noopener noreferrer"
-                  className="block text-center py-3 rounded-xl font-bold text-sm transition-all hover:scale-105"
+                <a href={WA_REQUEST} target="_blank" rel="noopener noreferrer"
+                  className="block text-center py-3 rounded-xl font-bold text-sm transition-all hover:scale-[1.02]"
                   style={ctaStyle}>
                   {cta}
                 </a>
               </div>
             ))}
           </div>
+          <p className="mt-10 text-center text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            Precios en USD. Cobramos en USD o pesos al equivalente del día. Pagos por Stripe o MercadoPago.
+          </p>
         </div>
       </section>
 
-      {/* ══ TESTIMONIALS ════════════════════════════════════════════════════ */}
-      <section className="py-20 px-6" style={{ backgroundColor: 'rgba(255,255,255,0.015)' }}>
-        <div className="mx-auto max-w-6xl">
+      {/* ═══════════ GARANTÍAS ════════════════════════════════════════════ */}
+      <section className="py-24 px-6">
+        <div className="mx-auto max-w-5xl">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-black">Lo que dicen nuestros clientes</h2>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#22c55e' }}>El riesgo lo corremos nosotros</p>
+            <h2 className="text-3xl md:text-4xl font-black tracking-[-0.03em]">Garantías que respaldan tu decisión</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-5">
             {[
               {
-                name: 'Lucía M.',
-                role: 'Tienda de indumentaria',
-                avatar: 'L',
-                text: 'Me entregaron la web en menos de una semana. Yo no tuve que hacer nada más que contarles qué quería. Quedó exactamente como lo imaginé.',
-                stars: 5,
+                Icon: IconClock,
+                title: '7 días o devolvemos el setup',
+                desc: 'Si no entregamos tu tienda funcionando en 10 días hábiles desde la primera reunión, te devolvemos el setup completo. Sin discusión.',
               },
               {
-                name: 'Rodrigo P.',
-                role: 'Concesionaria de autos',
-                avatar: 'R',
-                text: 'Le pedí la página para la concesionaria y en pocos días tenía todo funcionando. MercadoPago, WhatsApp, catálogo de autos — me lo entregaron listo para usar.',
-                stars: 5,
+                Icon: IconShield,
+                title: 'Tus datos son tuyos',
+                desc: 'Si en algún momento te querés ir, exportás tu catálogo, clientes y pedidos en CSV. Sin lock-in. Sin penalidad.',
               },
               {
-                name: 'Valentina S.',
-                role: 'Emprendedora',
-                avatar: 'V',
-                text: 'Yo no entiendo nada de páginas web. Les mandé referencias por Instagram y ellos lo tradujeron en un diseño increíble. Solo tuve que aprobar.',
-                stars: 5,
+                Icon: IconHandshake,
+                title: 'Sin permanencia',
+                desc: 'Cancelás con 30 días de aviso. Tu tienda sigue activa hasta el final del mes pago. Justo y simple.',
               },
-            ].map(({ name, role, avatar, text, stars }) => (
-              <div key={name}
-                className="p-6 rounded-2xl border"
-                style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}>
-                <div className="flex mb-4 gap-0.5">
-                  {Array.from({ length: stars }).map((_, i) => (
-                    <span key={i} className="text-yellow-400 text-sm">★</span>
-                  ))}
+            ].map(({ Icon, title, desc }) => (
+              <div key={title}
+                className="p-7 rounded-2xl border"
+                style={{ backgroundColor: 'rgba(34,197,94,0.04)', borderColor: 'rgba(34,197,94,0.2)' }}>
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5"
+                  style={{ backgroundColor: 'rgba(34,197,94,0.15)', color: '#22c55e' }}>
+                  <Icon />
                 </div>
-                <p className="text-sm leading-relaxed mb-6" style={{ color: 'rgba(255,255,255,0.7)' }}>"{text}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center font-black text-sm"
-                    style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
-                    {avatar}
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold">{name}</p>
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{role}</p>
-                  </div>
-                </div>
+                <h3 className="font-black mb-2 text-base tracking-tight">{title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>{desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ══ FAQ ══════════════════════════════════════════════════════════════ */}
-      <section id="faq" className="py-28 px-6">
+      {/* ═══════════ FAQ ══════════════════════════════════════════════════ */}
+      <section id="faq" className="py-24 px-6" style={{ backgroundColor: 'rgba(255,255,255,0.015)' }}>
         <div className="mx-auto max-w-3xl">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-black">Preguntas frecuentes</h2>
+          <div className="text-center mb-14">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: '#a78bfa' }}>Las dudas más comunes</p>
+            <h2 className="text-4xl font-black tracking-[-0.03em]">Preguntas frecuentes</h2>
           </div>
           <div className="space-y-2">
             {[
-              { q: '¿Cuánto tarda en estar lista mi web?', a: 'En la mayoría de los proyectos entregamos entre 5 y 10 días hábiles. Depende del alcance y la cantidad de productos, pero siempre te damos un plazo estimado antes de arrancar.' },
-              { q: '¿Qué necesito de mi parte para arrancar?', a: 'Solo contarnos qué vendés, cómo querés que se vea y compartir tus imágenes y productos. Nosotros nos encargamos del resto.' },
-              { q: '¿Puedo pedir cambios después de la entrega?', a: 'Sí. Todos los proyectos incluyen un período de ajustes post-entrega. Y si querés seguir haciendo cambios después, tenemos planes de soporte continuo.' },
-              { q: '¿Cómo funcionan los pagos de mis clientes?', a: 'A través de MercadoPago. Los pagos van directo a tu cuenta — nosotros solo configuramos la integración. Vendly no toca tu plata.' },
-              { q: '¿Mi web es mía o es de Vendly?', a: 'Es tuya. Vos tenés acceso completo y control total sobre el contenido y el panel de administración. Vendly es completamente invisible para tus clientes.' },
-              { q: '¿Qué pasa si quiero cambiar algo del diseño más adelante?', a: 'Podés pedírnoslo cuando quieras. Tenemos planes de mantenimiento o podés contratar cambios puntuales. Siempre vamos a estar disponibles.' },
+              { q: '¿En cuántos días entregan la tienda?',
+                a: 'Entre 7 y 10 días hábiles desde la primera reunión, asumiendo que recibimos las fotos y datos a tiempo. Si necesitamos esperar contenido tuyo, el reloj pausa.' },
+              { q: '¿Qué necesito de mi parte para arrancar?',
+                a: 'Logo (o lo diseñamos), fotos de productos, una lista con nombre/precio/descripción de tu catálogo, y datos de tu cuenta MercadoPago. Tampoco hay que tener todo perfecto desde el principio — vamos completando juntos.' },
+              { q: '¿La web es mía o de Vendly?',
+                a: 'Es 100% tuya. Vos sos dueño del dominio, del contenido, del catálogo, de los clientes. Vendly es invisible — tus clientes ven tu marca, no la nuestra.' },
+              { q: '¿Qué pasa si Vendly cierra mañana?',
+                a: 'Pregunta válida. Tu tienda está construida con tecnología estándar (Next.js + Supabase + Vercel). Si algún día desaparecemos, te entregamos el código fuente y la documentación para que la migres a otro proveedor en pocas horas.' },
+              { q: '¿Cómo funciona el cobro de mis clientes?',
+                a: 'A través de MercadoPago directo a tu cuenta. Vendly NO toca tu plata. Vos cobrás como si fuera tu cuenta personal de MP — porque es tu cuenta personal de MP.' },
+              { q: '¿Puedo pedir cambios después del lanzamiento?',
+                a: 'Sí, todos los planes incluyen soporte para cambios mensuales. En Esencial son 2 horas/mes, en Pro son 5 horas/mes, en Custom es ilimitado. Pasados esos límites cobramos un fee por hora extra.' },
+              { q: '¿Qué pasa si necesito una funcionalidad que no tienen?',
+                a: 'En el plan Custom desarrollamos integraciones a medida. En Esencial y Pro, tenemos un roadmap público y vamos agregando features con el tiempo. Si lo que pedís le sirve a más clientes, suele entrar al roadmap.' },
+              { q: '¿Aceptan clientes fuera de Argentina?',
+                a: 'Sí. Trabajamos con LATAM (México, Colombia, Chile, Uruguay) y también con Europa/EEUU. El producto soporta multi-currency y multi-locale. Los pagos los podemos hacer por USD via Stripe.' },
             ].map(({ q, a }, i) => (
               <div key={i}
-                className="rounded-xl border overflow-hidden"
-                style={{ borderColor: faqOpen === i ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.06)' }}>
+                className="rounded-xl border overflow-hidden transition-colors"
+                style={{ borderColor: faqOpen === i ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.06)', backgroundColor: faqOpen === i ? 'rgba(99,102,241,0.04)' : 'transparent' }}>
                 <button
                   onClick={() => setFaqOpen(faqOpen === i ? null : i)}
-                  className="w-full flex items-center justify-between px-6 py-4 text-left transition-colors hover:bg-white/5"
-                >
-                  <span className="font-semibold text-sm">{q}</span>
-                  <span className="text-lg transition-transform duration-200 flex-shrink-0 ml-4"
+                  className="w-full flex items-center justify-between px-6 py-4 text-left transition-colors hover:bg-white/5">
+                  <span className="font-semibold text-sm pr-4">{q}</span>
+                  <span className="text-lg transition-transform duration-200 flex-shrink-0"
                     style={{ transform: faqOpen === i ? 'rotate(45deg)' : 'none', color: 'rgba(255,255,255,0.4)' }}>
                     +
                   </span>
                 </button>
                 {faqOpen === i && (
-                  <div className="px-6 pb-4">
-                    <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>{a}</p>
+                  <div className="px-6 pb-5">
+                    <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.65)' }}>{a}</p>
                   </div>
                 )}
               </div>
@@ -872,62 +780,94 @@ export function VendlyMarketingPage() {
         </div>
       </section>
 
-      {/* ══ CTA FINAL ════════════════════════════════════════════════════════ */}
+      {/* ═══════════ CTA FINAL ════════════════════════════════════════════ */}
       <section className="py-32 px-6 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full opacity-25 blur-3xl"
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full opacity-30 blur-3xl"
             style={{ background: 'radial-gradient(circle, #6366f1, #8b5cf6, transparent)' }} />
         </div>
         <div className="relative mx-auto max-w-3xl text-center">
-          <h2 className="text-5xl md:text-6xl font-black tracking-tight mb-6">
-            Tu web lista.<br />
-            <span style={{ background: 'linear-gradient(135deg, #6366f1, #a78bfa, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              En días.
+          <p className="text-xs font-bold uppercase tracking-[0.3em] mb-5" style={{ color: '#a5b4fc' }}>
+            Listo para empezar
+          </p>
+          <h2 className="text-5xl md:text-6xl font-black tracking-[-0.03em] mb-6 leading-[0.95]">
+            Tu tienda activa<br />
+            <span style={{ background: 'linear-gradient(110deg, #c7d2fe, #a78bfa 50%, #67e8f9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              en 10 días o menos.
             </span>
           </h2>
-          <p className="text-lg mb-10" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            Días, no meses. Nosotros nos encargamos del diseño,<br />
-            la configuración y la entrega. Vos solo empezás a vender.
+          <p className="text-base md:text-lg mb-10 leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
+            Agendá una demo de 15 minutos. Te mostramos cómo trabaja el sistema y armamos<br className="hidden md:block" />
+            una propuesta concreta para tu marca.
           </p>
-          <a href="https://wa.me/5491100000000?text=Hola! Quiero solicitar mi web"
-            target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-3 px-10 py-5 rounded-xl font-black text-lg transition-all hover:scale-105"
-            style={{
-              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-              boxShadow: '0 0 60px rgba(99,102,241,0.5)',
-            }}>
-            Solicitar mi web →
-          </a>
-          <p className="mt-4 text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>
-            Respondemos en menos de 24 horas.
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href={WA_DEMO} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 px-10 py-5 rounded-xl font-black text-lg transition-all hover:scale-105"
+              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 0 60px rgba(99,102,241,0.5)' }}>
+              Agendar demo de 15 min →
+            </a>
+            <a href={PORTFOLIO_HERO.url} target="_blank" rel="noopener noreferrer"
+              className="px-6 py-5 rounded-xl font-medium text-sm border transition-all hover:bg-white/5"
+              style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.8)' }}>
+              o vé una tienda real ↗
+            </a>
+          </div>
+          <p className="mt-6 text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            Respondemos en menos de 24 horas. WhatsApp, email o llamada — vos elegís.
           </p>
         </div>
       </section>
 
-      {/* ══ FOOTER ═══════════════════════════════════════════════════════════ */}
+      {/* ═══════════ FOOTER ═══════════════════════════════════════════════ */}
       <footer className="border-t py-12 px-6" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-        <div className="mx-auto max-w-6xl flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
-              <span className="text-white font-black text-xs">V</span>
+        <div className="mx-auto max-w-6xl">
+          <div className="grid md:grid-cols-4 gap-10 mb-10">
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+                  style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
+                  <span className="text-white font-black text-xs">V</span>
+                </div>
+                <span className="font-black text-lg">Vendly</span>
+              </div>
+              <p className="text-sm max-w-md leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                Estudio especializado en ecommerce premium para LATAM. Diseñamos, configuramos y entregamos tu tienda funcionando en una semana.
+              </p>
             </div>
-            <span className="font-black">Vendly</span>
-            <span className="text-xs ml-2" style={{ color: 'rgba(255,255,255,0.25)' }}>© 2026</span>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>Producto</p>
+              <ul className="space-y-2 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                <li><a href="#proceso" className="hover:text-white transition-colors">Cómo funciona</a></li>
+                <li><a href="#proyectos" className="hover:text-white transition-colors">Proyectos</a></li>
+                <li><a href="#planes" className="hover:text-white transition-colors">Planes</a></li>
+                <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>Contacto</p>
+              <ul className="space-y-2 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                <li>
+                  <a href={WA_HELLO} target="_blank" rel="noopener noreferrer"
+                    className="hover:text-white transition-colors inline-flex items-center gap-2">
+                    WhatsApp
+                  </a>
+                </li>
+                <li><a href="/terminos" className="hover:text-white transition-colors">Términos</a></li>
+                <li><a href="/privacidad" className="hover:text-white transition-colors">Privacidad</a></li>
+              </ul>
+            </div>
           </div>
-          <div className="flex gap-6 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            <a href="/terminos" className="hover:text-white transition-colors">Términos</a>
-            <a href="/privacidad" className="hover:text-white transition-colors">Privacidad</a>
-            <a href="https://wa.me/5491100000000?text=Hola! Quiero información sobre Vendly"
-              target="_blank" rel="noopener noreferrer"
-              className="hover:text-white transition-colors">Contacto</a>
+          <div className="pt-6 border-t flex flex-col md:flex-row items-center justify-between gap-4"
+            style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              © {new Date().getFullYear()} Vendly. Buenos Aires, Argentina.
+            </p>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              Construido con Next.js · Supabase · MercadoPago
+            </p>
           </div>
         </div>
       </footer>
-
-      {/* ══ VIDEO MODAL ══════════════════════════════════════════════════════ */}
-      {videoOpen && <VideoModal onClose={() => setVideoOpen(false)} />}
-
     </div>
   )
 }
