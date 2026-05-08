@@ -2,6 +2,9 @@ import { MetadataRoute } from 'next'
 import { createServiceClient } from '@/lib/supabase/server'
 import { getStoreConfig } from '@/lib/store'
 
+// El sitemap depende del subdomain del request — multi-tenant. No prerenderear.
+export const dynamic = 'force-dynamic'
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createServiceClient()
   // Resolución dinámica del store y base URL para soporte multi-tenant

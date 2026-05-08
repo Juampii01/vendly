@@ -27,8 +27,13 @@ function suggestCouponCode(buyerName: string | null): string {
 }
 
 function formatPhone(phone: string): string {
-  const digits = phone.replace(/\D/g, '')
-  if (digits.startsWith('54')) return digits
+  const trimmed = phone.trim()
+  // Si ya tiene `+`, devolvemos los dígitos
+  if (trimmed.startsWith('+')) return trimmed.slice(1).replace(/\D/g, '')
+  const digits = trimmed.replace(/\D/g, '')
+  // Si tiene 11+ dígitos asumimos que ya incluye country code
+  if (digits.length >= 11) return digits
+  // Fallback AR para números locales sin country code
   if (digits.startsWith('0')) return '54' + digits.slice(1)
   return '54' + digits
 }
@@ -105,14 +110,18 @@ function WAModal({ cart, storeUrl, storeName, onClose, onSent }: WAModalProps) {
         return
       }
 
-      // 2. Registrar whatsapp_count en el carrito
+      // 2. Registrar whatsapp_count en el carrito (action: wa_sent — no lo marca recovered)
       await fetch('/api/admin/carritos', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: cart.id }),
+        body: JSON.stringify({ id: cart.id, action: 'wa_sent' }),
       })
 
-      // 3. Abrir WhatsApp
+      // 3. Abrir WhatsApp — guardamos contra exceder ~2000 chars de URL
+      if (waLink.length > 2000) {
+        setError('El mensaje es demasiado largo. Reducí la cantidad de productos.')
+        return
+      }
       window.open(waLink, '_blank')
       onSent(cart.id)
       onClose()
@@ -362,7 +371,7 @@ export function CarritosClient({ initialCarts, storeUrl, storeName }: Props) {
       await fetch('/api/admin/carritos', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ id, action: 'recover' }),
       })
       setCarts(prev => prev.filter(c => c.id !== id))
     } finally {
@@ -371,7 +380,12 @@ export function CarritosClient({ initialCarts, storeUrl, storeName }: Props) {
   }, [])
 
   const handleSent = useCallback((cartId: string) => {
-    setCarts(prev => prev.filter(c => c.id !== cartId))
+    // Después de mandar WA NO marcamos el carrito como recuperado — solo
+    // actualizamos el contador. El admin puede hacer click en "Recuperado"
+    // si efectivamente cerró la venta.
+    setCarts(prev =>
+      prev.map(c => (c.id === cartId ? { ...c, whatsapp_count: c.whatsapp_count + 1 } : c)),
+    )
   }, [])
 
   if (carts.length === 0) {

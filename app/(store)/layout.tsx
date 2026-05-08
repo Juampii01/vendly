@@ -19,6 +19,9 @@ import { PageEnter } from '@/components/store/motion'
 import { getSiteFeatures } from '@/lib/site-features'
 import type { Metadata } from 'next'
 
+// Store layout depende del subdomain/cookie del request — nunca prerenderear.
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata(): Promise<Metadata> {
   const store = await getStoreConfig()
   return {

@@ -5,6 +5,8 @@ import { getStoreConfig } from '@/lib/store'
 import { getStoreId } from '@/lib/tenant'
 import { AdminSidebar } from '@/components/admin/Sidebar'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   // El middleware ya validó la sesión y redirige si no hay usuario.
   // Leemos user desde los headers que inyectó el middleware —
