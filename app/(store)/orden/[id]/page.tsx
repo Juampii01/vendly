@@ -5,6 +5,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { getStoreConfig } from '@/lib/store'
 import { getStoreId } from '@/lib/tenant'
 import { ClearCartOnSuccess } from '@/components/store/ClearCartOnSuccess'
+import { formatPrice } from '@/lib/format'
 import type { Order } from '@/types'
 import type { Metadata } from 'next'
 
@@ -113,7 +114,7 @@ export default async function OrdenPage({ params }: PageProps) {
                 )}
                 <p className="text-xs opacity-50">x{item.quantity}</p>
               </div>
-              <span className="text-sm font-bold">{formatPrice(item.subtotal)}</span>
+              <span className="text-sm font-bold">{formatPrice(item.subtotal, store.currency, store.locale)}</span>
             </li>
           ))}
         </ul>
@@ -122,21 +123,21 @@ export default async function OrdenPage({ params }: PageProps) {
         <div className="space-y-2 border-t border-black/10 pt-4 text-sm">
           <div className="flex justify-between">
             <span className="opacity-60">Subtotal</span>
-            <span>{formatPrice(order.subtotal)}</span>
+            <span>{formatPrice(order.subtotal, store.currency, store.locale)}</span>
           </div>
           {order.discount_amount > 0 && (
             <div className="flex justify-between text-green-600">
               <span>Descuento</span>
-              <span>−{formatPrice(order.discount_amount)}</span>
+              <span>−{formatPrice(order.discount_amount, store.currency, store.locale)}</span>
             </div>
           )}
           <div className="flex justify-between">
             <span className="opacity-60">Envío</span>
-            <span>{order.shipping_amount === 0 ? 'Gratis' : formatPrice(order.shipping_amount)}</span>
+            <span>{order.shipping_amount === 0 ? 'Gratis' : formatPrice(order.shipping_amount, store.currency, store.locale)}</span>
           </div>
           <div className="flex justify-between border-t border-black/10 pt-2 text-base font-bold">
             <span>Total</span>
-            <span>{formatPrice(order.total)}</span>
+            <span>{formatPrice(order.total, store.currency, store.locale)}</span>
           </div>
         </div>
 
@@ -171,14 +172,6 @@ export default async function OrdenPage({ params }: PageProps) {
       </div>
     </div>
   )
-}
-
-function formatPrice(n: number): string {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    maximumFractionDigits: 0,
-  }).format(n)
 }
 
 function OrderStatusBadge({

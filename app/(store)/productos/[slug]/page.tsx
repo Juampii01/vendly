@@ -8,6 +8,7 @@ import { RealEstatePropertyDetail } from '@/components/store/real-estate/RealEst
 import { DealershipVehicleDetail } from '@/components/store/dealership/DealershipVehicleDetail'
 import { FadeUp, SlideLeft, SlideRight, StaggerGrid, StaggerItem } from '@/components/store/motion'
 import { getSiteFeatures } from '@/lib/site-features'
+import { formatPrice } from '@/lib/format'
 import type { Metadata } from 'next'
 
 interface PageProps {
@@ -68,7 +69,7 @@ export default async function ProductoPage({ params }: PageProps) {
     brand: { '@type': 'Brand', name: store.name },
     offers: {
       '@type': 'Offer',
-      priceCurrency: 'ARS',
+      priceCurrency: store.currency,
       price: product.price,
       availability: hasStock
         ? 'https://schema.org/InStock'
@@ -131,11 +132,11 @@ export default async function ProductoPage({ params }: PageProps) {
 
           {/* Precio */}
           <div className="flex items-baseline gap-3">
-            <span className="text-2xl font-black">{formatPrice(product.price)}</span>
+            <span className="text-2xl font-black">{formatPrice(product.price, store.currency, store.locale)}</span>
             {isOnSale && (
               <>
                 <span className="text-base line-through opacity-30">
-                  {formatPrice(product.compare_at_price!)}
+                  {formatPrice(product.compare_at_price!, store.currency, store.locale)}
                 </span>
                 <span className="px-2 py-0.5 text-[11px] font-bold text-white"
                   style={{ backgroundColor: store.color_accent }}>
@@ -202,6 +203,3 @@ export default async function ProductoPage({ params }: PageProps) {
   )
 }
 
-function formatPrice(n: number): string {
-  return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n)
-}

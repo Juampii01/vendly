@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useCartStore } from '@/lib/cart'
-import { formatVariantLabel } from '@/lib/format'
+import { formatVariantLabel, formatPrice } from '@/lib/format'
 import type { StoreConfig } from '@/types'
 
 interface CartPageClientProps {
@@ -111,9 +111,9 @@ export function CartPageClient({ store }: CartPageClientProps) {
                       </p>
                     )}
                     <p className="text-sm font-bold" style={{ color: store.color_primary }}>
-                      {formatPrice(item.unit_price * item.quantity)}
+                      {formatPrice(item.unit_price * item.quantity, store.currency, store.locale)}
                     </p>
-                    <p className="text-xs opacity-40">{formatPrice(item.unit_price)} c/u</p>
+                    <p className="text-xs opacity-40">{formatPrice(item.unit_price, store.currency, store.locale)} c/u</p>
 
                     {/* Controles */}
                     <div className="mt-2 flex items-center gap-3">
@@ -200,26 +200,26 @@ export function CartPageClient({ store }: CartPageClientProps) {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="opacity-60">Subtotal</span>
-              <span>{formatPrice(subtotal)}</span>
+              <span>{formatPrice(subtotal, store.currency, store.locale)}</span>
             </div>
             {discount > 0 && (
               <div className="flex justify-between font-semibold" style={{ color: store.color_accent }}>
                 <span>Descuento</span>
-                <span>−{formatPrice(discount)}</span>
+                <span>−{formatPrice(discount, store.currency, store.locale)}</span>
               </div>
             )}
             <div className="flex justify-between">
               <span className="opacity-60">Envío</span>
-              <span>{shipping === 0 ? 'Gratis' : formatPrice(shipping)}</span>
+              <span>{shipping === 0 ? 'Gratis' : formatPrice(shipping, store.currency, store.locale)}</span>
             </div>
             {store.free_shipping_threshold !== null && shipping > 0 && (
               <p className="text-xs opacity-50">
-                Faltan {formatPrice(store.free_shipping_threshold - subtotal)} para envío gratis
+                Faltan {formatPrice(store.free_shipping_threshold - subtotal, store.currency, store.locale)} para envío gratis
               </p>
             )}
             <div className="flex justify-between border-t border-black/10 pt-3 text-base font-bold">
               <span>Total</span>
-              <span>{formatPrice(total)}</span>
+              <span>{formatPrice(total, store.currency, store.locale)}</span>
             </div>
           </div>
 
@@ -236,13 +236,6 @@ export function CartPageClient({ store }: CartPageClientProps) {
   )
 }
 
-function formatPrice(n: number): string {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    maximumFractionDigits: 0,
-  }).format(n)
-}
 
 function EmptyCartIcon() {
   return (

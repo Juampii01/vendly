@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { formatPrice } from '@/lib/format'
 import type { StoreConfig, Category } from '@/types'
 import type { SiteFeatures } from '@/lib/site-features'
 
@@ -139,8 +140,7 @@ export function Footer({ store, categories, features = DEFAULT_FEATURES }: Foote
             {store.free_shipping_threshold !== null && (
               <p className="mt-6 text-[10px] leading-relaxed opacity-40">
                 Envío gratis en compras mayores a{' '}
-                {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })
-                  .format(store.free_shipping_threshold)}.
+                {formatPrice(store.free_shipping_threshold, store.currency, store.locale)}.
               </p>
             )}
           </div>
