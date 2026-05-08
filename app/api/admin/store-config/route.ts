@@ -24,7 +24,51 @@ const ALLOWED_FIELDS = [
   'home_editorial_label', 'home_editorial_title', 'home_editorial_body',
   'base_url', 'currency', 'locale',
   'site_type',
+  // Sistema config-driven de homes (ver components/store/HomeRenderer.tsx)
+  'home_layout', 'theme_tokens',
 ] as const
+
+const HOME_SECTION_TYPES = new Set([
+  'hero', 'marquee', 'categoryGrid', 'editorialSplit', 'featuredProducts',
+  'productScroll', 'instagramGallery', 'newsletter', 'trustBar',
+])
+
+function validateHomeLayout(v: unknown): { ok: true } | { ok: false; error: string } {
+  if (v === null) return { ok: true }
+  if (!Array.isArray(v)) return { ok: false, error: 'home_layout debe ser un array' }
+  if (v.length > 50) return { ok: false, error: 'home_layout: máximo 50 secciones' }
+  for (let i = 0; i < v.length; i++) {
+    const s = v[i] as Record<string, unknown>
+    if (!s || typeof s !== 'object')
+      return { ok: false, error: `home_layout[${i}] debe ser un objeto` }
+    if (typeof s.id !== 'string' || !s.id)
+      return { ok: false, error: `home_layout[${i}].id debe ser string no vacío` }
+    if (typeof s.type !== 'string' || !HOME_SECTION_TYPES.has(s.type))
+      return { ok: false, error: `home_layout[${i}].type inválido: ${String(s.type)}` }
+    if (typeof s.active !== 'boolean')
+      return { ok: false, error: `home_layout[${i}].active debe ser boolean` }
+    if (s.content === null || typeof s.content !== 'object')
+      return { ok: false, error: `home_layout[${i}].content debe ser objeto` }
+  }
+  // Verificar IDs únicos para que React no se confunda con keys duplicadas
+  const ids = new Set<string>()
+  for (const s of v as Array<{ id: string }>) {
+    if (ids.has(s.id)) return { ok: false, error: `IDs duplicados en home_layout: ${s.id}` }
+    ids.add(s.id)
+  }
+  return { ok: true }
+}
+
+function validateThemeTokens(v: unknown): { ok: true } | { ok: false; error: string } {
+  if (v === null || v === undefined) return { ok: true }
+  if (typeof v !== 'object' || Array.isArray(v))
+    return { ok: false, error: 'theme_tokens debe ser un objeto' }
+  // Sin schema estricto — defaults en lib/theme.ts manejan ausencias.
+  // Solo bloqueamos payloads obscenos.
+  if (JSON.stringify(v).length > 10_000)
+    return { ok: false, error: 'theme_tokens demasiado grande' }
+  return { ok: true }
+}
 
 export async function PATCH(req: Request) {
   const auth = await requireStoreAdmin()
@@ -74,6 +118,20 @@ export async function PATCH(req: Request) {
           return NextResponse.json({ error: 'home_marquee_items debe ser un array' }, { status: 400 })
         }
         updates[key] = v.map(String).slice(0, 20)
+        continue
+      }
+
+      if (key === 'home_layout') {
+        const r = validateHomeLayout(v)
+        if (!r.ok) return NextResponse.json({ error: r.error }, { status: 400 })
+        updates[key] = v
+        continue
+      }
+
+      if (key === 'theme_tokens') {
+        const r = validateThemeTokens(v)
+        if (!r.ok) return NextResponse.json({ error: r.error }, { status: 400 })
+        updates[key] = v ?? {}
         continue
       }
 
