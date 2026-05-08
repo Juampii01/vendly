@@ -20,6 +20,24 @@ interface StoreMetric {
   period_revenue: number
 }
 
+interface RiskStore {
+  id: string
+  name: string
+  slug: string
+  reason: string
+  severity: 'high' | 'medium'
+}
+
+interface PlatformHealth {
+  stores_by_status: { active: number; inactive: number; suspended: number }
+  stores_by_plan: { free: number; starter: number; pro: number; enterprise: number }
+  mrr_estimate_usd: number
+  mrr_disclaimer: string
+  gmv_period: number
+  new_stores_in_period: number
+  at_risk: RiskStore[]
+}
+
 interface AnalyticsData {
   days: number
   total_orders: number
@@ -27,6 +45,7 @@ interface AnalyticsData {
   period_revenue: number
   series: SeriesPoint[]
   stores: StoreMetric[]
+  platform: PlatformHealth
 }
 
 const DAYS_OPTIONS = [7, 14, 30, 60, 90]
@@ -79,18 +98,26 @@ export default function AnalyticsDashboard() {
         {loading && <span className="text-xs text-slate-500 ml-2">Cargando...</span>}
       </div>
 
+      {/* ── Platform Health (vista del líder Vendly) ────────────────────── */}
+      {data?.platform && <PlatformHealthSection platform={data.platform} days={data.days} />}
+
       {/* KPI cards */}
       {data && (
         <>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <KPI label="Órdenes (período)" value={data.period_orders.toLocaleString()} />
-            <KPI
-              label={`Revenue (período)`}
-              value={new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(data.period_revenue)}
-              sub="solo órdenes pagas"
-            />
-            <KPI label="Órdenes totales (histórico)" value={data.total_orders.toLocaleString()} />
-            <KPI label="Stores activos" value={data.stores.filter(s => s.status === 'active').length.toString()} />
+          <div>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-3">
+              Operación de tiendas — últimos {data.days} días
+            </h2>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <KPI label="Órdenes (período)" value={data.period_orders.toLocaleString()} />
+              <KPI
+                label={`Revenue (período)`}
+                value={new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(data.period_revenue)}
+                sub="solo órdenes pagas"
+              />
+              <KPI label="Órdenes totales (histórico)" value={data.total_orders.toLocaleString()} />
+              <KPI label="Stores activos" value={data.stores.filter(s => s.status === 'active').length.toString()} />
+            </div>
           </div>
 
           {/* Spark chart */}
@@ -228,4 +255,136 @@ function PlanBadge({ plan }: { plan: string }) {
       {plan}
     </span>
   )
+}
+
+// ─── Platform Health (vista del líder Vendly) ──────────────────────────────
+
+function PlatformHealthSection({ platform, days }: { platform: PlatformHealth; days: number }) {
+  const totalStores = platform.stores_by_status.active + platform.stores_by_status.inactive + platform.stores_by_status.suspended
+
+  return (
+    <div className="space-y-4 rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-900/30 p-6">
+      <div className="flex items-end justify-between">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-amber-500/60 mb-1">
+            Salud Vendly
+          </p>
+          <h2 className="text-lg font-semibold text-white">Vista del líder</h2>
+        </div>
+        <p className="text-xs text-slate-500">Métricas del negocio plataforma, no de tiendas individuales</p>
+      </div>
+
+      {/* Top KPIs — leader-level */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <LeaderKPI
+          label="MRR estimado"
+          value={`US$ ${platform.mrr_estimate_usd.toLocaleString()}`}
+          sub="estimación basada en plan"
+          tone="amber"
+        />
+        <LeaderKPI
+          label="Total stores"
+          value={totalStores.toString()}
+          sub={`${platform.stores_by_status.active} activos · ${platform.stores_by_status.suspended} suspendidos`}
+        />
+        <LeaderKPI
+          label="GMV procesado"
+          value={new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(platform.gmv_period)}
+          sub={`últimos ${days} días, sumado entre todas las tiendas`}
+        />
+        <LeaderKPI
+          label="Stores nuevos"
+          value={platform.new_stores_in_period.toString()}
+          sub={`creados en últimos ${days} días`}
+          tone={platform.new_stores_in_period > 0 ? 'green' : undefined}
+        />
+      </div>
+
+      {/* Plan distribution + risk side-by-side */}
+      <div className="grid lg:grid-cols-2 gap-4">
+        {/* Plan distribution */}
+        <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">
+            Distribución por plan
+          </p>
+          <div className="space-y-2">
+            {(['free', 'starter', 'pro', 'enterprise'] as const).map(plan => {
+              const count = platform.stores_by_plan[plan]
+              const pct = totalStores > 0 ? (count / totalStores) * 100 : 0
+              return (
+                <div key={plan} className="flex items-center gap-3">
+                  <PlanBadge plan={plan} />
+                  <div className="flex-1 h-2 rounded-full bg-slate-800 overflow-hidden">
+                    <div
+                      className={`h-full ${PLAN_BAR_COLORS[plan]} transition-all`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-mono text-white w-10 text-right">{count}</span>
+                </div>
+              )
+            })}
+          </div>
+          <p className="text-[10px] text-slate-600 mt-3 leading-relaxed">
+            {platform.mrr_disclaimer}
+          </p>
+        </div>
+
+        {/* Stores en riesgo */}
+        <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Stores en riesgo
+            </p>
+            <span className="text-xs font-mono text-slate-500">{platform.at_risk.length}</span>
+          </div>
+          {platform.at_risk.length === 0 ? (
+            <p className="text-sm text-emerald-500/70 py-4">
+              ✓ Todas las tiendas activas en buen estado
+            </p>
+          ) : (
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {platform.at_risk.map(store => (
+                <Link
+                  key={store.id}
+                  href={`/platform/stores/${store.id}`}
+                  className="flex items-start gap-3 p-2 -mx-2 rounded-lg hover:bg-slate-900 transition-colors"
+                >
+                  <span className={`mt-1 inline-block w-1.5 h-1.5 rounded-full ${store.severity === 'high' ? 'bg-red-500' : 'bg-amber-500'}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-white truncate">{store.name}</p>
+                    <p className="text-xs text-slate-500 leading-snug">{store.reason}</p>
+                  </div>
+                  <span className="text-slate-600 text-xs">→</span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function LeaderKPI({ label, value, sub, tone }: {
+  label: string; value: string; sub?: string; tone?: 'amber' | 'green'
+}) {
+  const valueClass =
+    tone === 'amber' ? 'text-amber-400'
+    : tone === 'green' ? 'text-emerald-400'
+    : 'text-white'
+  return (
+    <div className="rounded-xl border border-slate-800 bg-slate-950/40 px-4 py-3">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 mb-1">{label}</p>
+      <p className={`text-xl font-black ${valueClass}`}>{value}</p>
+      {sub && <p className="text-[10px] text-slate-600 mt-1 leading-snug">{sub}</p>}
+    </div>
+  )
+}
+
+const PLAN_BAR_COLORS: Record<string, string> = {
+  free:       'bg-slate-600',
+  starter:    'bg-blue-500',
+  pro:        'bg-purple-500',
+  enterprise: 'bg-amber-500',
 }
