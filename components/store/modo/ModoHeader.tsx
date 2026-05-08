@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { useRouter, usePathname } from 'next/navigation'
 import { useCartStore } from '@/lib/cart'
 import { CartSidebar } from '../CartSidebar'
+import { formatPrice } from '@/lib/format'
 import type { StoreConfig, Category } from '@/types'
 import type { SiteFeatures } from '@/lib/site-features'
 
@@ -35,7 +36,7 @@ export function ModoHeader({ store, categories, userLoggedIn = false, features =
     ? store.home_marquee_items
     : [
         store.free_shipping_threshold
-          ? `Envío gratis desde ${new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(store.free_shipping_threshold)}`
+          ? `Envío gratis desde ${formatPrice(store.free_shipping_threshold, store.currency, store.locale)}`
           : 'Envío gratis en compras seleccionadas',
         'Cambios gratis por 30 días',
         'Pagá en cuotas sin interés',

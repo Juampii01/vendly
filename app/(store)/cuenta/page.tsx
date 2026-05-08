@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { getStoreConfig } from '@/lib/store'
 import { getStoreId } from '@/lib/tenant'
+import { formatPrice } from '@/lib/format'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Mi cuenta' }
@@ -109,13 +110,13 @@ export default async function CuentaPage() {
                         #{order.id.slice(0, 8).toUpperCase()}
                       </p>
                       <p className="text-xs opacity-40 mt-0.5">
-                        {new Date(order.created_at).toLocaleDateString('es-AR', {
+                        {new Date(order.created_at).toLocaleDateString(store.locale, {
                           day: 'numeric', month: 'long', year: 'numeric'
                         })}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-black">{formatPrice(order.total)}</p>
+                      <p className="font-black">{formatPrice(order.total, store.currency, store.locale)}</p>
                       <PaymentBadge status={order.payment_status} />
                     </div>
                   </div>
@@ -151,8 +152,3 @@ function PaymentBadge({ status }: { status: string }) {
   )
 }
 
-function formatPrice(n: number) {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency', currency: 'ARS', maximumFractionDigits: 0,
-  }).format(n)
-}

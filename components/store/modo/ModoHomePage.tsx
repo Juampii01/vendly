@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ModoProductCard } from './ModoProductCard'
 import { NewsletterForm } from '../NewsletterForm'
+import { formatPrice } from '@/lib/format'
 import type { StoreConfig, Product, Category } from '@/types'
 
 // ─── Fallback images (fashion editorial) ──────────────────────────────────────
@@ -72,7 +73,7 @@ export function ModoHomePage({ store, products, categories, featured }: Props) {
           {store.free_shipping_threshold && (
             <p className="mt-10 text-[10px] font-bold uppercase tracking-[0.2em] opacity-30"
               style={{ color: store.color_text }}>
-              Envío gratis desde {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(store.free_shipping_threshold)}
+              Envío gratis desde {formatPrice(store.free_shipping_threshold, store.currency, store.locale)}
             </p>
           )}
         </div>

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { formatPrice } from '@/lib/format'
 import type { StoreConfig, Category } from '@/types'
 import type { SiteFeatures } from '@/lib/site-features'
 
@@ -125,8 +126,7 @@ export function ModoFooter({ store, categories, features = DEFAULT_FEATURES }: P
             {store.free_shipping_threshold && (
               <p className="text-[10px] opacity-30 leading-relaxed">
                 Envío gratis en compras mayores a{' '}
-                {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })
-                  .format(store.free_shipping_threshold)}.
+                {formatPrice(store.free_shipping_threshold, store.currency, store.locale)}.
               </p>
             )}
           </div>

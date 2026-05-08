@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useCartStore } from '@/lib/cart'
 import { CartSidebar } from '../CartSidebar'
+import { formatPrice } from '@/lib/format'
 import type { StoreConfig, Category } from '@/types'
 import type { SiteFeatures } from '@/lib/site-features'
 
@@ -40,7 +41,9 @@ export function AthleticHeader({ store, categories, userLoggedIn = false, featur
 
   // Promo copy
   const promoCopy = store.home_marquee_items?.[0]
-    ?? `Envío gratis desde $${store.free_shipping_threshold?.toLocaleString('es-AR') ?? '50.000'}`
+    ?? (store.free_shipping_threshold
+        ? `Envío gratis desde ${formatPrice(store.free_shipping_threshold, store.currency, store.locale)}`
+        : 'Envío a todo el país')
 
   return (
     <>
