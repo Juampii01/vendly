@@ -15,7 +15,7 @@
  *   expect(sb.callsFor('orders', 'insert')[0].payload).toMatchObject({...})
  */
 
-export type Op = 'select' | 'insert' | 'update' | 'upsert' | 'delete'
+export type Op = 'select' | 'insert' | 'update' | 'upsert' | 'delete' | 'rpc'
 
 export interface ScriptedResponse {
   data?: unknown
@@ -81,6 +81,8 @@ export interface SupabaseClientLike {
     upsert(payload: unknown, opts?: { onConflict?: string }): ChainBuilder
     delete(): ChainBuilder
   }
+  /** RPC: scriptea con scriptResponse(rpcName, 'rpc', response). */
+  rpc(name: string, args?: Record<string, unknown>): Promise<ScriptedResponse>
 }
 
 export function createSupabaseMock(): SupabaseMock {
@@ -166,6 +168,13 @@ export function createSupabaseMock(): SupabaseMock {
           return buildChain(table, 'delete', record)
         },
       }
+    },
+    async rpc(name: string, args?: Record<string, unknown>) {
+      const record: RecordWithTable = {
+        _table: name, op: 'rpc', filters: [], payload: args, terminator: 'thenable',
+      }
+      calls.push(record)
+      return nextResponse(name, 'rpc')
     },
   }
 

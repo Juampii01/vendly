@@ -4,7 +4,9 @@ import { getStoreId } from '@/lib/tenant'
 import { MetricCard } from '@/components/admin/MetricCard'
 import { RevenueChart } from '@/components/admin/RevenueChart'
 import { PaymentBadge } from '@/components/admin/PaymentBadge'
+import { UsageWidget } from '@/components/admin/UsageWidget'
 import { formatPrice } from '@/lib/format'
+import type { Plan } from '@/lib/plan-limits'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 
@@ -139,6 +141,11 @@ export default async function AdminDashboardPage() {
             accent="#8b5cf6"
           />
         </div>
+
+        {/* ── Plan + uso del mes ──────────────────────────────────────────── */}
+        {/* Server-rendered widget que lee usage_tracking. Foundation de
+            billing — los límites se aplican según el `plan` del store. */}
+        <UsageWidget storeId={storeId} plan={(store.plan as Plan) ?? 'free'} />
 
         {/* ── Segunda fila: gráfico + stats rápidas ──────────────────────────── */}
         <div className="grid gap-4 lg:grid-cols-[1fr_240px]">
