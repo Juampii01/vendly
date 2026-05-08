@@ -2,6 +2,7 @@ import 'server-only'
 import { NextResponse } from 'next/server'
 import { getStoreConfig } from '@/lib/store'
 import { requireStoreAdmin } from '@/lib/auth'
+import { guardLimit, trackUsage } from '@/lib/plan-limits'
 
 // ─── Tipos ─────────────────────────────────────────────────────────────────────
 
@@ -155,6 +156,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'API de IA no configurada.' }, { status: 503 })
   }
 
+  // ── Plan limits guard ──────────────────────────────────────────────────
+  // Chequeamos ANTES de llamar a Anthropic (no queremos pagar por requests
+  // que el plan del store no permite). Tracking sucede DESPUÉS de éxito
+  // para no inflar el contador con errores de Anthropic.
+  const limited = await guardLimit(auth.storeId, 'ai_generate')
+  if (limited) return NextResponse.json(limited.body, { status: limited.status })
+
   try {
     const body = await req.json() as GenerateRequest
     const { target } = body
@@ -171,6 +179,8 @@ export async function POST(req: Request) {
     const { system, user: userPrompt } = buildPrompts(target, body, store.name, store.locale ?? 'es-AR')
 
     const result = await callClaude(system, userPrompt)
+    // Track success — no bloqueante, no reverts si falla
+    await trackUsage(auth.storeId, 'ai_generate')
     return NextResponse.json({ ok: true, result })
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Error desconocido.'
