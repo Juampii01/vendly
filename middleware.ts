@@ -233,14 +233,18 @@ export async function middleware(request: NextRequest) {
 
   // ── 5. Routing raíz de la plataforma ──────────────────────────────────────
   //
-  // Aplica en:
-  //   - vendly.com / www.vendly.com  → dominio de producción de la plataforma
-  //   - localhost / 127.x / 192.168.x → entorno de desarrollo local
+  // Aplica solo en el dominio raíz de producción (vendly.com / www.vendly.com).
+  // En localhost con NEXT_PUBLIC_STORE_ID setteado, queremos que / muestre el
+  // storefront del store fallback — modo single-tenant local.
   //
   // Sin sesión  → /admin/login?next=/platform  (vuelve a platform tras login)
   // Con sesión  → /platform                    (el layout verifica acceso)
   //
-  const isRootContext = isPlatformHost(hostname) || isAmbiguousHost(hostname)
+  const hasSingleTenantFallback = !!process.env.NEXT_PUBLIC_STORE_ID
+  const isRootContext =
+    isPlatformHost(hostname) ||
+    (isAmbiguousHost(hostname) && !hasSingleTenantFallback)
+
   if (isRootContext && pathname === '/') {
     const dest = request.nextUrl.clone()
     if (user) {

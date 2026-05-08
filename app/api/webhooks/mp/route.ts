@@ -16,16 +16,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  // ── Validar firma ─────────────────────────────────────────────────────────
-  // storeId no está disponible aún — validamos con secret global.
-  // Para multi-tenant con secrets por store, el storeId se pasa después de
-  // resolver la orden. Esta validación previene requests maliciosas antes
-  // de cualquier operación costosa.
+  // ── 1. Validar firma con secret global ───────────────────────────────────
+  //
+  // Validamos siempre, sin excepciones. Si el secret global no está configurado,
+  // RECHAZAMOS la request — el comportamiento anterior (skip cuando faltaba
+  // env var) dejaba el endpoint público.
+  //
+  // Para multi-tenant con secrets por store: tras resolver la orden,
+  // re-validamos con el secret del tenant_config si está presente.
+  //
   const dataId = body.data?.id ?? String(body.id)
-  const isValid = await validateWebhookSignature(xSignature, xRequestId, dataId)
-
-  if (!isValid && process.env.MP_WEBHOOK_SECRET) {
-    console.warn('[mp-webhook] Invalid signature — ignoring')
+  const globalValid = await validateWebhookSignature(xSignature, xRequestId, dataId)
+  if (!globalValid) {
+    console.warn('[mp-webhook] Invalid signature (global) — rejecting')
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
 
@@ -38,7 +41,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing payment id' }, { status: 400 })
   }
 
-  // ── Obtener detalles del pago desde MP ────────────────────────────────────
+  // ── 2. Obtener pago desde MP ─────────────────────────────────────────────
+  // Primero sin storeId (token global) para obtener el order_id, luego, si la
+  // orden vive en otro tenant, re-fetcheamos con el token del store.
   let payment
   try {
     payment = await getPayment(paymentId)
@@ -55,6 +60,32 @@ export async function POST(req: NextRequest) {
 
   const supabase = createServiceClient()
 
+  // ── 3. Lookup orden + estado previo (ANTES del update) ───────────────────
+  //
+  // Leer estado actual primero permite detectar replay:
+  //   - si payment_status ya es 'approved' Y mp_payment_id coincide → idempotent skip
+  //   - si payment_status es 'approved' pero distinto mp_payment_id → orden ya
+  //     procesada, ignoramos para no doble-disparar stock + emails
+  //
+  const { data: existingOrder } = await supabase
+    .from('orders')
+    .select('id, store_id, payment_status, mp_payment_id')
+    .eq('id', orderId)
+    .single()
+
+  if (!existingOrder) {
+    return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+  }
+
+  const storeId: string = existingOrder.store_id
+
+  // Re-validar con el secret del store (tenant_config) si difiere del global.
+  const tenantValid = await validateWebhookSignature(xSignature, xRequestId, dataId, storeId)
+  if (!tenantValid) {
+    console.warn('[mp-webhook] Invalid tenant signature — rejecting')
+    return NextResponse.json({ error: 'Invalid tenant signature' }, { status: 401 })
+  }
+
   const paymentStatusMap: Record<string, string> = {
     approved: 'approved',
     rejected: 'rejected',
@@ -68,12 +99,10 @@ export async function POST(req: NextRequest) {
   const newPaymentStatus = paymentStatusMap[mpStatus] ?? 'pending'
   const newOrderStatus = mpStatus === 'approved' ? 'confirmed' : 'pending'
 
-  // ── Actualizar orden ──────────────────────────────────────────────────────
-  //
-  // No filtramos por store_id aquí: el orderId es un UUID globalmente único
-  // y el webhook de MP no tiene contexto de hostname para resolver el tenant.
-  // Obtenemos el store_id del propio registro de la orden.
-  //
+  const wasAlreadyApproved = existingOrder.payment_status === 'approved'
+  const transitioningToApproved = !wasAlreadyApproved && newPaymentStatus === 'approved'
+
+  // ── 4. Actualizar orden ───────────────────────────────────────────────────
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .update({
@@ -88,18 +117,19 @@ export async function POST(req: NextRequest) {
 
   if (orderError || !order) {
     console.error('[mp-webhook] order update error:', orderError)
-    return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+    return NextResponse.json({ error: 'Order update failed' }, { status: 500 })
   }
 
-  if (mpStatus !== 'approved') {
-    return NextResponse.json({ received: true })
+  // ── 5. Side effects SOLO en transición pending → approved ────────────────
+  //
+  // Idempotencia: si la orden ya estaba approved (replay), NO descontamos
+  // stock de nuevo NI volvemos a enviar emails/WhatsApp.
+  //
+  if (!transitioningToApproved) {
+    return NextResponse.json({ received: true, replay: wasAlreadyApproved })
   }
 
-  // Resolver store_id desde la orden (multi-tenant safe)
-  const storeId: string = order.store_id
-
-  // ── Operaciones post-aprobación en paralelo ───────────────────────────────
-
+  // 5a. Decrement de stock por variante (en paralelo)
   const stockUpdates = (order.items ?? [])
     .filter((item: { variant_id: string | null; quantity: number }) => item.variant_id)
     .map((item: { variant_id: string; quantity: number }) =>
@@ -109,6 +139,7 @@ export async function POST(req: NextRequest) {
       }),
     )
 
+  // 5b. Resolver store_config + marcar carrito como recovered + stock — paralelo
   const [{ data: storeConfig }] = await Promise.all([
     supabase
       .from('store_config')
@@ -130,7 +161,7 @@ export async function POST(req: NextRequest) {
 
   const store = storeConfig as StoreConfig
 
-  // ── Notificaciones en paralelo ────────────────────────────────────────────
+  // 5c. Notificaciones (no bloqueantes — si fallan, la orden ya está confirmada)
   await Promise.allSettled([
     sendOrderConfirmation(order, store).catch((err) =>
       console.error('[mp-webhook] email error:', err),

@@ -1,6 +1,9 @@
 import { MetadataRoute } from 'next'
 import { getStoreConfig } from '@/lib/store'
 
+// Manifest depende del store config del subdomain — multi-tenant. No prerenderear.
+export const dynamic = 'force-dynamic'
+
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const store = await getStoreConfig()
 

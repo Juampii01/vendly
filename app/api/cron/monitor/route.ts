@@ -2,21 +2,13 @@ import { NextResponse } from 'next/server'
 import { runAllChecks, type CheckResult } from '@/lib/monitor'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendMonitorAlert, sendMonitorRecovery } from '@/lib/whatsapp'
+import { isAuthorizedCron, requirePlatformAccess } from '@/lib/auth'
 import type { StoreConfig } from '@/types'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
 const ALERT_COOLDOWN_MS = 30 * 60 * 1000 // 30 min entre re-alertas del mismo check
-
-// ─── Auth ─────────────────────────────────────────────────────────────────────
-
-function isAuthorized(req: Request): boolean {
-  const auth = req.headers.get('authorization')
-  const secret = process.env.CRON_SECRET
-  if (!secret) return true // En dev sin secret, permitir
-  return auth === `Bearer ${secret}`
-}
 
 // ─── Monitor de un store ──────────────────────────────────────────────────────
 //
@@ -130,8 +122,15 @@ async function monitorStore(
 // ─── Handler ──────────────────────────────────────────────────────────────────
 
 export async function GET(req: Request) {
-  if (!isAuthorized(req)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  // Aceptamos dos formas de auth:
+  //  1. Header `Authorization: Bearer ${CRON_SECRET}` — Vercel Cron
+  //  2. Sesión de platform_user — para que un operador dispare el cron manualmente
+  //     desde el dashboard sin tener que copiar el secret.
+  if (!isAuthorizedCron(req)) {
+    const platform = await requirePlatformAccess()
+    if ('error' in platform) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
   }
 
   const supabase = createServiceClient()

@@ -101,7 +101,9 @@ export async function getProducts(filters: ProductFilters = {}): Promise<{
   }
 
   if (search) {
-    query = query.ilike('name', `%${search}%`)
+    // Escapar % y _ para que el usuario no pueda matchear más de lo que tipea.
+    const escaped = search.replace(/[%_\\]/g, ch => `\\${ch}`)
+    query = query.ilike('name', `%${escaped}%`)
   }
 
   if (tag) {
@@ -156,14 +158,17 @@ export async function getRelatedProducts(
 // ─── Coupons ──────────────────────────────────────────────────────────────────
 
 export async function validateCoupon(code: string) {
-  const [supabase, storeId] = await Promise.all([createClient(), getStoreId()])
+  // Usamos service_role: tras el RLS hardening, anon ya no puede leer coupons.
+  // El endpoint que llama a esta función filtra por el storeId del request,
+  // así que no hay riesgo de cross-tenant.
+  const [supabase, storeId] = [createServiceClient(), await getStoreId()]
   const { data } = await supabase
     .from('coupons')
     .select('*')
     .eq('store_id', storeId)
-    .eq('code', code.toUpperCase())
+    .eq('code', code.trim().toUpperCase())
     .eq('is_active', true)
-    .single()
+    .maybeSingle()
 
   if (!data) return null
 

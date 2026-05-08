@@ -1,35 +1,13 @@
 import { NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { setStoreStatus } from '@/lib/store-generator'
+import { requirePlatformAccess } from '@/lib/auth'
 
-async function requirePlatformAccess() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-
-  const service = createServiceClient()
-  const { count } = await service
-    .from('platform_users')
-    .select('*', { count: 'exact', head: true })
-
-  if (!count || count === 0) return user
-
-  const { data } = await service
-    .from('platform_users')
-    .select('id, role')
-    .eq('email', user.email!)
-    .maybeSingle()
-
-  return data ? user : null
-}
-
-// PATCH /api/platform/stores/[id]/status
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const user = await requirePlatformAccess()
-  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const auth = await requirePlatformAccess()
+  if ('error' in auth) return auth.error
 
   const { id } = await params
 

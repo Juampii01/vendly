@@ -1,31 +1,11 @@
 import 'server-only'
 import { NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
-
-async function requirePlatformAccess() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-
-  const service = createServiceClient()
-  const { count } = await service
-    .from('platform_users')
-    .select('*', { count: 'exact', head: true })
-
-  if (!count || count === 0) return user
-
-  const { data } = await service
-    .from('platform_users')
-    .select('id')
-    .eq('email', user.email!)
-    .maybeSingle()
-
-  return data ? user : null
-}
+import { createServiceClient } from '@/lib/supabase/server'
+import { requirePlatformAccess } from '@/lib/auth'
 
 export async function GET(req: Request) {
-  const user = await requirePlatformAccess()
-  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const auth = await requirePlatformAccess()
+  if ('error' in auth) return auth.error
 
   const { searchParams } = new URL(req.url)
   const days = Math.min(parseInt(searchParams.get('days') ?? '30'), 90)

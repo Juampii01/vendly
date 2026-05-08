@@ -1,28 +1,25 @@
 import { NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { getStoreId } from '@/lib/tenant'
+import { createServiceClient } from '@/lib/supabase/server'
+import { requireStoreAdmin } from '@/lib/auth'
 
 function toSlug(name: string): string {
   return name
     .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quita tildes
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9\s-]/g, '')
     .trim()
     .replace(/\s+/g, '-')
 }
 
-// GET — listar categorías con conteo de productos
 export async function GET() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const auth = await requireStoreAdmin()
+  if ('error' in auth) return auth.error
 
-  const [service, storeId] = [createServiceClient(), await getStoreId()]
-
+  const service = createServiceClient()
   const { data, error } = await service
     .from('categories')
     .select('*, products(count)')
-    .eq('store_id', storeId)
+    .eq('store_id', auth.storeId)
     .order('position', { ascending: true })
     .order('created_at', { ascending: true })
 
@@ -30,13 +27,11 @@ export async function GET() {
   return NextResponse.json({ data })
 }
 
-// POST — crear categoría
 export async function POST(req: Request) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const auth = await requireStoreAdmin()
+  if ('error' in auth) return auth.error
 
-  const [service, storeId] = [createServiceClient(), await getStoreId()]
+  const service = createServiceClient()
   const body = await req.json()
   const { name, description, image_url } = body
 
@@ -44,23 +39,25 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'El nombre es requerido' }, { status: 400 })
   }
 
-  // Calcular próxima posición
   const { count } = await service
     .from('categories')
     .select('*', { count: 'exact', head: true })
-    .eq('store_id', storeId)
+    .eq('store_id', auth.storeId)
 
   const slug = toSlug(name.trim())
+  if (!slug) {
+    return NextResponse.json({ error: 'El nombre debe contener al menos una letra o número' }, { status: 400 })
+  }
 
   const { data, error } = await service
     .from('categories')
     .insert({
-      store_id: storeId,
+      store_id: auth.storeId,
       name: name.trim(),
       slug,
       description: description?.trim() || null,
       image_url: image_url?.trim() || null,
-      position: (count ?? 0),
+      position: count ?? 0,
       is_active: true,
     })
     .select()
@@ -68,7 +65,7 @@ export async function POST(req: Request) {
 
   if (error) {
     if (error.code === '23505') {
-      return NextResponse.json({ error: 'Ya existe una categoría con ese nombre' }, { status: 409 })
+      return NextResponse.json({ error: 'Ya existe una categoría con ese nombre o slug' }, { status: 409 })
     }
     return NextResponse.json({ error: error.message }, { status: 500 })
   }

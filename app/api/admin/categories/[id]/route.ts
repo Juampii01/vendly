@@ -1,50 +1,49 @@
 import { NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { getStoreId } from '@/lib/tenant'
+import { createServiceClient } from '@/lib/supabase/server'
+import { requireStoreAdmin } from '@/lib/auth'
 
 function toSlug(name: string): string {
   return name
     .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9\s-]/g, '')
     .trim()
     .replace(/\s+/g, '-')
 }
 
-// PATCH — editar categoría (nombre, descripción, imagen, posición, activo)
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const auth = await requireStoreAdmin()
+  if ('error' in auth) return auth.error
 
-  const [service, storeId, { id }] = [createServiceClient(), await getStoreId(), await params]
+  const service = createServiceClient()
+  const { id } = await params
   const body = await req.json()
 
-  // Construir payload solo con campos presentes
   const update: Record<string, unknown> = {}
   if (body.name !== undefined) {
-    update.name = body.name.trim()
-    update.slug = toSlug(body.name.trim())
+    const trimmed = String(body.name).trim()
+    update.name = trimmed
+    update.slug = toSlug(trimmed)
   }
   if (body.description !== undefined) update.description = body.description?.trim() || null
   if (body.image_url !== undefined) update.image_url = body.image_url?.trim() || null
-  if (body.is_active !== undefined) update.is_active = body.is_active
-  if (body.position !== undefined) update.position = body.position
+  if (body.is_active !== undefined) update.is_active = !!body.is_active
+  if (body.position !== undefined) update.position = Number(body.position) || 0
 
   const { data, error } = await service
     .from('categories')
     .update(update)
     .eq('id', id)
-    .eq('store_id', storeId)   // garantiza que pertenece a este store
+    .eq('store_id', auth.storeId)
     .select()
     .single()
 
   if (error) {
     if (error.code === '23505') {
-      return NextResponse.json({ error: 'Ya existe una categoría con ese nombre' }, { status: 409 })
+      return NextResponse.json({ error: 'Ya existe una categoría con ese nombre o slug' }, { status: 409 })
     }
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
@@ -52,22 +51,21 @@ export async function PATCH(
   return NextResponse.json({ data })
 }
 
-// DELETE — eliminar categoría (solo si no tiene productos activos)
 export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const auth = await requireStoreAdmin()
+  if ('error' in auth) return auth.error
 
-  const [service, storeId, { id }] = [createServiceClient(), await getStoreId(), await params]
+  const service = createServiceClient()
+  const { id } = await params
 
-  // Verificar que no tenga productos
   const { count } = await service
     .from('products')
     .select('*', { count: 'exact', head: true })
     .eq('category_id', id)
+    .eq('store_id', auth.storeId)
     .eq('is_active', true)
 
   if (count && count > 0) {
@@ -81,7 +79,7 @@ export async function DELETE(
     .from('categories')
     .delete()
     .eq('id', id)
-    .eq('store_id', storeId)
+    .eq('store_id', auth.storeId)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })

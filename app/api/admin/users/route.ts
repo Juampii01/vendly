@@ -1,66 +1,42 @@
 import { NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { getStoreId } from '@/lib/tenant'
+import { createServiceClient } from '@/lib/supabase/server'
+import { requireStoreAdmin } from '@/lib/auth'
 
-async function getCallerRole(userEmail: string, storeId: string) {
-  const service = createServiceClient()
-  const { data } = await service
-    .from('admin_users')
-    .select('role')
-    .eq('store_id', storeId)
-    .eq('email', userEmail)
-    .maybeSingle()
-  return data?.role ?? null
-}
-
-// GET — listar admins
+// GET — listar admins (cualquier rol logueado del store puede ver la lista)
 export async function GET() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const auth = await requireStoreAdmin()
+  if ('error' in auth) return auth.error
 
-  const [service, storeId] = [createServiceClient(), await getStoreId()]
+  const service = createServiceClient()
   const { data, error } = await service
     .from('admin_users')
     .select('id, email, role, created_at')
-    .eq('store_id', storeId)
+    .eq('store_id', auth.storeId)
     .order('created_at', { ascending: true })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ data })
 }
 
-// POST — agregar admin
+// POST — agregar admin (solo owner). Devuelve la fila creada.
 export async function POST(req: Request) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-
-  const storeId = await getStoreId()
-  const callerRole = await getCallerRole(user.email!, storeId)
-
-  // En modo bootstrap (0 admins) el primer usuario puede agregarse
-  const service = createServiceClient()
-  const { count } = await service
-    .from('admin_users')
-    .select('*', { count: 'exact', head: true })
-    .eq('store_id', storeId)
-
-  if (count && count > 0 && callerRole !== 'owner') {
-    return NextResponse.json({ error: 'Solo el owner puede agregar usuarios' }, { status: 403 })
-  }
+  const auth = await requireStoreAdmin({ role: 'owner' })
+  if ('error' in auth) return auth.error
 
   const { email, role } = await req.json()
-  if (!email || !email.includes('@')) {
+  if (!email || typeof email !== 'string' || !email.includes('@')) {
     return NextResponse.json({ error: 'Email inválido' }, { status: 400 })
   }
   if (!['owner', 'admin'].includes(role)) {
     return NextResponse.json({ error: 'Rol inválido' }, { status: 400 })
   }
 
-  const { error } = await service
+  const service = createServiceClient()
+  const { data, error } = await service
     .from('admin_users')
-    .insert({ store_id: storeId, email: email.toLowerCase().trim(), role })
+    .insert({ store_id: auth.storeId, email: email.toLowerCase().trim(), role })
+    .select('id, email, role, created_at')
+    .single()
 
   if (error) {
     if (error.code === '23505') {
@@ -69,26 +45,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, data })
 }
 
-// DELETE — eliminar admin
+// DELETE — eliminar admin (solo owner)
 export async function DELETE(req: Request) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-
-  const storeId = await getStoreId()
-  const callerRole = await getCallerRole(user.email!, storeId)
-  if (callerRole !== 'owner') {
-    return NextResponse.json({ error: 'Solo el owner puede eliminar usuarios' }, { status: 403 })
-  }
+  const auth = await requireStoreAdmin({ role: 'owner' })
+  if ('error' in auth) return auth.error
 
   const { email } = await req.json()
   if (!email) return NextResponse.json({ error: 'Email requerido' }, { status: 400 })
 
-  // No se puede eliminar al propio owner
-  if (email.toLowerCase() === user.email!.toLowerCase()) {
+  if (email.toLowerCase() === auth.user.email.toLowerCase()) {
     return NextResponse.json({ error: 'No podés eliminarte a vos mismo' }, { status: 400 })
   }
 
@@ -96,8 +64,8 @@ export async function DELETE(req: Request) {
   const { error } = await service
     .from('admin_users')
     .delete()
-    .eq('store_id', storeId)
-    .eq('email', email.toLowerCase())
+    .eq('store_id', auth.storeId)
+    .ilike('email', email.toLowerCase())
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })

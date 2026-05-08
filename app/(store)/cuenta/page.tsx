@@ -17,32 +17,35 @@ export default async function CuentaPage() {
 
   // ── Verificar que este usuario tenga cuenta en ESTE store ─────────────────
   //
-  // Un usuario autenticado en otro store NO debe poder acceder a /cuenta aquí.
-  // Si no está registrado → redirigir al login con mensaje claro.
+  // En el modelo tenant-aislado, auth.users.email es opaco (interno). El email
+  // REAL del cliente vive en store_customers.email. Buscamos por auth_user_id
+  // y usamos ese email REAL para todo lo que el usuario ve.
   //
   const storeId = await getStoreId()
+  // No incluimos `phone` en el SELECT — la columna puede no existir en deploys
+  // que aún no aplicaron `migration_security_hardening.sql`.
   const { data: storeCustomer } = await service
     .from('store_customers')
-    .select('id')
+    .select('id, email, full_name')
     .eq('store_id', storeId)
     .eq('auth_user_id', user.id)
     .maybeSingle()
 
   if (!storeCustomer) {
-    // Autenticado pero sin cuenta en esta tienda → cerrar sesión y redirigir
     redirect('/cuenta/login?error=not_registered')
   }
 
-  // Órdenes del cliente por email
+  // Órdenes del cliente por su email REAL
   const { data: orders } = await service
     .from('orders')
     .select('id, status, payment_status, total, created_at, items:order_items(product_name, quantity, unit_price)')
-    .eq('store_id', await getStoreId())
-    .eq('buyer_email', user.email!)
+    .eq('store_id', storeId)
+    .ilike('buyer_email', storeCustomer.email)
     .order('created_at', { ascending: false })
     .limit(10)
 
-  const name: string = user.user_metadata?.full_name ?? user.email!.split('@')[0]
+  const customerEmail = storeCustomer.email
+  const name: string = storeCustomer.full_name ?? customerEmail.split('@')[0]
 
   const bg = store.color_background
   const text = store.color_text
@@ -56,7 +59,7 @@ export default async function CuentaPage() {
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-40 mb-1">Bienvenida</p>
             <h1 className="text-3xl font-black uppercase tracking-tight">{name}</h1>
-            <p className="text-sm opacity-50 mt-1">{user.email}</p>
+            <p className="text-sm opacity-50 mt-1">{customerEmail}</p>
           </div>
           <form action="/api/auth/logout" method="POST">
             <button

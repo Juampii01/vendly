@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import type { StoreConfig } from '@/types'
 
 interface AuthFormProps {
@@ -12,13 +11,24 @@ interface AuthFormProps {
   defaultMode?: 'login' | 'register'
 }
 
-type Mode = 'login' | 'register' | 'sent' | 'offer-register'
+type Mode = 'login' | 'register' | 'forgot' | 'forgot-sent'
 
+/**
+ * Formulario de autenticación tenant-aislada.
+ *
+ * El registro y login están aislados por (store_id, email): el mismo email puede
+ * tener cuentas independientes en distintas tiendas, con passwords distintas.
+ *
+ * Toda la lógica de Auth pasa por endpoints server-side (`/api/auth/store-*`).
+ * El cliente NO llama directamente a `supabase.auth` para evitar exponer el
+ * email "interno" opaco que está en `auth.users`.
+ */
 export function AuthForm({ store, redirectTo = '/cuenta', defaultMode = 'login' }: AuthFormProps) {
   const [mode, setMode] = useState<Mode>(defaultMode)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
@@ -27,59 +37,41 @@ export function AuthForm({ store, redirectTo = '/cuenta', defaultMode = 'login' 
   const BG = store.color_primary
   const FG = store.color_background
 
-  // ── Helpers ─────────────────────────────────────────────────────────────────
-
-  async function registerInStore() {
-    await fetch('/api/auth/store-register', { method: 'POST' })
-  }
-
-  function resetForm() {
-    setEmail('')
-    setPassword('')
-    setName('')
+  function clearError() {
     setError('')
   }
 
-  // ── INGRESAR ──────────────────────────────────────────────────────────────────
+  // ── LOGIN ────────────────────────────────────────────────────────────────────
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const supabase = createClient()
 
-    const { error: err } = await supabase.auth.signInWithPassword({ email, password })
+    const res = await fetch('/api/auth/store-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
 
-    if (err) {
-      setError('Email o contraseña incorrectos.')
+    const data = await res.json()
+
+    if (!res.ok) {
+      setError(data.error ?? 'Email o contraseña incorrectos.')
       setLoading(false)
       return
     }
 
-    // Verificar si tiene cuenta en ESTA tienda
-    const res = await fetch('/api/auth/store-register')
-    const { registered } = await res.json()
-
-    if (registered) {
-      router.push(redirectTo)
-      router.refresh()
-      return
-    }
-
-    // Credenciales válidas pero NO registrado en esta tienda.
-    // Ofrecemos registrarse aquí en lugar de mostrar un error engañoso.
-    await supabase.auth.signOut()
-    setMode('offer-register')
-    setLoading(false)
+    router.push(redirectTo)
+    router.refresh()
   }
 
-  // ── REGISTRARSE ───────────────────────────────────────────────────────────────
+  // ── REGISTER ─────────────────────────────────────────────────────────────────
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const supabase = createClient()
 
     if (password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres.')
@@ -87,152 +79,137 @@ export function AuthForm({ store, redirectTo = '/cuenta', defaultMode = 'login' 
       return
     }
 
-    const { data, error: signUpErr } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: name },
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=${redirectTo}`,
-      },
+    const res = await fetch('/api/auth/store-register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        password,
+        full_name: name,
+        phone: phone || null,
+      }),
     })
 
-    // Email ya existe en Supabase Auth globalmente (registrado en otra tienda)
-    const emailAlreadyExists =
-      !signUpErr &&
-      data.user !== null &&
-      (data.user.identities?.length === 0 || data.user.identities === null)
+    const data = await res.json()
 
-    if (emailAlreadyExists) {
-      // El email ya existe. NO auto-registramos: esto evita que credenciales
-      // de una tienda se usen para acceder a otra sin acción explícita.
-      // En cambio, intentamos verificar la contraseña y mostramos el flujo
-      // "registrarse en esta tienda" de forma clara.
-      const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password })
-
-      if (loginErr) {
-        // Contraseña incorrecta → ese email existe pero con otra contraseña
-        await supabase.auth.signOut()
-        setError('Ese email ya está en uso con otra contraseña. Probá iniciando sesión.')
-        setLoading(false)
-        return
+    if (!res.ok) {
+      if (data.code === 'email_taken') {
+        setError(`Ya tenés una cuenta en ${store.name} con ese email. Probá iniciando sesión.`)
+      } else {
+        setError(data.error ?? 'Error al crear la cuenta.')
       }
-
-      // Contraseña OK → el usuario tiene cuenta en otra tienda y quiere registrarse acá.
-      // Cerramos sesión y mostramos la pantalla de confirmación explícita.
-      await supabase.auth.signOut()
-      setMode('offer-register')
       setLoading(false)
       return
     }
 
-    if (signUpErr) {
-      setError(signUpErr.message)
+    if (data.must_login) {
+      // Registro OK pero el sign-in tras crear falló — pasamos a login
+      setMode('login')
+      setError('Cuenta creada. Iniciá sesión para continuar.')
       setLoading(false)
       return
     }
 
-    // Registro nuevo exitoso
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      // Sin confirmación de email → sesión activa, registrar en este store
-      await registerInStore()
-      router.push(redirectTo)
-      router.refresh()
-    } else {
-      // Con confirmación de email → avisar al usuario
-      setMode('sent')
-    }
-    setLoading(false)
-  }
-
-  // ── CONFIRMAR REGISTRO EN ESTA TIENDA (email ya existe) ───────────────────────
-
-  async function handleConfirmRegister() {
-    setLoading(true)
-    setError('')
-    const supabase = createClient()
-
-    const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password })
-    if (loginErr) {
-      setError('No pudimos verificar tu identidad. Intentá de nuevo.')
-      setLoading(false)
-      return
-    }
-
-    // Verificar si ya está registrado en esta tienda
-    const res = await fetch('/api/auth/store-register')
-    const { registered } = await res.json()
-
-    if (registered) {
-      // Ya estaba registrado → entrar directamente
-      router.push(redirectTo)
-      router.refresh()
-      return
-    }
-
-    // Registrar explícitamente en esta tienda
-    await registerInStore()
     router.push(redirectTo)
     router.refresh()
   }
 
-  // ── UI: Pantalla de confirmación (cuenta existe en otra tienda) ───────────────
+  // ── FORGOT PASSWORD ─────────────────────────────────────────────────────────
 
-  if (mode === 'offer-register') {
+  async function handleForgot(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+
+    await fetch('/api/auth/store-password-reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    })
+
+    // Endpoint siempre responde OK (anti-enumeration)
+    setMode('forgot-sent')
+    setLoading(false)
+  }
+
+  // ── UI: forgot-sent ─────────────────────────────────────────────────────────
+
+  if (mode === 'forgot-sent') {
     return (
-      <div className="text-center py-6">
-        <div className="text-4xl mb-4">🏪</div>
-        <h2 className="text-lg font-black uppercase tracking-tight mb-2" style={{ color: store.color_text }}>
-          Bienvenido a {store.name}
+      <div className="text-center py-8">
+        <div className="text-4xl mb-4">✉️</div>
+        <h2 className="text-xl font-bold mb-2" style={{ color: store.color_text }}>
+          Revisá tu email
         </h2>
-        <p className="text-sm mb-1" style={{ color: `${store.color_text}99` }}>
-          Tu cuenta <strong>{email}</strong> existe en otra tienda.
+        <p className="text-sm opacity-60" style={{ color: store.color_text }}>
+          Si <strong>{email}</strong> tiene cuenta en {store.name}, te llegó un link para
+          restablecer la contraseña. El link vence en 1 hora.
         </p>
-        <p className="text-sm mb-8" style={{ color: `${store.color_text}99` }}>
-          ¿Querés registrarte en <strong>{store.name}</strong> también?
-        </p>
-
-        {error && <p className="text-xs text-red-500 font-medium mb-4">{error}</p>}
-
         <button
-          onClick={handleConfirmRegister}
-          disabled={loading}
-          className="w-full py-3.5 text-xs font-black uppercase tracking-[0.15em] transition-opacity hover:opacity-80 disabled:opacity-40 mb-3"
-          style={{ backgroundColor: BG, color: FG }}
-        >
-          {loading ? '...' : `Registrarme en ${store.name}`}
-        </button>
-
-        <button
-          onClick={() => { resetForm(); setMode('login') }}
-          className="text-xs opacity-40 hover:opacity-70 transition-opacity"
+          onClick={() => {
+            clearError()
+            setMode('login')
+          }}
+          className="mt-6 text-sm underline opacity-50 hover:opacity-80"
           style={{ color: store.color_text }}
         >
-          Cancelar
+          Volver al login
         </button>
       </div>
     )
   }
 
-  // ── UI: Email de confirmación enviado ─────────────────────────────────────────
+  // ── UI: forgot ─────────────────────────────────────────────────────────────
 
-  if (mode === 'sent') {
+  if (mode === 'forgot') {
     return (
-      <div className="text-center py-8">
-        <div className="text-4xl mb-4">✉️</div>
-        <h2 className="text-xl font-bold mb-2" style={{ color: store.color_text }}>
-          Confirmá tu email
+      <div>
+        <h2 className="text-base font-bold mb-2" style={{ color: store.color_text }}>
+          Olvidaste tu contraseña
         </h2>
-        <p className="text-sm opacity-60" style={{ color: store.color_text }}>
-          Enviamos un link de confirmación a <strong>{email}</strong>.
-          Hacé click en el link para activar tu cuenta.
+        <p className="text-sm opacity-60 mb-6" style={{ color: store.color_text }}>
+          Te mandamos un link para restablecerla.
         </p>
+        <form onSubmit={handleForgot} className="space-y-4">
+          <div>
+            <label
+              className="block text-xs font-semibold uppercase tracking-wider mb-1.5 opacity-60"
+              style={{ color: store.color_text }}
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="tu@email.com"
+              required
+              autoFocus
+              className="w-full border rounded-xl px-4 py-3 text-sm outline-none bg-transparent transition-all"
+              style={{ borderColor: `${store.color_text}25`, color: store.color_text }}
+            />
+          </div>
+
+          {error && <p className="text-xs text-red-500 font-medium">{error}</p>}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3.5 text-xs font-black uppercase tracking-[0.15em] transition-opacity hover:opacity-80 disabled:opacity-40 rounded-xl"
+            style={{ backgroundColor: BG, color: FG }}
+          >
+            {loading ? '...' : 'Enviar link'}
+          </button>
+        </form>
         <button
-          onClick={() => { resetForm(); setMode('login') }}
-          className="mt-6 text-sm underline opacity-50 hover:opacity-80"
+          onClick={() => {
+            clearError()
+            setMode('login')
+          }}
+          className="mt-4 text-xs opacity-50 hover:opacity-80 transition-opacity"
           style={{ color: store.color_text }}
         >
-          Ya confirmé, quiero ingresar
+          ← Volver al login
         </button>
       </div>
     )
@@ -247,7 +224,10 @@ export function AuthForm({ store, redirectTo = '/cuenta', defaultMode = 'login' 
         {(['login', 'register'] as const).map((m) => (
           <button
             key={m}
-            onClick={() => { setMode(m); setError('') }}
+            onClick={() => {
+              setMode(m)
+              clearError()
+            }}
             className={`flex-1 pb-3 text-sm font-bold uppercase tracking-wider transition-opacity border-b-2 -mb-px ${
               mode === m ? 'opacity-100' : 'opacity-30 border-transparent hover:opacity-50'
             }`}
@@ -261,25 +241,46 @@ export function AuthForm({ store, redirectTo = '/cuenta', defaultMode = 'login' 
         ))}
       </div>
 
-      <form onSubmit={mode === 'register' ? handleRegister : handleLogin} className="space-y-4">
+      <form
+        onSubmit={mode === 'register' ? handleRegister : handleLogin}
+        className="space-y-4"
+      >
         {mode === 'register' && (
-          <div>
-            <label
-              className="block text-xs font-semibold uppercase tracking-wider mb-1.5 opacity-60"
-              style={{ color: store.color_text }}
-            >
-              Nombre completo
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Juan García"
-              required
-              className="w-full border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 bg-transparent transition-all"
-              style={{ borderColor: `${store.color_text}25`, color: store.color_text }}
-            />
-          </div>
+          <>
+            <div>
+              <label
+                className="block text-xs font-semibold uppercase tracking-wider mb-1.5 opacity-60"
+                style={{ color: store.color_text }}
+              >
+                Nombre completo
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Juan García"
+                required
+                className="w-full border rounded-xl px-4 py-3 text-sm outline-none bg-transparent transition-all"
+                style={{ borderColor: `${store.color_text}25`, color: store.color_text }}
+              />
+            </div>
+            <div>
+              <label
+                className="block text-xs font-semibold uppercase tracking-wider mb-1.5 opacity-60"
+                style={{ color: store.color_text }}
+              >
+                Teléfono <span className="opacity-50 normal-case">(opcional)</span>
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="11 1234 5678"
+                className="w-full border rounded-xl px-4 py-3 text-sm outline-none bg-transparent transition-all"
+                style={{ borderColor: `${store.color_text}25`, color: store.color_text }}
+              />
+            </div>
+          </>
         )}
 
         <div>
@@ -302,26 +303,40 @@ export function AuthForm({ store, redirectTo = '/cuenta', defaultMode = 'login' 
         </div>
 
         <div>
-          <label
-            className="block text-xs font-semibold uppercase tracking-wider mb-1.5 opacity-60"
-            style={{ color: store.color_text }}
-          >
-            Contraseña
-          </label>
+          <div className="flex justify-between items-baseline mb-1.5">
+            <label
+              className="block text-xs font-semibold uppercase tracking-wider opacity-60"
+              style={{ color: store.color_text }}
+            >
+              Contraseña
+            </label>
+            {mode === 'login' && (
+              <button
+                type="button"
+                onClick={() => {
+                  clearError()
+                  setMode('forgot')
+                }}
+                className="text-xs opacity-50 hover:opacity-80 transition-opacity"
+                style={{ color: store.color_text }}
+              >
+                Olvidé mi contraseña
+              </button>
+            )}
+          </div>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder={mode === 'register' ? 'Mínimo 6 caracteres' : '••••••••'}
             required
+            minLength={6}
             className="w-full border rounded-xl px-4 py-3 text-sm outline-none bg-transparent transition-all"
             style={{ borderColor: `${store.color_text}25`, color: store.color_text }}
           />
         </div>
 
-        {error && (
-          <p className="text-xs text-red-500 font-medium">{error}</p>
-        )}
+        {error && <p className="text-xs text-red-500 font-medium">{error}</p>}
 
         <button
           type="submit"
@@ -331,6 +346,13 @@ export function AuthForm({ store, redirectTo = '/cuenta', defaultMode = 'login' 
         >
           {loading ? '...' : mode === 'login' ? 'Ingresar' : 'Crear cuenta'}
         </button>
+
+        {mode === 'register' && (
+          <p className="text-[11px] opacity-50 text-center" style={{ color: store.color_text }}>
+            Al crear una cuenta, aceptás nuestros términos y política de privacidad.
+            Tu cuenta queda vinculada solo a {store.name}.
+          </p>
+        )}
       </form>
     </div>
   )

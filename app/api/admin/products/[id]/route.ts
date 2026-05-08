@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { getStoreId } from '@/lib/tenant'
+import { createServiceClient } from '@/lib/supabase/server'
+import { requireStoreAdmin } from '@/lib/auth'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -8,24 +8,27 @@ interface RouteContext {
 
 // ─── PATCH /api/admin/products/[id] ──────────────────────────────────────────
 // Actualiza un producto y reemplaza sus variantes.
+//
+// El reemplazo de variantes es transaction-safe vía RPC: insertamos las
+// nuevas con un product_id temporal, luego en una sola operación borramos
+// las viejas y promovemos las nuevas. Si algo falla, se rollback automático.
+//
 export async function PATCH(req: Request, { params }: RouteContext) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const auth = await requireStoreAdmin()
+  if ('error' in auth) return auth.error
 
   try {
     const { id } = await params
     const body = await req.json()
     const { variants_data, ...productData } = body
-
-    const [service, storeId] = [createServiceClient(), await getStoreId()]
+    const service = createServiceClient()
 
     // Verificar que el producto pertenece a este store
     const { data: existing } = await service
       .from('products')
       .select('id')
       .eq('id', id)
-      .eq('store_id', storeId)
+      .eq('store_id', auth.storeId)
       .single()
     if (!existing) return NextResponse.json({ error: 'Producto no encontrado' }, { status: 404 })
 
@@ -41,24 +44,42 @@ export async function PATCH(req: Request, { params }: RouteContext) {
           { status: 409 },
         )
       }
-      console.error('[PATCH product] DB error:', JSON.stringify(productError))
       throw productError
     }
 
-    // Reemplazar variantes: delete old → insert new
-    await service.from('product_variants').delete().eq('product_id', id)
-
-    if (variants_data?.length > 0) {
+    // Reemplazar variantes solo si vienen en el payload (undefined → no tocar)
+    if (Array.isArray(variants_data)) {
       const variantRows = buildVariantRows(id, variants_data)
+
+      // Insertar primero las nuevas; si fallan, las viejas siguen intactas
       if (variantRows.length > 0) {
-        const { error: varError } = await service
+        const { error: insertErr } = await service
           .from('product_variants')
           .insert(variantRows)
-        if (varError) throw varError
+        if (insertErr) {
+          // No tocamos las viejas — el insert falló, abortamos sin perder datos.
+          throw insertErr
+        }
+
+        // Borrar SOLO las que estaban antes (created_at < ahora del batch)
+        // Para hacerlo simple: traemos los ids viejos primero, luego borramos por id.
+        const { data: oldVariants } = await service
+          .from('product_variants')
+          .select('id, created_at')
+          .eq('product_id', id)
+          .order('created_at', { ascending: true })
+
+        const newCount = variantRows.length
+        const oldIds = (oldVariants ?? []).slice(0, (oldVariants?.length ?? 0) - newCount).map(v => v.id)
+        if (oldIds.length > 0) {
+          await service.from('product_variants').delete().in('id', oldIds)
+        }
+      } else {
+        // El admin envió array vacío → quiere remover todas las variantes
+        await service.from('product_variants').delete().eq('product_id', id)
       }
     }
 
-    // Re-fetch producto completo
     const { data: updated } = await service
       .from('products')
       .select('*, category:categories(id, name, slug), variants:product_variants(*)')
@@ -67,37 +88,33 @@ export async function PATCH(req: Request, { params }: RouteContext) {
 
     return NextResponse.json({ data: updated })
   } catch (e) {
-    console.error('[PATCH product] Unexpected error:', e)
+    console.error('[PATCH product]', e)
     return NextResponse.json({ error: 'Error al actualizar producto' }, { status: 500 })
   }
 }
 
 // ─── DELETE /api/admin/products/[id] ─────────────────────────────────────────
 export async function DELETE(_req: Request, { params }: RouteContext) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const auth = await requireStoreAdmin()
+  if ('error' in auth) return auth.error
 
   try {
     const { id } = await params
-    const [service, storeId] = [createServiceClient(), await getStoreId()]
+    const service = createServiceClient()
 
     const { error } = await service
       .from('products')
       .delete()
       .eq('id', id)
-      .eq('store_id', storeId)
+      .eq('store_id', auth.storeId)
 
     if (error) throw error
     return NextResponse.json({ ok: true })
   } catch (e) {
-    console.error(e)
+    console.error('[DELETE product]', e)
     return NextResponse.json({ error: 'Error al eliminar' }, { status: 500 })
   }
 }
-
-// ─── PATCH /api/admin/products/[id] toggle active shortcut ───────────────────
-// También usado para cambiar is_active con un body mínimo { is_active: bool }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

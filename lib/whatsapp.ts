@@ -203,9 +203,26 @@ export async function sendMonitorRecovery(
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+/**
+ * Devuelve el número en formato E.164 (solo dígitos, sin `+`).
+ *
+ * Si el input ya tiene country code (11+ dígitos) o empieza con `+`, lo respeta.
+ * Si parece un número AR local (10 dígitos comenzando con `0` o `1[1-9]`),
+ * agrega el prefijo 54 — fallback para tiendas legacy AR.
+ *
+ * Para soportar otros países, los store owners deben guardar el teléfono
+ * con country code completo (ej: 5491100000000, 521555000000, 5511900000000).
+ */
 function normalizePhone(phone: string): string {
-  const digits = phone.replace(/\D/g, '')
-  if (digits.startsWith('54')) return digits
+  const trimmed = phone.trim()
+  // Si viene con `+`, sacamos el `+` y devolvemos los dígitos
+  if (trimmed.startsWith('+')) {
+    return trimmed.slice(1).replace(/\D/g, '')
+  }
+  const digits = trimmed.replace(/\D/g, '')
+  // Si tiene 11+ dígitos asumimos que ya incluye country code
+  if (digits.length >= 11) return digits
+  // Fallback AR: 10 dígitos sin country code
   if (digits.startsWith('0')) return `54${digits.slice(1)}`
   return `54${digits}`
 }

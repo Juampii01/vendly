@@ -6,6 +6,8 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Platform — Vendly' }
 
+export const dynamic = 'force-dynamic'
+
 export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
   const h = await headers()
   const userEmail = h.get('x-user-email') ?? ''
@@ -17,15 +19,15 @@ export default async function PlatformLayout({ children }: { children: React.Rea
   const { data: platformUser } = await service
     .from('platform_users')
     .select('id, role')
-    .eq('email', userEmail)
+    .ilike('email', userEmail)
     .maybeSingle()
 
+  // SIN bootstrap bypass: aunque la tabla esté vacía, NO permitimos acceso
+  // automático. La inicialización del primer platform_user se hace por SQL/CLI.
+  // El bypass anterior dejaba /platform abierto a cualquier usuario logueado
+  // hasta que alguien insertara la primera fila, lo cual era un agujero crítico.
   if (!platformUser) {
-    const { count } = await service
-      .from('platform_users')
-      .select('*', { count: 'exact', head: true })
-
-    if (count && count > 0) redirect('/admin?error=sin_acceso_plataforma')
+    redirect('/admin?error=sin_acceso_plataforma')
   }
 
   const initials = userEmail.slice(0, 2).toUpperCase()

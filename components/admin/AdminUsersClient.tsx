@@ -41,16 +41,12 @@ export function AdminUsersClient({ initialUsers, currentUserEmail, currentUserRo
 
     if (!res.ok) {
       setAddError(data.error ?? 'Error al agregar')
+    } else if (data.data) {
+      // Usar el id real de la DB — antes generábamos un UUID falso en cliente que
+      // descoordinaba la lista del estado real (ej. al borrar inmediatamente).
+      setUsers((prev) => [...prev, data.data as AdminUser])
+      setNewEmail('')
     } else {
-      setUsers((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          email: newEmail.trim().toLowerCase(),
-          role: newRole,
-          created_at: new Date().toISOString(),
-        },
-      ])
       setNewEmail('')
     }
     setAdding(false)

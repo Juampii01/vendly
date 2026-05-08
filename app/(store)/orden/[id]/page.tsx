@@ -10,17 +10,17 @@ import type { Metadata } from 'next'
 
 interface PageProps {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ status?: string }>
 }
+
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata(): Promise<Metadata> {
   const store = await getStoreConfig()
   return { title: `Confirmación de orden — ${store.name}` }
 }
 
-export default async function OrdenPage({ params, searchParams }: PageProps) {
+export default async function OrdenPage({ params }: PageProps) {
   const { id } = await params
-  const { status } = await searchParams
 
   const [store, supabase] = await Promise.all([getStoreConfig(), Promise.resolve(createServiceClient())])
 
@@ -33,7 +33,10 @@ export default async function OrdenPage({ params, searchParams }: PageProps) {
 
   if (!order) notFound()
 
-  const paymentStatus = status ?? order.payment_status
+  // SIEMPRE usamos el payment_status real de la BD — el query string `?status=approved`
+  // que MP devuelve es spoofeable y mostraría "pago confirmado" sin que el webhook
+  // haya procesado el pago, además de gatillar la limpieza del carrito.
+  const paymentStatus: string = order.payment_status
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">

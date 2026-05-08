@@ -1,6 +1,6 @@
 import 'server-only'
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireStoreAdmin } from '@/lib/auth'
 import type { StoreConfig, LandingSection, Product, Category } from '@/types'
 import type { DesignMessage, ProductAction, CategoryAction } from './types'
 
@@ -181,19 +181,28 @@ REGLAS CRÍTICAS — SEGUÍ ESTAS SIN EXCEPCIÓN:
 // ─── Route ────────────────────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const auth = await requireStoreAdmin()
+  if ('error' in auth) return auth.error
 
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) return NextResponse.json({ error: 'API de IA no configurada' }, { status: 503 })
 
   const { message, history, store, products = [], categories = [] } = await req.json() as DesignRequest
 
+  // Verificar que el `store` enviado coincide con el store resuelto por hostname/cookie.
+  // Esto evita que un admin del store A pueda dirigir cambios al store B vía body.
+  if (store?.id !== auth.storeId) {
+    return NextResponse.json({ error: 'Store mismatch' }, { status: 403 })
+  }
+
   const messages = [
     ...history.map(m => ({ role: m.role, content: m.content })),
     { role: 'user', content: message },
   ]
+
+  // Prompt caching: el system prompt es grande (~3KB con productos + categorías).
+  // Lo marcamos como ephemeral para reusarlo durante 5min sin reenviar tokens.
+  const systemPrompt = buildSystemPrompt(store, products, categories)
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -203,9 +212,11 @@ export async function POST(req: Request) {
       'content-type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 3000,
-      system: buildSystemPrompt(store, products, categories),
+      system: [
+        { type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } },
+      ],
       messages,
     }),
   })

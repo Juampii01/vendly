@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
-import { headers } from 'next/headers'
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+import { requirePlatformAccess } from '@/lib/auth'
 
 function slugify(text: string): string {
   return text
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 80)
@@ -29,15 +27,12 @@ async function resolveCategory(
   return data?.id ?? null
 }
 
-// ─── GET — list products for a store ─────────────────────────────────────────
-
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const h = await headers()
-  const userEmail = h.get('x-user-email')
-  if (!userEmail) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const auth = await requirePlatformAccess()
+  if ('error' in auth) return auth.error
 
   const { id: storeId } = await params
   const service = createServiceClient()
@@ -52,15 +47,12 @@ export async function GET(
   return NextResponse.json({ products: data ?? [] })
 }
 
-// ─── POST — create / update / delete ─────────────────────────────────────────
-
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const h = await headers()
-  const userEmail = h.get('x-user-email')
-  if (!userEmail) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const auth = await requirePlatformAccess()
+  if ('error' in auth) return auth.error
 
   const { id: storeId } = await params
   const service = createServiceClient()
@@ -84,7 +76,6 @@ export async function POST(
 
   const { action, product_id, data } = body
 
-  // ── Delete ─────────────────────────────────────────────────────────────────
   if (action === 'delete') {
     if (!product_id) return NextResponse.json({ error: 'product_id requerido' }, { status: 400 })
     const { error } = await service
@@ -98,13 +89,11 @@ export async function POST(
 
   if (!data) return NextResponse.json({ error: 'data requerido' }, { status: 400 })
 
-  // ── Create ─────────────────────────────────────────────────────────────────
   if (action === 'create') {
     if (!data.name) return NextResponse.json({ error: 'name requerido' }, { status: 400 })
     if (data.price == null) return NextResponse.json({ error: 'price requerido' }, { status: 400 })
 
     const baseSlug = data.slug || slugify(data.name)
-    // Ensure unique slug
     let slug = baseSlug
     let attempt = 0
     while (true) {
@@ -143,7 +132,6 @@ export async function POST(
     return NextResponse.json({ ok: true, action: 'created', product })
   }
 
-  // ── Update ─────────────────────────────────────────────────────────────────
   if (action === 'update') {
     if (!product_id) return NextResponse.json({ error: 'product_id requerido' }, { status: 400 })
 
