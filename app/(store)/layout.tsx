@@ -17,6 +17,7 @@ import { GymHeader } from '@/components/store/gym/GymHeader'
 import { GymFooter } from '@/components/store/gym/GymFooter'
 import { PageEnter } from '@/components/store/motion'
 import { getSiteFeatures } from '@/lib/site-features'
+import { tokensToCssVars } from '@/lib/theme'
 import type { Metadata } from 'next'
 
 // Store layout depende del subdomain/cookie del request — nunca prerenderear.
@@ -50,15 +51,9 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   const isRealEstate = store.site_type === 'real-estate'
   const features = getSiteFeatures(store.site_type)
 
-  const cssVars = `
-    :root {
-      --color-primary:   ${store.color_primary};
-      --color-secondary: ${store.color_secondary};
-      --color-accent:    ${store.color_accent};
-      --color-bg:        ${store.color_background};
-      --color-text:      ${store.color_text};
-    }
-  `
+  // CSS vars: incluye colores + theme_tokens (typography, radius, container max).
+  // Cualquier token ausente cae al default — ver lib/theme.ts.
+  const cssVars = tokensToCssVars(store)
 
   // Templates que manejan su propio layout completo
   if (isVendlyMarketing || isRealEstate) {

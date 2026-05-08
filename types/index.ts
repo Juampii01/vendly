@@ -48,8 +48,36 @@ export interface StoreConfig {
   // Site type
   site_type: 'ecommerce' | 'landing' | 'portfolio' | 'restaurant' | 'services' | 'modo' | 'athletic' | 'dealership' | 'libreria' | 'vendly-marketing' | 'real-estate'
   sections: LandingSection[] | null
+  // Config-driven home (nuevo sistema, ver HomeSection abajo)
+  // Si null → page.tsx usa el dispatcher legacy según site_type.
+  // Si set  → page.tsx usa HomeRenderer y renderiza sections en orden.
+  home_layout: HomeSection[] | null
+  theme_tokens: ThemeTokens
   created_at: string
   updated_at: string
+}
+
+// ─── Theme tokens ─────────────────────────────────────────────────────────────
+//
+// Tokens de diseño que no son colores. Los 5 colores siguen viviendo en
+// color_primary/secondary/accent/background/text en store_config — no los
+// movemos para no romper nada.
+//
+// Cualquier campo undefined → el renderer usa defaults sensatos (ver
+// lib/theme.ts → DEFAULT_THEME_TOKENS).
+export interface ThemeTokens {
+  fontHeading?: string         // ej: "Inter", "Playfair Display"
+  fontBody?: string            // ej: "Inter"
+  headingWeight?: string       // ej: "900", "700"
+  headingTransform?: 'uppercase' | 'none'
+  headingTracking?: string     // CSS letter-spacing, ej: "-0.03em"
+  radius?: {
+    sm?: string                // ej: "4px"
+    md?: string
+    lg?: string
+  }
+  sectionPaddingY?: string     // tailwind classes, ej: "py-16 md:py-24"
+  containerMaxWidth?: string   // ej: "1440px", "1280px"
 }
 
 // ─── Store Domain ─────────────────────────────────────────────────────────────
@@ -456,6 +484,144 @@ export const DEFAULT_SECTIONS: LandingSection[] = [
     } as ContactContent,
   },
 ]
+
+// ─── Home sections (config-driven home pages) ────────────────────────────────
+//
+// Sistema unificado para armar la home de cualquier ecommerce con secciones
+// reusables. Cada vertical (athletic, modo, libreria, etc.) deja de ser un
+// componente hardcoded y pasa a ser un preset de HomeSection[] + theme tokens.
+//
+// Reglas:
+//   - section.id es estable (úsalo de key en React)
+//   - section.active = false esconde la sección sin borrarla
+//   - section.content es tipado por section.type (discriminated union)
+//
+// Para agregar un tipo nuevo:
+//   1. Agregá la variante a HomeSectionType y a HomeSection
+//   2. Definí el ContentXxx interface
+//   3. Implementá el componente en components/store/sections/Xxx.tsx
+//   4. Registralo en components/store/HomeRenderer.tsx
+
+export type HomeSectionType =
+  | 'hero'
+  | 'marquee'
+  | 'categoryGrid'
+  | 'editorialSplit'
+  | 'featuredProducts'
+  | 'productScroll'
+  | 'instagramGallery'
+  | 'newsletter'
+  | 'trustBar'
+
+// ── Hero ────────────────────────────────────────────────────────────────────
+// Imagen full-bleed con overlay, eyebrow opcional, título grande, 1-2 CTAs.
+// Si imageUrl/title/cta vienen vacíos, usa los de store_config (back-compat).
+export interface HeroSectionContent {
+  imageUrl?: string                 // override; default = store.hero_image_url
+  eyebrow?: string                  // pre-título, ej: "NUEVA COLECCIÓN"
+  title?: string                    // override; default = store.hero_title
+  primaryCta?: { label: string; url: string }
+  secondaryCta?: { label: string; url: string }
+  height?: 'screen' | 'tall' | 'medium'   // default: 'screen'
+  align?: 'left' | 'center'         // default: 'left'
+  overlay?: 'gradient-bottom' | 'gradient-left' | 'dark' | 'none'  // default: 'gradient-bottom'
+}
+
+// ── Marquee ─────────────────────────────────────────────────────────────────
+// Banda de texto que se desplaza horizontal en loop.
+export interface MarqueeSectionContent {
+  items?: string[]                  // override; default = store.home_marquee_items
+  background?: 'primary' | 'accent' | 'secondary' | 'text'   // default: 'accent'
+  speed?: 'slow' | 'medium' | 'fast'   // default: 'medium' (~22s)
+}
+
+// ── CategoryGrid ────────────────────────────────────────────────────────────
+// Grid de categorías. El layout se adapta a 1/2/3+ categorías ("smart bento").
+export interface CategoryGridContent {
+  title?: string                    // default: "Categorías"
+  ctaLabel?: string                 // default: "Ver todo"
+  ctaUrl?: string                   // default: "/productos"
+  layout?: 'bento' | 'uniform'      // default: 'bento' (1 grande + resto chicos)
+  maxItems?: number                 // default: 6
+}
+
+// ── EditorialSplit ──────────────────────────────────────────────────────────
+// Split 50/50 imagen + panel de texto sobre fondo color_primary.
+export interface EditorialSplitContent {
+  imageUrl?: string                 // override; default = store.home_split_image_url
+  imagePosition?: 'left' | 'right'  // default: 'left'
+  eyebrow?: string                  // override; default = store.home_editorial_label
+  title?: string                    // override; default = store.home_editorial_title
+  body?: string                     // override; default = store.home_editorial_body
+  ctaLabel?: string                 // default: "Explorar colección"
+  ctaUrl?: string                   // default: "/productos"
+}
+
+// ── FeaturedProducts ────────────────────────────────────────────────────────
+// Grid uniforme de productos destacados.
+export interface FeaturedProductsContent {
+  title?: string                    // default: "Destacados"
+  eyebrow?: string                  // ej: "Selección"
+  ctaLabel?: string                 // default: "Ver todos"
+  ctaUrl?: string                   // default: "/productos"
+  columns?: 2 | 3 | 4               // default: 4 (desktop)
+  maxItems?: number                 // default: 8
+  source?: 'featured' | 'all'       // default: 'featured'
+}
+
+// ── ProductScroll ───────────────────────────────────────────────────────────
+// Scroll horizontal en mobile, grid en desktop. Para "Más vendidos", "Nueva
+// temporada", etc.
+export interface ProductScrollContent {
+  title?: string                    // default: "Más vendidos"
+  ctaLabel?: string                 // default: "Ver todos"
+  ctaUrl?: string                   // default: "/productos"
+  desktopColumns?: 3 | 4            // default: 4
+  maxItems?: number                 // default: 8
+  source?: 'featured' | 'all'       // default: 'all'
+  background?: 'transparent' | 'subtle'  // default: 'subtle'
+}
+
+// ── InstagramGallery ────────────────────────────────────────────────────────
+// 6 imágenes de productos en grid 6-col, con link a Instagram en el header.
+export interface InstagramGalleryContent {
+  title?: string                    // default: "Nuestras prendas" o "@usuario" si hay instagram_url
+  eyebrow?: string                  // default: "Galería"
+  maxItems?: number                 // default: 6
+}
+
+// ── Newsletter ──────────────────────────────────────────────────────────────
+// Bloque grande con eyebrow + título + body + form de email.
+export interface NewsletterSectionContent {
+  eyebrow?: string                  // default: "Comunidad {store.name}"
+  title?: string                    // default: "Primero te enterás vos"
+  body?: string                     // default: "Lanzamientos, preventas y descuentos exclusivos. Sin spam."
+  background?: 'primary' | 'accent' | 'subtle'   // default: 'primary'
+}
+
+// ── TrustBar ────────────────────────────────────────────────────────────────
+// Fila de 3-4 ítems con icono + título + desc (envío, devoluciones, etc).
+export interface TrustBarItem {
+  icon: 'truck' | 'return' | 'lock' | 'ship' | 'star' | 'support' | 'gift'
+  title: string
+  desc: string
+}
+export interface TrustBarContent {
+  items?: TrustBarItem[]            // default: 4 ítems estándar (envío/cambios/pago/freeship)
+  layout?: 'border' | 'cards'       // default: 'border'
+}
+
+// ── Discriminated union ──────────────────────────────────────────────────────
+export type HomeSection =
+  | { id: string; type: 'hero';             active: boolean; content: HeroSectionContent }
+  | { id: string; type: 'marquee';          active: boolean; content: MarqueeSectionContent }
+  | { id: string; type: 'categoryGrid';     active: boolean; content: CategoryGridContent }
+  | { id: string; type: 'editorialSplit';   active: boolean; content: EditorialSplitContent }
+  | { id: string; type: 'featuredProducts'; active: boolean; content: FeaturedProductsContent }
+  | { id: string; type: 'productScroll';    active: boolean; content: ProductScrollContent }
+  | { id: string; type: 'instagramGallery'; active: boolean; content: InstagramGalleryContent }
+  | { id: string; type: 'newsletter';       active: boolean; content: NewsletterSectionContent }
+  | { id: string; type: 'trustBar';         active: boolean; content: TrustBarContent }
 
 // ─── API responses (generic) ─────────────────────────────────────────────────
 
