@@ -12,6 +12,7 @@ import { VendlyMarketingPage } from '@/components/store/vendly-marketing/VendlyM
 import { RealEstateHomePage } from '@/components/store/real-estate/RealEstateHomePage'
 import { RestaurantHomePage } from '@/components/store/restaurant/RestaurantHomePage'
 import { GymHomePage } from '@/components/store/gym/GymHomePage'
+import { HomeRenderer } from '@/components/store/HomeRenderer'
 import { FadeUp, SlideLeft, SlideRight, StaggerGrid, StaggerItem } from '@/components/store/motion'
 import { formatPrice } from '@/lib/format'
 import { DEFAULT_SECTIONS } from '@/types'
@@ -46,6 +47,22 @@ export default async function HomePage() {
     getProducts({ featured: true, per_page: 8 }),
     getProducts({ per_page: 8 }),
   ])
+
+  // ── Sistema config-driven (nuevo) ─────────────────────────────────────────
+  // Si el store tiene home_layout setteado, lo renderiza con HomeRenderer y
+  // se ignora el dispatcher legacy de site_type. Esto permite migrar
+  // store-by-store sin romper los HomePage.tsx existentes.
+  if (store.home_layout && store.home_layout.length > 0) {
+    return (
+      <HomeRenderer
+        store={store}
+        categories={categories}
+        featured={featured}
+        all={all}
+        layout={store.home_layout}
+      />
+    )
+  }
 
   // ── Landing page ───────────────────────────────────────────────────────────
   if (store.site_type === 'landing') {
