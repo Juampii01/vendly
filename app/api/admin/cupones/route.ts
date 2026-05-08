@@ -1,60 +1,94 @@
 import { NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { getStoreId } from '@/lib/tenant'
+import { createServiceClient } from '@/lib/supabase/server'
+import { requireStoreAdmin } from '@/lib/auth'
 
-// GET — listar cupones del store
+const COUPON_CODE_RE = /^[A-Z0-9_-]{3,32}$/
+
 export async function GET() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const auth = await requireStoreAdmin()
+  if ('error' in auth) return auth.error
 
   const service = createServiceClient()
-  const storeId = await getStoreId()
-
   const { data, error } = await service
     .from('coupons')
     .select('*')
-    .eq('store_id', storeId)
+    .eq('store_id', auth.storeId)
     .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ data })
 }
 
-// POST — crear cupón
 export async function POST(req: Request) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const auth = await requireStoreAdmin()
+  if ('error' in auth) return auth.error
 
   const service = createServiceClient()
-  const storeId = await getStoreId()
-
   const body = await req.json()
   const { code, type, value, max_uses, min_order_amount, expires_at } = body
 
+  // ── Validación ────────────────────────────────────────────────────────────
   if (!code || !type || value == null) {
     return NextResponse.json({ error: 'code, type y value son requeridos' }, { status: 400 })
   }
+
+  const normalizedCode = String(code).trim().toUpperCase()
+  if (!COUPON_CODE_RE.test(normalizedCode)) {
+    return NextResponse.json(
+      { error: 'El código debe tener 3-32 caracteres (A-Z, 0-9, _ o -)' },
+      { status: 400 },
+    )
+  }
+
   if (!['percentage', 'fixed'].includes(type)) {
     return NextResponse.json({ error: 'type inválido' }, { status: 400 })
   }
-  if (type === 'percentage' && (value <= 0 || value > 100)) {
-    return NextResponse.json({ error: 'El porcentaje debe ser entre 1 y 100' }, { status: 400 })
+
+  const numericValue = Number(value)
+  if (!Number.isFinite(numericValue) || numericValue <= 0) {
+    return NextResponse.json({ error: 'El valor debe ser mayor a 0' }, { status: 400 })
   }
-  if (type === 'fixed' && value <= 0) {
-    return NextResponse.json({ error: 'El monto debe ser mayor a 0' }, { status: 400 })
+  if (type === 'percentage' && numericValue > 100) {
+    return NextResponse.json({ error: 'El porcentaje no puede ser mayor a 100' }, { status: 400 })
+  }
+
+  let normalizedMaxUses: number | null = null
+  if (max_uses !== null && max_uses !== undefined && max_uses !== '') {
+    const n = Number(max_uses)
+    if (!Number.isFinite(n) || n < 1) {
+      return NextResponse.json({ error: 'max_uses debe ser un entero ≥ 1' }, { status: 400 })
+    }
+    normalizedMaxUses = Math.floor(n)
+  }
+
+  let normalizedMin: number | null = null
+  if (min_order_amount !== null && min_order_amount !== undefined && min_order_amount !== '') {
+    const n = Number(min_order_amount)
+    if (!Number.isFinite(n) || n < 0) {
+      return NextResponse.json({ error: 'min_order_amount no puede ser negativo' }, { status: 400 })
+    }
+    normalizedMin = n
+  }
+
+  if (expires_at) {
+    const exp = new Date(expires_at)
+    if (isNaN(exp.getTime())) {
+      return NextResponse.json({ error: 'expires_at inválido' }, { status: 400 })
+    }
+    if (exp.getTime() <= Date.now()) {
+      return NextResponse.json({ error: 'La fecha de expiración debe ser futura' }, { status: 400 })
+    }
   }
 
   const { data, error } = await service
     .from('coupons')
     .insert({
-      store_id: storeId,
-      code: code.trim().toUpperCase(),
+      store_id: auth.storeId,
+      code: normalizedCode,
       type,
-      value: Number(value),
-      max_uses: max_uses ? Number(max_uses) : null,
-      min_order_amount: min_order_amount ? Number(min_order_amount) : null,
+      value: numericValue,
+      max_uses: normalizedMaxUses,
+      min_order_amount: normalizedMin,
       expires_at: expires_at || null,
       is_active: true,
       uses_count: 0,
@@ -64,7 +98,7 @@ export async function POST(req: Request) {
 
   if (error) {
     if (error.code === '23505') {
-      return NextResponse.json({ error: 'Ya existe un cupón con ese código' }, { status: 409 })
+      return NextResponse.json({ error: 'Ya existe un cupón con ese código en este store' }, { status: 409 })
     }
     return NextResponse.json({ error: error.message }, { status: 500 })
   }

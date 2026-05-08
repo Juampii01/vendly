@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
-import { headers } from 'next/headers'
+import { requirePlatformAccess } from '@/lib/auth'
 
 function slugify(text: string): string {
   return text
@@ -37,9 +37,8 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const h = await headers()
-  const userEmail = h.get('x-user-email')
-  if (!userEmail) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const auth = await requirePlatformAccess()
+  if ('error' in auth) return auth.error
 
   const { id: storeId } = await params
   const service = createServiceClient()

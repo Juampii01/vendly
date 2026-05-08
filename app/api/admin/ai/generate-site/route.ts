@@ -1,6 +1,6 @@
 import 'server-only'
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireStoreAdmin } from '@/lib/auth'
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -146,9 +146,8 @@ Este sitio debe poder ser utilizado inmediatamente como base para desarrollo rea
 // ─── Route — streaming ────────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const auth = await requireStoreAdmin()
+  if ('error' in auth) return auth.error
 
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) return NextResponse.json({ error: 'API de IA no configurada.' }, { status: 503 })
@@ -171,7 +170,7 @@ export async function POST(req: Request) {
       'content-type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
+      model: 'claude-sonnet-4-6',
       max_tokens: 4096,
       stream: true,
       system: 'Sos un experto en diseño web, UX/UI y estrategia de conversión para e-commerce y negocios digitales en América Latina. Respondés siempre en español, en formato Markdown estructurado, con copy real y accionable.',

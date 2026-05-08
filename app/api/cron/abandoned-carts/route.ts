@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendAbandonedCartEmail } from '@/lib/resend'
 import { sendAbandonedCartWA } from '@/lib/whatsapp'
+import { isAuthorizedCron } from '@/lib/auth'
 import type { AbandonedCart, StoreConfig } from '@/types'
 
 /**
@@ -15,11 +16,7 @@ import type { AbandonedCart, StoreConfig } from '@/types'
  *   WhatsApp independiente (2h, una vez)
  */
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get('authorization')
-  if (
-    process.env.CRON_SECRET &&
-    authHeader !== `Bearer ${process.env.CRON_SECRET}`
-  ) {
+  if (!isAuthorizedCron(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -79,6 +76,10 @@ async function processStoreAbandonedCarts(
   const now = new Date()
   const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000).toISOString()
   const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString()
+  // Cap superior: nunca contactamos carritos de más de 14 días.
+  // Evita que el cron mande emails sobre carritos viejísimos cuando el job
+  // se ejecuta poco frecuente o hay backlog.
+  const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString()
 
   const results = {
     email1_sent: 0,
@@ -99,6 +100,7 @@ async function processStoreAbandonedCarts(
         .eq('email_count', 0)
         .not('email', 'is', null)
         .lt('created_at', thirtyMinAgo)
+        .gt('created_at', fourteenDaysAgo)
         .limit(50),
       supabase
         .from('abandoned_carts')
@@ -108,6 +110,7 @@ async function processStoreAbandonedCarts(
         .eq('email_count', 1)
         .not('email', 'is', null)
         .lt('email_sent_at', twoHoursAgo)
+        .gt('created_at', fourteenDaysAgo)
         .limit(50),
       supabase
         .from('abandoned_carts')
@@ -117,6 +120,7 @@ async function processStoreAbandonedCarts(
         .eq('whatsapp_count', 0)
         .not('phone', 'is', null)
         .lt('created_at', twoHoursAgo)
+        .gt('created_at', fourteenDaysAgo)
         .limit(50),
     ])
 

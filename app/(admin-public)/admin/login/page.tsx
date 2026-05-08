@@ -4,8 +4,10 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Iniciar sesión' }
 
-// Rutas permitidas como destino post-login (evita open redirect)
-const ALLOWED_NEXT = ['/admin', '/platform', '/platform/stores']
+// Rutas permitidas como destino post-login.
+// Usamos regex con boundary `/` para que /admin@evil.com o /admin//evil.com
+// (que algunos clientes interpretan como external) no pasen el check.
+const ALLOWED_NEXT_RE = /^\/(admin|platform)(\/[^\/].*)?$/
 
 export default async function LoginPage({
   searchParams,
@@ -13,7 +15,7 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string; sent?: string; next?: string }>
 }) {
   const params = await searchParams
-  const next = params.next && ALLOWED_NEXT.some(p => params.next!.startsWith(p))
+  const next = params.next && ALLOWED_NEXT_RE.test(params.next)
     ? params.next
     : '/admin'
 

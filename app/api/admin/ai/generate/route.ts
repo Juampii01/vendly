@@ -1,8 +1,7 @@
 import 'server-only'
 import { NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { getStoreConfig } from '@/lib/store'
-import { getStoreId } from '@/lib/tenant'
+import { requireStoreAdmin } from '@/lib/auth'
 
 // ─── Tipos ─────────────────────────────────────────────────────────────────────
 
@@ -40,7 +39,7 @@ async function callClaude(systemPrompt: string, userPrompt: string): Promise<str
       'content-type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 512,
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
@@ -149,21 +148,8 @@ Rules:
 // ─── Route ────────────────────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
-  // Auth: solo admins del store
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-
-  // Verificar que el usuario es admin de este store
-  const storeId = await getStoreId()
-  const service = createServiceClient()
-  const { data: adminRow } = await service
-    .from('admin_users')
-    .select('role')
-    .eq('store_id', storeId)
-    .eq('email', user.email!.toLowerCase())
-    .maybeSingle()
-  if (!adminRow) return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+  const auth = await requireStoreAdmin()
+  if ('error' in auth) return auth.error
 
   if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: 'API de IA no configurada.' }, { status: 503 })

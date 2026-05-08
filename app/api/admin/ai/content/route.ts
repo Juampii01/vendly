@@ -1,23 +1,10 @@
 import 'server-only'
 import { NextResponse } from 'next/server'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { getStoreId } from '@/lib/tenant'
+import { requireStoreAdmin } from '@/lib/auth'
 
 export async function POST(req: Request) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-
-  // Verificar que el usuario es admin de este store
-  const storeId = await getStoreId()
-  const service = createServiceClient()
-  const { data: adminRow } = await service
-    .from('admin_users')
-    .select('role')
-    .eq('store_id', storeId)
-    .eq('email', user.email!.toLowerCase())
-    .maybeSingle()
-  if (!adminRow) return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+  const auth = await requireStoreAdmin()
+  if ('error' in auth) return auth.error
 
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) return NextResponse.json({ error: 'API de IA no configurada.' }, { status: 503 })
@@ -34,7 +21,7 @@ export async function POST(req: Request) {
       'content-type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
+      model: 'claude-sonnet-4-6',
       max_tokens: 2048,
       stream: true,
       system: `Sos un experto en copywriting y marketing para e-commerce en América Latina. Trabajás para la tienda "${storeName}". Respondés siempre en español, con copy real, accionable y sin relleno genérico. Formato limpio, sin markdown excesivo.`,

@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { headers } from 'next/headers'
 import { createServiceClient } from '@/lib/supabase/server'
 import { runAllChecks } from '@/lib/monitor'
+import { requirePlatformAccess } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -17,11 +17,8 @@ export async function POST(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  // Auth: x-user-email es inyectado por el middleware solo cuando hay sesión válida
-  const h = await headers()
-  if (!h.get('x-user-email')) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const auth = await requirePlatformAccess()
+  if ('error' in auth) return auth.error
 
   const { id } = await params
   const supabase = createServiceClient()
