@@ -140,18 +140,20 @@ export async function createStore(
     return { ok: false, error: storeError?.message ?? 'Error al crear el store.' }
   }
 
-  // ── 2. Inicializar tenant_config vacío ────────────────────────────────────
-  // Todos los campos NULL → usa env vars globales hasta configurar los propios
+  // ── 2. Inicializar tenant_config + admin owner — atomic con rollback ──────
+  //
+  // Si cualquiera de las inserts falla, borramos el store_config para no dejar
+  // tenants huérfanos. tenant_config NO es fatal (puede usarse con env vars
+  // globales), pero admin_users SÍ — sin ese registro nadie puede entrar al panel.
+
   const { error: tenantError } = await supabase
     .from('tenant_config')
     .insert({ store_id: newStore.id })
 
   if (tenantError) {
-    // No es fatal — el store funciona sin tenant_config (usa env vars)
     console.warn('[store-generator] tenant_config insert warning:', tenantError)
   }
 
-  // ── 3. Crear primer admin si se proporcionó ownerEmail ────────────────────
   if (ownerEmail) {
     const { error: adminError } = await supabase
       .from('admin_users')
@@ -162,7 +164,11 @@ export async function createStore(
       })
 
     if (adminError) {
-      console.warn('[store-generator] admin_users insert warning:', adminError)
+      // Rollback: el store quedaría sin owner alcanzable. Mejor borrarlo.
+      console.error('[store-generator] admin_users insert failed, rolling back store:', adminError)
+      await supabase.from('tenant_config').delete().eq('store_id', newStore.id)
+      await supabase.from('store_config').delete().eq('id', newStore.id)
+      return { ok: false, error: `Error al asignar owner: ${adminError.message}` }
     }
   }
 
@@ -201,11 +207,17 @@ export async function setStoreStatus(
   status: 'active' | 'inactive' | 'suspended',
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = createServiceClient()
-  const { error } = await supabase
+  // Update con select para confirmar que el registro existe.
+  // Sin .select() un id inexistente devuelve error: null pero affected rows = 0,
+  // y la API responde 200 OK falsamente.
+  const { data, error } = await supabase
     .from('store_config')
     .update({ status, updated_at: new Date().toISOString() })
     .eq('id', storeId)
+    .select('id')
+    .maybeSingle()
 
   if (error) return { ok: false, error: error.message }
+  if (!data) return { ok: false, error: 'Store no encontrado' }
   return { ok: true }
 }
