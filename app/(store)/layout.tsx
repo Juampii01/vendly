@@ -15,6 +15,8 @@ import { RestaurantHeader } from '@/components/store/restaurant/RestaurantHeader
 import { RestaurantFooter } from '@/components/store/restaurant/RestaurantFooter'
 import { GymHeader } from '@/components/store/gym/GymHeader'
 import { GymFooter } from '@/components/store/gym/GymFooter'
+import { AdidasHeader } from '@/components/store/adidas/AdidasHeader'
+import { AdidasFooter } from '@/components/store/adidas/AdidasFooter'
 import { PageEnter } from '@/components/store/motion'
 import { getSiteFeatures } from '@/lib/site-features'
 import { tokensToCssVars } from '@/lib/theme'
@@ -39,10 +41,13 @@ export default async function StoreLayout({ children }: { children: React.ReactN
     getCategories(),
   ])
   const userLoggedIn = Boolean(h.get('x-user-id'))
+  // Override por slug: tiendas con build flagship custom (Adidas) usan
+  // su propio header/footer dedicado, por encima del routing por site_type.
+  const isAdidas = store.slug === 'adidas'
   const isModo = store.site_type === 'modo'
   // gym uses athletic site_type + home_editorial_label === 'gym' as marker (until DB migration runs)
   const isGym = store.site_type === 'athletic' && store.home_editorial_label === 'gym'
-  const isAthletic = store.site_type === 'athletic' && !isGym
+  const isAthletic = store.site_type === 'athletic' && !isGym && !isAdidas
   const isDealership = store.site_type === 'dealership'
   const isLibreria = store.site_type === 'libreria'
   const isRestaurant = store.site_type === 'restaurant'
@@ -68,7 +73,9 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   const pageContent = (
     <div className="flex min-h-screen flex-col"
       style={{ backgroundColor: store.color_background, color: store.color_text }}>
-      {isModo
+      {isAdidas
+        ? <AdidasHeader store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
+        : isModo
         ? <ModoHeader store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
         : isAthletic
         ? <AthleticHeader store={store} categories={categories} userLoggedIn={userLoggedIn} features={features} />
@@ -85,7 +92,9 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       <main className="flex-1">
         <PageEnter>{children}</PageEnter>
       </main>
-      {isModo
+      {isAdidas
+        ? <AdidasFooter store={store} categories={categories} />
+        : isModo
         ? <ModoFooter store={store} categories={categories} features={features} />
         : isAthletic
         ? <AthleticFooter store={store} categories={categories} />

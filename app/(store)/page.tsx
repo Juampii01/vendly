@@ -12,6 +12,7 @@ import { VendlyMarketingPage } from '@/components/store/vendly-marketing/VendlyM
 import { RealEstateHomePage } from '@/components/store/real-estate/RealEstateHomePage'
 import { RestaurantHomePage } from '@/components/store/restaurant/RestaurantHomePage'
 import { GymHomePage } from '@/components/store/gym/GymHomePage'
+import { AdidasHomePage } from '@/components/store/adidas/AdidasHomePage'
 import { HomeRenderer } from '@/components/store/HomeRenderer'
 import { FadeUp, SlideLeft, SlideRight, StaggerGrid, StaggerItem } from '@/components/store/motion'
 import { formatPrice } from '@/lib/format'
@@ -47,6 +48,14 @@ export default async function HomePage() {
     getProducts({ featured: true, per_page: 8 }),
     getProducts({ per_page: 8 }),
   ])
+
+  // ── Override por slug (flagship custom builds) ────────────────────────────
+  // Tiendas que tienen un build dedicado por encima del sistema config-driven.
+  // Sirve como showpiece de portfolio: cuando un prospect entra al sitio,
+  // ve un build a medida, no un preset reutilizado.
+  if (store.slug === 'adidas') {
+    return <AdidasHomePage store={store} products={all} categories={categories} featured={featured} />
+  }
 
   // ── Sistema config-driven (nuevo) ─────────────────────────────────────────
   // Si el store tiene home_layout setteado, lo renderiza con HomeRenderer y
