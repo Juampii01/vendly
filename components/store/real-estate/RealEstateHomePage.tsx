@@ -284,7 +284,8 @@ export function RealEstateHomePage({ store, products, featured, categories }: Pr
       {(store.home_editorial_title || store.home_editorial_body) && (
         <section className="grid md:grid-cols-2 min-h-[520px]">
           <SlideLeft className="relative aspect-[4/3] md:aspect-auto overflow-hidden">
-            <Image src={splitSrc} alt="Nosotros" fill sizes="50vw" className="object-cover object-center" />
+            <Image src={splitSrc} alt="Nosotros" fill sizes="50vw" className="object-cover"
+              style={{ objectPosition: store.home_split_image_position || 'center' }} />
           </SlideLeft>
           <SlideRight className="flex flex-col justify-center px-10 py-16 md:px-16 bg-gray-50">
             {store.home_editorial_label && (

@@ -20,9 +20,11 @@ export function EditorialSplitSection({ content, ctx }: Props) {
 
   const imageRight = content.imagePosition === 'right'
 
+  const objectPosition = store.home_split_image_position || 'center'
   const imagePanel = (
     <div className="relative overflow-hidden" style={{ minHeight: '400px' }}>
-      <Image src={src} alt="Editorial" fill sizes="50vw" className="object-cover object-center" />
+      <Image src={src} alt="Editorial" fill sizes="50vw" className="object-cover"
+        style={{ objectPosition }} />
     </div>
   )
   const textPanel = (

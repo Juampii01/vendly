@@ -144,7 +144,8 @@ export default async function HomePage() {
       {/* ── HERO ────────────────────────────────────────────────────────── */}
       <section className="relative h-screen min-h-[600px] w-full overflow-hidden">
         <Image src={heroSrc} alt={store.hero_title} fill priority sizes="100vw"
-          className="object-cover object-center" />
+          className="object-cover"
+          style={{ objectPosition: store.hero_image_position || 'center' }} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
 
         <div className="absolute bottom-0 left-0 w-full px-6 pb-12 md:px-12 md:pb-16 lg:px-20">
@@ -228,7 +229,8 @@ export default async function HomePage() {
         <section className="grid min-h-[520px] md:grid-cols-2">
           <SlideLeft className="relative aspect-[4/5] md:aspect-auto">
             <Image src={splitImageSrc} alt="Editorial" fill sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover object-top" />
+              className="object-cover"
+              style={{ objectPosition: store.home_split_image_position || 'top' }} />
           </SlideLeft>
           <SlideRight className="flex flex-col justify-center px-8 py-16 md:px-16"
             style={{ backgroundColor: store.color_primary }}>
