@@ -18,6 +18,7 @@ export interface StoreConfig {
   hero_cta_label: string
   hero_cta_url: string
   hero_image_url: string | null
+  hero_image_position: string      // CSS object-position. Default "center". Ej: "50% 30%"
   hero_cta_color: string | null   // color del botón CTA del hero; null = usa color_accent
   // Shipping
   free_shipping_threshold: number | null
@@ -32,6 +33,7 @@ export interface StoreConfig {
   // Home page content (configurable por tienda)
   home_marquee_items: string[]
   home_split_image_url: string | null
+  home_split_image_position: string  // CSS object-position. Default "center"
   home_editorial_label: string | null
   home_editorial_title: string | null
   home_editorial_body: string | null

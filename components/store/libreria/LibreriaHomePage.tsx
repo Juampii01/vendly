@@ -41,7 +41,8 @@ export function LibreriaHomePage({ store, products, categories, featured }: Prop
 
         {store.hero_image_url && (
           <div className="absolute right-0 top-0 h-full w-1/2 hidden md:block opacity-25">
-            <Image src={store.hero_image_url} alt="Hero" fill priority sizes="50vw" className="object-cover object-center" />
+            <Image src={store.hero_image_url} alt="Hero" fill priority sizes="50vw" className="object-cover"
+              style={{ objectPosition: store.hero_image_position || 'center' }} />
             <div className="absolute inset-0" style={{ background: `linear-gradient(to right, ${PRIMARY} 0%, transparent 60%)` }} />
           </div>
         )}
@@ -168,7 +169,8 @@ export function LibreriaHomePage({ store, products, categories, featured }: Prop
       <section className="grid md:grid-cols-2 min-h-[500px]">
         <SlideLeft className="relative aspect-[4/3] md:aspect-auto overflow-hidden">
           <Image src={store.home_split_image_url ?? 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1200&q=85'}
-            alt="Librería" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover object-center" />
+            alt="Librería" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover"
+            style={{ objectPosition: store.home_split_image_position || 'center' }} />
         </SlideLeft>
         <SlideRight className="flex flex-col justify-center px-10 md:px-16 py-16" style={{ backgroundColor: PRIMARY }}>
           <p className="text-[9px] font-black uppercase tracking-[0.4em] mb-5" style={{ color: ACCENT }}>

@@ -31,7 +31,7 @@ export function AthleticHomePage({ store, products, featured, categories }: Prop
       {/* ══ HERO — full screen ═══════════════════════════════════════════════ */}
       <section className="relative w-full" style={{ height: '100svh', minHeight: '600px' }}>
         <Image src={heroSrc} alt={store.hero_title} fill priority sizes="100vw"
-          className="object-cover object-center" />
+          className="object-cover" style={{ objectPosition: store.hero_image_position || 'center' }} />
         <div className="absolute inset-0"
           style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 55%, transparent 100%)' }} />
         <div className="absolute inset-0"
@@ -158,7 +158,8 @@ export function AthleticHomePage({ store, products, featured, categories }: Prop
         <section className="grid md:grid-cols-2" style={{ minHeight: '560px' }}>
           <div className="relative overflow-hidden" style={{ minHeight: '400px' }}>
             <Image src={editorialSrc} alt="Editorial" fill sizes="50vw"
-              className="object-cover object-center" />
+              className="object-cover"
+              style={{ objectPosition: store.home_split_image_position || 'center' }} />
           </div>
           <div className="flex flex-col justify-center px-10 py-16 md:px-14 lg:px-20"
             style={{ backgroundColor: store.color_primary }}>

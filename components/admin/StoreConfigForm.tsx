@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { FocalPointPicker } from './FocalPointPicker'
 import type { StoreConfig } from '@/types'
 
 interface Props { store: StoreConfig }
@@ -51,6 +52,7 @@ export function StoreConfigForm({ store }: Props) {
     hero_cta_label: store.hero_cta_label,
     hero_cta_url: store.hero_cta_url,
     hero_image_url: store.hero_image_url ?? '',
+    hero_image_position: store.hero_image_position ?? 'center',
     free_shipping_threshold: store.free_shipping_threshold?.toString() ?? '',
     shipping_base_price: store.shipping_base_price.toString(),
     whatsapp_number: store.whatsapp_number ?? '',
@@ -60,6 +62,7 @@ export function StoreConfigForm({ store }: Props) {
     meta_description: store.meta_description ?? '',
     home_marquee_items: (store.home_marquee_items ?? []).join('\n'),
     home_split_image_url: store.home_split_image_url ?? '',
+    home_split_image_position: store.home_split_image_position ?? 'center',
     home_editorial_label: store.home_editorial_label ?? '',
     home_editorial_title: store.home_editorial_title ?? '',
     home_editorial_body: store.home_editorial_body ?? '',
@@ -395,6 +398,15 @@ export function StoreConfigForm({ store }: Props) {
                   storeId={store.id}
                   aspect="16/9"
                 />
+                {form.hero_image_url && (
+                  <FocalPointPicker
+                    imageUrl={form.hero_image_url}
+                    value={form.hero_image_position}
+                    onChange={(v) => set('hero_image_position', v)}
+                    aspect="16/9"
+                    hint="Click sobre la imagen para elegir qué punto debe quedar visible cuando la imagen se recorta. Útil para retratos, modelos o productos altos."
+                  />
+                )}
               </div>
 
               {/* Live hero preview */}
@@ -405,7 +417,8 @@ export function StoreConfigForm({ store }: Props) {
                 <div className="relative aspect-[16/9] overflow-hidden">
                   {form.hero_image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={form.hero_image_url} alt="Hero" className="absolute inset-0 w-full h-full object-cover" />
+                    <img src={form.hero_image_url} alt="Hero" className="absolute inset-0 w-full h-full object-cover"
+                      style={{ objectPosition: form.hero_image_position || 'center' }} />
                   ) : (
                     <div className="absolute inset-0" style={{ backgroundColor: form.color_primary }} />
                   )}
@@ -475,6 +488,15 @@ export function StoreConfigForm({ store }: Props) {
               storeId={store.id}
               aspect="16/9"
             />
+            {form.home_split_image_url && (
+              <FocalPointPicker
+                imageUrl={form.home_split_image_url}
+                value={form.home_split_image_position}
+                onChange={(v) => set('home_split_image_position', v)}
+                aspect="4/3"
+                hint="Click para elegir el punto focal. Si la imagen es vertical o tiene la cara/producto arriba, click en esa zona para que no quede cortado."
+              />
+            )}
 
             <div className="grid gap-5 sm:grid-cols-3">
               <Field label="Etiqueta editorial" hint='Ej: "Colección 2025"'>

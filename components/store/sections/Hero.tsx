@@ -22,9 +22,13 @@ export function HeroSection({ content, ctx }: Props) {
 
   const overlay = content.overlay ?? 'gradient-bottom'
 
+  // object-position: si el content tiene override usalo, sino el del store, sino center
+  const objectPosition = store.hero_image_position || 'center'
+
   return (
     <section className={`relative w-full overflow-hidden ${heightClass}`}>
-      <Image src={src} alt={title} fill priority sizes="100vw" className="object-cover object-center" />
+      <Image src={src} alt={title} fill priority sizes="100vw" className="object-cover"
+        style={{ objectPosition }} />
 
       {overlay === 'gradient-bottom' && (
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.15) 50%, transparent 100%)' }} />

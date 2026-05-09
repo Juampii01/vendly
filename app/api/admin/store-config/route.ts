@@ -17,16 +17,21 @@ const ALLOWED_FIELDS = [
   'name', 'logo_url', 'favicon_url',
   'color_primary', 'color_secondary', 'color_accent', 'color_background', 'color_text',
   'hero_title', 'hero_subtitle', 'hero_cta_label', 'hero_cta_url', 'hero_image_url', 'hero_cta_color',
+  'hero_image_position',
   'free_shipping_threshold', 'shipping_base_price',
   'whatsapp_number', 'email', 'instagram_url',
   'meta_title', 'meta_description',
-  'home_marquee_items', 'home_split_image_url',
+  'home_marquee_items', 'home_split_image_url', 'home_split_image_position',
   'home_editorial_label', 'home_editorial_title', 'home_editorial_body',
   'base_url', 'currency', 'locale',
   'site_type',
   // Sistema config-driven de homes (ver components/store/HomeRenderer.tsx)
   'home_layout', 'theme_tokens',
 ] as const
+
+// CSS object-position: keyword (top/bottom/left/right/center) o "X% Y%"
+// Validamos formato simple para evitar inyección de CSS.
+const POSITION_RE = /^(top|bottom|left|right|center|(\d{1,3}%\s+\d{1,3}%)|(top|bottom|center)\s+(left|right|center))$/i
 
 const HOME_SECTION_TYPES = new Set([
   'hero', 'marquee', 'categoryGrid', 'editorialSplit', 'featuredProducts',
@@ -98,6 +103,22 @@ export async function PATCH(req: Request) {
 
       if (key === 'site_type' && v !== null && !VALID_SITE_TYPES.has(v)) {
         return NextResponse.json({ error: 'site_type inválido' }, { status: 400 })
+      }
+
+      // CSS object-position — validar formato para evitar CSS injection
+      if (key === 'hero_image_position' || key === 'home_split_image_position') {
+        if (v === null || v === '' || v === undefined) {
+          updates[key] = 'center'
+          continue
+        }
+        if (typeof v !== 'string' || !POSITION_RE.test(v.trim())) {
+          return NextResponse.json(
+            { error: `${key}: formato inválido. Usá "center", "top", "50% 30%" etc.` },
+            { status: 400 },
+          )
+        }
+        updates[key] = v.trim()
+        continue
       }
 
       if (key === 'free_shipping_threshold' || key === 'shipping_base_price') {

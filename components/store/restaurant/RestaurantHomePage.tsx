@@ -44,7 +44,8 @@ export function RestaurantHomePage({ store, products, categories, featured }: Pr
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center"
+          className="object-cover"
+          style={{ objectPosition: store.hero_image_position || 'center' }}
         />
         {/* Overlay oscuro en capas */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
