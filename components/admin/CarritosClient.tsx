@@ -388,21 +388,27 @@ export function CarritosClient({ initialCarts, storeUrl, storeName }: Props) {
     )
   }, [])
 
+  // Wrap en container oscuro: el componente fue construido con paleta dark-mode
+  // (text-white, bg-slate-900, border-slate-800) pero el admin layout es claro.
+  // En vez de refactorizar 500 LOC, wrapeamos como "dark island" dentro del admin.
   if (carts.length === 0) {
     return (
-      <div className="p-8">
-        <h1 className="text-2xl font-black text-white mb-1">Carritos abandonados</h1>
-        <p className="text-slate-500 text-sm mb-8">Clientes que empezaron el checkout pero no finalizaron.</p>
-        <div className="rounded-2xl border-2 border-dashed border-slate-800 py-20 text-center">
-          <p className="text-slate-400 text-sm">🛍️ No hay carritos abandonados activos.</p>
-          <p className="text-slate-600 text-xs mt-2">Cuando alguien deje un carrito, aparecerá acá.</p>
+      <div className="bg-slate-950 text-white min-h-screen">
+        <div className="p-8 max-w-7xl mx-auto">
+          <h1 className="text-2xl font-black text-white mb-1">Carritos abandonados</h1>
+          <p className="text-slate-500 text-sm mb-8">Clientes que empezaron el checkout pero no finalizaron.</p>
+          <div className="rounded-2xl border-2 border-dashed border-slate-800 py-20 text-center">
+            <p className="text-slate-400 text-sm">🛍️ No hay carritos abandonados activos.</p>
+            <p className="text-slate-600 text-xs mt-2">Cuando alguien deje un carrito, aparecerá acá.</p>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="p-8">
+    <div className="bg-slate-950 text-white min-h-screen">
+      <div className="p-8 max-w-7xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-black text-white mb-1">Carritos abandonados</h1>
         <p className="text-slate-500 text-sm">{carts.length} carrito{carts.length !== 1 ? 's' : ''} sin recuperar</p>
@@ -493,6 +499,7 @@ export function CarritosClient({ initialCarts, storeUrl, storeName }: Props) {
           onSent={handleSent}
         />
       )}
+      </div>
     </div>
   )
 }
