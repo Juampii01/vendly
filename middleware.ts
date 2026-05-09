@@ -56,13 +56,30 @@ function extractSubdomain(hostname: string): string | null {
   return sub
 }
 
+/** Truly ambiguous: hostnames donde NO tiene sentido consultar la DB. */
+function isTrulyAmbiguous(hostname: string): boolean {
+  return (
+    hostname === 'localhost' ||
+    hostname.startsWith('127.') ||
+    hostname.startsWith('192.168.') ||
+    hostname.endsWith('.vercel.app')
+  )
+}
+
 /**
  * Resuelve store_id desde el hostname consultando Supabase.
  * Solo se llama cuando el cookie cache no tiene el valor.
  * Usa el cliente anon — store_domains y store_config.slug son datos públicos.
+ *
+ * REGLA: store_domains GANA sobre cualquier otra heurística. Si una tienda
+ * reclama explícitamente un dominio (incluso el apex/www del ROOT_DOMAIN),
+ * esa entrada es autoritativa. Esto permite que vendly-mod.space sirva la
+ * marketing site (mapeada via store_domains) en lugar de redirigir al admin
+ * platform como si fuera un placeholder host vacío.
  */
 async function resolveStoreFromHostname(hostname: string): Promise<string | null> {
-  if (isAmbiguousHost(hostname)) return null
+  // Local dev / preview de Vercel: no hay mapping posible
+  if (isTrulyAmbiguous(hostname)) return null
 
   // Cliente stateless (solo lectura, sin cookies)
   const supabase = createServerClient(
@@ -71,25 +88,28 @@ async function resolveStoreFromHostname(hostname: string): Promise<string | null
     { cookies: { getAll: () => [], setAll: () => {} } },
   )
 
-  const subdomain = extractSubdomain(hostname)
+  // 1. Custom domain mapping (incluye apex y www del ROOT_DOMAIN).
+  //    Esto se chequea PRIMERO porque es la única señal explícita del dueño
+  //    sobre qué tienda sirve un dominio dado.
+  const { data: domainRow } = await supabase
+    .from('store_domains')
+    .select('store_id')
+    .eq('domain', hostname)
+    .maybeSingle()
+  if (domainRow?.store_id) return domainRow.store_id
 
+  // 2. Subdominio de la plataforma: resolvemos por slug
+  const subdomain = extractSubdomain(hostname)
   if (subdomain) {
-    // Subdominio de la plataforma: resolvemos por slug
     const { data } = await supabase
       .from('store_config')
       .select('id')
       .eq('slug', subdomain)
-      .single()
+      .maybeSingle()
     return data?.id ?? null
   }
 
-  // Dominio propio: consultamos store_domains
-  const { data } = await supabase
-    .from('store_domains')
-    .select('store_id')
-    .eq('domain', hostname)
-    .single()
-  return data?.store_id ?? null
+  return null
 }
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
@@ -233,17 +253,20 @@ export async function middleware(request: NextRequest) {
 
   // ── 5. Routing raíz de la plataforma ──────────────────────────────────────
   //
-  // Aplica solo en el dominio raíz de producción (vendly.com / www.vendly.com).
-  // En localhost con NEXT_PUBLIC_STORE_ID setteado, queremos que / muestre el
-  // storefront del store fallback — modo single-tenant local.
+  // Aplica solo cuando el hostname es el dominio raíz Y no hay store mapeado.
+  // Si una tienda reclama el apex/www via store_domains (vendly-mod.space
+  // sirviendo la marketing site, por ejemplo), respetamos esa decisión y
+  // NO redirigimos al admin platform.
   //
   // Sin sesión  → /admin/login?next=/platform  (vuelve a platform tras login)
   // Con sesión  → /platform                    (el layout verifica acceso)
   //
   const hasSingleTenantFallback = !!process.env.NEXT_PUBLIC_STORE_ID
   const isRootContext =
-    isPlatformHost(hostname) ||
-    (isAmbiguousHost(hostname) && !hasSingleTenantFallback)
+    !storeId && (
+      isPlatformHost(hostname) ||
+      (isAmbiguousHost(hostname) && !hasSingleTenantFallback)
+    )
 
   if (isRootContext && pathname === '/') {
     const dest = request.nextUrl.clone()
