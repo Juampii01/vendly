@@ -10,6 +10,7 @@ import { RealEstateProductsPage } from '@/components/store/real-estate/RealEstat
 import { ModoProductsPage } from '@/components/store/modo/ModoProductsPage'
 import { RestaurantMenuPage } from '@/components/store/restaurant/RestaurantMenuPage'
 import { GymCatalogPage } from '@/components/store/gym/GymCatalogPage'
+import { AdidasCatalogPage } from '@/components/store/adidas/AdidasCatalogPage'
 import { FilterSidebar } from '@/components/store/FilterSidebar'
 import { SearchInput } from '@/components/store/SearchInput'
 import { FadeUp, StaggerGrid, StaggerItem } from '@/components/store/motion'
@@ -48,6 +49,21 @@ export default async function ProductosPage({ searchParams }: PageProps) {
 
   const features = getSiteFeatures(store.site_type)
   const totalPages = Math.ceil(total / PER_PAGE)
+
+  // ── Override por slug (flagship custom builds) ────────────────────────────
+  // Mismo patrón que app/(store)/page.tsx — Adidas tiene un catálogo dedicado
+  // que cae a demo products si la DB está vacía, para mantener coherencia
+  // entre home y catálogo en el showcase de portfolio.
+  if (store.slug === 'adidas') {
+    return (
+      <AdidasCatalogPage
+        store={store}
+        products={products}
+        categories={categories}
+        params={params}
+      />
+    )
+  }
 
   // Templates with their own full-page layout (header + footer included)
   if (store.site_type === 'real-estate') {
