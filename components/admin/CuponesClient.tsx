@@ -22,7 +22,10 @@ const EMPTY_FORM = {
   max_uses: '',
   min_order_amount: '',
   expires_at: '',
+  description: '',
 }
+
+const DESCRIPTION_MAX = 200
 
 export function CuponesClient({ initialCoupons }: Props) {
   const [coupons, setCoupons] = useState(initialCoupons)
@@ -31,6 +34,9 @@ export function CuponesClient({ initialCoupons }: Props) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [toggling, setToggling] = useState<string | null>(null)
+  const [editingDescId, setEditingDescId] = useState<string | null>(null)
+  const [editingDescValue, setEditingDescValue] = useState('')
+  const [savingDesc, setSavingDesc] = useState(false)
 
   function setField(key: keyof typeof EMPTY_FORM, value: string) {
     setForm(f => ({ ...f, [key]: value }))
@@ -61,6 +67,7 @@ export function CuponesClient({ initialCoupons }: Props) {
           max_uses: form.max_uses ? Number(form.max_uses) : null,
           min_order_amount: form.min_order_amount ? Number(form.min_order_amount) : null,
           expires_at: form.expires_at || null,
+          description: form.description.trim() || null,
         }),
       })
       const json = await res.json()
@@ -94,6 +101,33 @@ export function CuponesClient({ initialCoupons }: Props) {
     if (!confirm('¿Eliminar este cupón?')) return
     await fetch(`/api/admin/cupones/${id}`, { method: 'DELETE' })
     setCoupons(prev => prev.filter(c => c.id !== id))
+  }
+
+  function startEditDesc(coupon: Coupon) {
+    setEditingDescId(coupon.id)
+    setEditingDescValue(coupon.description ?? '')
+  }
+
+  function cancelEditDesc() {
+    setEditingDescId(null)
+    setEditingDescValue('')
+  }
+
+  async function saveEditDesc(id: string) {
+    setSavingDesc(true)
+    try {
+      const res = await fetch(`/api/admin/cupones/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description: editingDescValue.trim() || null }),
+      })
+      if (!res.ok) return
+      const next = editingDescValue.trim() || null
+      setCoupons(prev => prev.map(c => c.id === id ? { ...c, description: next } : c))
+      cancelEditDesc()
+    } finally {
+      setSavingDesc(false)
+    }
   }
 
   const activeCoupons = coupons.filter(c => c.is_active)
@@ -201,6 +235,22 @@ export function CuponesClient({ initialCoupons }: Props) {
             </div>
           </div>
 
+          {/* Descripción */}
+          <div>
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] text-slate-500 uppercase tracking-wide">Descripción (opcional)</label>
+              <span className="text-[10px] text-slate-600">{form.description.length}/{DESCRIPTION_MAX}</span>
+            </div>
+            <textarea
+              value={form.description}
+              onChange={e => setField('description', e.target.value.slice(0, DESCRIPTION_MAX))}
+              placeholder='Ej: "Descuento abonando en efectivo en el local"'
+              rows={2}
+              className="mt-1 w-full resize-none rounded-lg bg-slate-800 border border-slate-700 text-white text-sm px-3 py-2 outline-none focus:border-slate-500 placeholder:text-slate-600"
+            />
+            <p className="mt-1 text-[10px] text-slate-600">Se muestra al cliente en el checkout cuando aplica el cupón.</p>
+          </div>
+
           {error && <p className="text-xs text-red-400">{error}</p>}
 
           <div className="flex gap-2 pt-1">
@@ -269,6 +319,54 @@ export function CuponesClient({ initialCoupons }: Props) {
                       <span>vence {formatDate(coupon.expires_at)}</span>
                     )}
                   </div>
+
+                  {/* Descripción: vista o editor inline */}
+                  {editingDescId === coupon.id ? (
+                    <div className="mt-2 w-full">
+                      <textarea
+                        value={editingDescValue}
+                        onChange={e => setEditingDescValue(e.target.value.slice(0, DESCRIPTION_MAX))}
+                        placeholder='Ej: "Descuento abonando en efectivo en el local"'
+                        rows={2}
+                        autoFocus
+                        className="w-full resize-none rounded-lg bg-slate-800 border border-slate-700 text-white text-xs px-3 py-2 outline-none focus:border-slate-500 placeholder:text-slate-600"
+                      />
+                      <div className="mt-1.5 flex items-center justify-between gap-2">
+                        <span className="text-[10px] text-slate-600">{editingDescValue.length}/{DESCRIPTION_MAX}</span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={cancelEditDesc}
+                            disabled={savingDesc}
+                            className="rounded-lg border border-slate-700 text-[11px] text-slate-400 hover:text-white px-2.5 py-1 transition-colors disabled:opacity-40"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            onClick={() => saveEditDesc(coupon.id)}
+                            disabled={savingDesc}
+                            className="rounded-lg bg-white text-slate-900 text-[11px] font-semibold px-2.5 py-1 hover:bg-slate-100 transition-colors disabled:opacity-40"
+                          >
+                            {savingDesc ? 'Guardando...' : 'Guardar'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : coupon.description ? (
+                    <button
+                      onClick={() => startEditDesc(coupon)}
+                      className="mt-1.5 block w-full text-left text-xs text-slate-400 hover:text-white transition-colors"
+                      title="Click para editar"
+                    >
+                      {coupon.description}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => startEditDesc(coupon)}
+                      className="mt-1.5 text-[11px] text-slate-600 hover:text-slate-300 transition-colors"
+                    >
+                      + Agregar descripción
+                    </button>
+                  )}
                 </div>
 
                 {/* Acciones */}

@@ -171,6 +171,7 @@ create table if not exists coupons (
   uses_count       integer not null default 0,
   expires_at       timestamptz,
   is_active        boolean not null default true,
+  description      text,
   created_at       timestamptz not null default now(),
   unique(store_id, code)
 );
