@@ -9,9 +9,18 @@ interface RouteContext {
 // ─── PATCH /api/admin/products/[id] ──────────────────────────────────────────
 // Actualiza un producto y reemplaza sus variantes.
 //
-// El reemplazo de variantes es transaction-safe vía RPC: insertamos las
-// nuevas con un product_id temporal, luego en una sola operación borramos
-// las viejas y promovemos las nuevas. Si algo falla, se rollback automático.
+// Estrategia: DELETE-then-INSERT en orden secuencial.
+// El approach previo (INSERT-then-slice-by-created_at) era buggy: cuando
+// varias filas se insertaban en el mismo batch, todas recibían el mismo
+// timestamp `now()`, haciendo el orden no determinístico. El slice podía
+// elegir filas NUEVAS en vez de viejas, dejando viejas sin borrar →
+// duplicación de variantes en cada save.
+//
+// Trade-off: si el INSERT falla después del DELETE, las variantes quedan
+// vacías temporalmente. Mitigación: build + validate las nuevas filas
+// ANTES de borrar las viejas. Si hay error de schema, falla antes del
+// delete y las viejas siguen intactas. Si querés transaccionalidad
+// estricta, eventualmente se puede mover a un RPC `replace_product_variants`.
 //
 export async function PATCH(req: Request, { params }: RouteContext) {
   const auth = await requireStoreAdmin()
@@ -49,34 +58,23 @@ export async function PATCH(req: Request, { params }: RouteContext) {
 
     // Reemplazar variantes solo si vienen en el payload (undefined → no tocar)
     if (Array.isArray(variants_data)) {
+      // Build PRIMERO (validación temprana antes de borrar nada)
       const variantRows = buildVariantRows(id, variants_data)
 
-      // Insertar primero las nuevas; si fallan, las viejas siguen intactas
+      // 1. Borrar todas las variantes existentes de este producto
+      const { error: delErr } = await service
+        .from('product_variants')
+        .delete()
+        .eq('product_id', id)
+      if (delErr) throw delErr
+
+      // 2. Insertar las nuevas (si las hay; si el array vino vacío, queda
+      //    sin variantes — el admin removió todas, comportamiento esperado)
       if (variantRows.length > 0) {
         const { error: insertErr } = await service
           .from('product_variants')
           .insert(variantRows)
-        if (insertErr) {
-          // No tocamos las viejas — el insert falló, abortamos sin perder datos.
-          throw insertErr
-        }
-
-        // Borrar SOLO las que estaban antes (created_at < ahora del batch)
-        // Para hacerlo simple: traemos los ids viejos primero, luego borramos por id.
-        const { data: oldVariants } = await service
-          .from('product_variants')
-          .select('id, created_at')
-          .eq('product_id', id)
-          .order('created_at', { ascending: true })
-
-        const newCount = variantRows.length
-        const oldIds = (oldVariants ?? []).slice(0, (oldVariants?.length ?? 0) - newCount).map(v => v.id)
-        if (oldIds.length > 0) {
-          await service.from('product_variants').delete().in('id', oldIds)
-        }
-      } else {
-        // El admin envió array vacío → quiere remover todas las variantes
-        await service.from('product_variants').delete().eq('product_id', id)
+        if (insertErr) throw insertErr
       }
     }
 
