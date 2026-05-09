@@ -2,6 +2,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { NewsletterForm } from '@/components/store/NewsletterForm'
 import type { StoreConfig, Category, Product } from '@/types'
+import { ADIDAS_DEMO_PRODUCTS as DEMO_PRODUCTS, shouldUseAdidasDemo } from './demo-products'
+import type { ShowcaseProduct } from './demo-products'
 
 /**
  * ADIDAS — Flagship custom home (portfolio centerpiece de Vendly).
@@ -25,28 +27,8 @@ interface Props {
   categories: Category[]
 }
 
-// ─── Demo content (fallback) ────────────────────────────────────────────────
-// Productos visuales para que el showcase siempre se vea full. Si la DB de
-// Adidas tiene productos reales con imágenes decentes, los usamos.
-
-interface ShowcaseProduct {
-  name: string
-  category: string
-  price: string
-  image: string
-  badge?: string
-}
-
-const DEMO_PRODUCTS: ShowcaseProduct[] = [
-  { name: 'Speedline Pro 9',  category: 'Running',     price: '$229.000', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900&q=85', badge: 'NUEVO' },
-  { name: 'Court Classic Vintage', category: 'Originals', price: '$185.000', image: 'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=900&q=85' },
-  { name: 'Stride 24',         category: 'Training',    price: '$195.000', image: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=900&q=85' },
-  { name: 'Court Pro Black',   category: 'Basketball',  price: '$249.000', image: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=900&q=85', badge: 'EDICIÓN' },
-  { name: 'Track Crew Negro',  category: 'Apparel',     price: '$89.000',  image: 'https://images.unsplash.com/photo-1556906781-9a412961c28c?w=900&q=85' },
-  { name: 'Performance Tee',   category: 'Apparel',     price: '$45.000',  image: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=900&q=85' },
-  { name: 'Goalkeeper Pro',    category: 'Football',    price: '$215.000', image: 'https://images.unsplash.com/photo-1487956382158-bb926046304a?w=900&q=85' },
-  { name: 'Backpack Tech 24L', category: 'Accesorios',  price: '$72.000',  image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=900&q=85' },
-]
+// Demo products viven en ./demo-products para compartirlos con
+// AdidasCatalogPage (/productos) y mantener coherencia entre vistas.
 
 const SPORTS = [
   { name: 'RUNNING',     image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200&q=85', tag: '01' },
@@ -75,7 +57,7 @@ function ThreeStripes({ color = '#000', size = 'md' }: { color?: string; size?: 
 
 export function AdidasHomePage({ store, products }: Props) {
   const heroSrc = store.hero_image_url ?? 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=1800&q=85'
-  const useDemoProducts = !products?.length || products.every(p => !p.images?.[0])
+  const useDemoProducts = shouldUseAdidasDemo(products)
   const showcaseGrid: ShowcaseProduct[] = useDemoProducts
     ? DEMO_PRODUCTS
     : products.slice(0, 8).map(p => ({
