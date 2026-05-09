@@ -278,25 +278,32 @@ export function CheckoutClient({ store }: CheckoutClientProps) {
 
             {coupon ? (
               // Cupón aplicado
-              <div className="flex items-center justify-between rounded-xl bg-green-50 px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-green-600">✓</span>
-                  <div>
-                    <p className="text-sm font-bold text-green-800">{coupon.code}</p>
-                    <p className="text-xs text-green-600">
-                      {coupon.type === 'percentage'
-                        ? `${coupon.value}% de descuento`
-                        : `${formatPrice(coupon.value)} de descuento`}
-                    </p>
+              <div className="rounded-xl bg-green-50 px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-green-600">✓</span>
+                    <div>
+                      <p className="text-sm font-bold text-green-800">{coupon.code}</p>
+                      <p className="text-xs text-green-600">
+                        {coupon.type === 'percentage'
+                          ? `${coupon.value}% de descuento`
+                          : `${formatPrice(coupon.value)} de descuento`}
+                      </p>
+                    </div>
                   </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveCoupon}
+                    className="text-xs text-green-700 underline underline-offset-2 hover:text-green-900"
+                  >
+                    Quitar
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleRemoveCoupon}
-                  className="text-xs text-green-700 underline underline-offset-2 hover:text-green-900"
-                >
-                  Quitar
-                </button>
+                {coupon.description && (
+                  <p className="mt-2 border-t border-green-200/60 pt-2 text-xs leading-relaxed text-green-700">
+                    {coupon.description}
+                  </p>
+                )}
               </div>
             ) : (
               // Input para ingresar cupón

@@ -10,12 +10,34 @@ export async function PATCH(
   if ('error' in auth) return auth.error
 
   const { id } = await params
-  const { is_active } = await req.json()
+  const body = await req.json()
   const service = createServiceClient()
+
+  const update: Record<string, unknown> = {}
+
+  if ('is_active' in body) {
+    update.is_active = !!body.is_active
+  }
+
+  if ('description' in body) {
+    if (body.description == null || String(body.description).trim() === '') {
+      update.description = null
+    } else {
+      const trimmed = String(body.description).trim()
+      if (trimmed.length > 200) {
+        return NextResponse.json({ error: 'La descripción no puede superar los 200 caracteres' }, { status: 400 })
+      }
+      update.description = trimmed
+    }
+  }
+
+  if (Object.keys(update).length === 0) {
+    return NextResponse.json({ error: 'Sin campos para actualizar' }, { status: 400 })
+  }
 
   const { error } = await service
     .from('coupons')
-    .update({ is_active: !!is_active })
+    .update(update)
     .eq('id', id)
     .eq('store_id', auth.storeId)
 

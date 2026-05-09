@@ -25,7 +25,7 @@ export async function POST(req: Request) {
 
   const service = createServiceClient()
   const body = await req.json()
-  const { code, type, value, max_uses, min_order_amount, expires_at } = body
+  const { code, type, value, max_uses, min_order_amount, expires_at, description } = body
 
   // ── Validación ────────────────────────────────────────────────────────────
   if (!code || !type || value == null) {
@@ -80,6 +80,15 @@ export async function POST(req: Request) {
     }
   }
 
+  let normalizedDescription: string | null = null
+  if (description != null && String(description).trim() !== '') {
+    const trimmed = String(description).trim()
+    if (trimmed.length > 200) {
+      return NextResponse.json({ error: 'La descripción no puede superar los 200 caracteres' }, { status: 400 })
+    }
+    normalizedDescription = trimmed
+  }
+
   const { data, error } = await service
     .from('coupons')
     .insert({
@@ -90,6 +99,7 @@ export async function POST(req: Request) {
       max_uses: normalizedMaxUses,
       min_order_amount: normalizedMin,
       expires_at: expires_at || null,
+      description: normalizedDescription,
       is_active: true,
       uses_count: 0,
     })

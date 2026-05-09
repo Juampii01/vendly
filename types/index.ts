@@ -196,6 +196,7 @@ export interface Coupon {
   uses_count: number
   expires_at: string | null
   is_active: boolean
+  description: string | null
   created_at: string
 }
 
